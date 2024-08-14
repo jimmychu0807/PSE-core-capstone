@@ -19,15 +19,16 @@ interface IGuessingGame {
   // game state
   enum GameState {
     GameInitiated,
-    RoundRunningBid,
-    RoundRunningReveal,
+    RoundBid,
+    RoundReveal,
+    RoundEnd,
     GameEnd
   }
 
   // Error declaration
   error GuessingGame__InvalidGameId();
   error GuessingGame__GameHasEnded();
-  error GuessingGame__UnexpectedGameState(GameState expected, GameState actual);
+  error GuessingGame__UnexpectedGameState(GameState actual);
   error GuessingGame__PlayerAlreadyJoin(address p);
   error GuessingGame__SenderIsNotGameHost();
 
@@ -39,5 +40,5 @@ interface IGuessingGame {
   // External Functions
   function newGame() external returns (uint32 gameId);
   function joinGame(uint32 gameId) external;
-  function startGame(uint32 gameId) external;
+  function startRound(uint32 gameId) external;
 }

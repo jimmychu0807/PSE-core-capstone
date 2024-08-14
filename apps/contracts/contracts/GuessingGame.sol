@@ -30,10 +30,17 @@ contract GuessingGame is IGuessingGame, Ownable {
     _;
   }
 
-  modifier gameStateEq(uint32 gameId, GameState gameState) {
+  modifier gameStateIn(uint32 gameId, GameState[2] memory gameStates) {
     Game storage game = games[gameId];
-    if (game.state != gameState) {
-      revert GuessingGame__UnexpectedGameState(gameState, game.state);
+    bool found = false;
+    for (uint8 i = 0; i < gameStates.length; i++) {
+      if (game.state == gameStates[i]) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      revert GuessingGame__UnexpectedGameState(game.state);
     }
     _;
   }
@@ -70,7 +77,9 @@ contract GuessingGame is IGuessingGame, Ownable {
     emit NewGame(gameId, msg.sender);
   }
 
-  function joinGame(uint32 gameId) external override validGameId(gameId) gameStateEq(gameId, GameState.GameInitiated) {
+  // IMPROVE: the gameStateIn() modifier code is bad. It is restricted to take
+  //   two params.
+  function joinGame(uint32 gameId) external override validGameId(gameId) gameStateIn(gameId, [GameState.GameInitiated, GameState.GameInitiated]) {
     Game storage game = games[gameId];
     // check the player has not been added to the game
     for (uint8 i = 0; i < game.players.length; i++) {
@@ -83,10 +92,22 @@ contract GuessingGame is IGuessingGame, Ownable {
     emit PlayerJoinGame(gameId, msg.sender);
   }
 
-  function startGame(
+  function startRound(
     uint32 gameId
-  ) external override validGameId(gameId) byGameHost(gameId) gameStateEq(gameId, GameState.GameInitiated) {
-    _updateGameState(gameId, GameState.RoundRunningBid);
+  ) external override validGameId(gameId) byGameHost(gameId) gameStateIn(gameId, [GameState.GameInitiated, GameState.RoundEnd]) {
+    _updateGameState(gameId, GameState.RoundBid);
     emit GameStarted(gameId);
+  }
+
+  function submitBid() {
+    // each player submit a bid. The last player that submit a bid will change the game state
+  }
+
+  function revealBid() {
+    // each player reveal a bid. The last player that reveal a bid will change the game state
+  }
+
+  function endRound() {
+    // the average will be cmoputed, the winner will be determined. Update the game state.
   }
 }
