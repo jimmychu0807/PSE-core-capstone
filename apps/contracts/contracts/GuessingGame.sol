@@ -30,16 +30,32 @@ contract GuessingGame is IGuessingGame, Ownable {
     _;
   }
 
-  modifier gameStateIn(uint32 gameId, GameState[2] memory gameStates) {
+  modifier gameStateIn2(uint32 gameId, GameState[2] memory gss) {
+    Game storage game = games[gameId];
+    if (game.state != gss[0] && game.state != gss[1]) {
+      revert GuessingGame__UnexpectedGameState(game.state);
+    }
+    _;
+  }
+
+  modifier oneOfPlayers(uint32 gameId) {
     Game storage game = games[gameId];
     bool found = false;
-    for (uint8 i = 0; i < gameStates.length; i++) {
-      if (game.state == gameStates[i]) {
+    for (uint8 i = 0; i < game.players.length; i++) {
+      if (game.players[i] == msg.sender) {
         found = true;
         break;
       }
     }
     if (!found) {
+      revert GuessingGame__SenderNotOneOfPlayers();
+    }
+    _;
+  }
+
+  modifier gameStateEq(uint32 gameId, GameState gs) {
+    Game storage game = games[gameId];
+    if (game.state != gs) {
       revert GuessingGame__UnexpectedGameState(game.state);
     }
     _;
@@ -66,6 +82,8 @@ contract GuessingGame is IGuessingGame, Ownable {
     } else if (state == GameState.GameEnd) {
       game.endTime = game.lastUpdate;
     }
+
+    emit GameStateUpdated(gameId, state);
   }
 
   function newGame() external override returns (uint32 gameId) {
@@ -79,7 +97,7 @@ contract GuessingGame is IGuessingGame, Ownable {
 
   // IMPROVE: the gameStateIn() modifier code is bad. It is restricted to take
   //   two params.
-  function joinGame(uint32 gameId) external override validGameId(gameId) gameStateIn(gameId, [GameState.GameInitiated, GameState.GameInitiated]) {
+  function joinGame(uint32 gameId) external override validGameId(gameId) gameStateEq(gameId, GameState.GameInitiated) {
     Game storage game = games[gameId];
     // check the player has not been added to the game
     for (uint8 i = 0; i < game.players.length; i++) {
@@ -94,13 +112,35 @@ contract GuessingGame is IGuessingGame, Ownable {
 
   function startRound(
     uint32 gameId
-  ) external override validGameId(gameId) byGameHost(gameId) gameStateIn(gameId, [GameState.GameInitiated, GameState.RoundEnd]) {
+  ) external override validGameId(gameId) byGameHost(gameId) gameStateIn2(gameId, [GameState.GameInitiated, GameState.RoundEnd]) {
     _updateGameState(gameId, GameState.RoundBid);
     emit GameStarted(gameId);
   }
 
-  function submitBid() {
+  function submitBid(
+    uint32 gameId,
+    bytes32 bid_null_hash,
+    bytes32 null_hash
+  ) external override validGameId(gameId) oneOfPlayers(gameId) gameStateEq(gameId, GameState.RoundBid) {
     // each player submit a bid. The last player that submit a bid will change the game state
+    Game storage game = games[gameId];
+    uint8 round = game.currentRound;
+    game.bids[round][msg.sender] = Bid(bid_null_hash, null_hash);
+    emit BidSubmitted(gameId, round, msg.sender);
+
+    // If all players have submitted bid, update game state
+    bool notYetBid = false;
+    for (uint i = 0; i < game.players.length; i++) {
+      address p = game.players[i];
+      if (game.bids[round][p].bid_null_hash == bytes32(0)) {
+        notYetBid = true;
+        break;
+      }
+    }
+
+    if (!notYetBid) {
+      _updateGameState(gameId, GameState.RoundReveal);
+    }
   }
 
   function revealBid() {

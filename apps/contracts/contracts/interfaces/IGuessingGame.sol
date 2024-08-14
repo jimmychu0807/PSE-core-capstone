@@ -2,15 +2,20 @@
 pragma solidity ^0.8.23;
 
 interface IGuessingGame {
+  struct Bid {
+    bytes32 bid_null_hash;
+    bytes32 null_hash;
+  }
+
   struct Game {
     // game players. The first player is the game host
     address[] players;
     mapping(address => uint8[]) winning;
     uint8 currentRound;
     GameState state;
-    // player move list
-    mapping(address => uint8[]) moves;
-    address winner;
+    // player bid list
+    mapping(uint8 => mapping(address => Bid)) bids;
+    address finalWinner;
     uint256 startTime;
     uint256 lastUpdate;
     uint256 endTime;
@@ -31,14 +36,18 @@ interface IGuessingGame {
   error GuessingGame__UnexpectedGameState(GameState actual);
   error GuessingGame__PlayerAlreadyJoin(address p);
   error GuessingGame__SenderIsNotGameHost();
+  error GuessingGame__SenderNotOneOfPlayers();
 
   // Emitted Events
   event NewGame(uint32 indexed gameId, address indexed sender);
   event PlayerJoinGame(uint32 indexed gameId, address indexed sender);
   event GameStarted(uint32 gameId);
+  event GameStateUpdated(uint32 gameId, GameState state);
+  event BidSubmitted(uint32 gameId, uint8 round, address sender);
 
   // External Functions
   function newGame() external returns (uint32 gameId);
   function joinGame(uint32 gameId) external;
   function startRound(uint32 gameId) external;
+  function submitBid(uint32 gameId, bytes32 bid_nullifier_hash, bytes32 nullifier_hash) external;
 }
