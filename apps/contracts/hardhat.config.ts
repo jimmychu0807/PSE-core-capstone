@@ -1,25 +1,25 @@
-import "@nomicfoundation/hardhat-chai-matchers"
-import "@nomicfoundation/hardhat-ethers"
-import "@nomicfoundation/hardhat-verify"
-import "@semaphore-protocol/hardhat"
-import "@typechain/hardhat"
-import { config as dotenvConfig } from "dotenv"
-import "hardhat-gas-reporter"
-import { HardhatUserConfig } from "hardhat/config"
-import { NetworksUserConfig } from "hardhat/types"
-import { resolve } from "path"
-import "solidity-coverage"
-import "./tasks/deploy"
+import "@nomicfoundation/hardhat-chai-matchers";
+import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-verify";
+import "@semaphore-protocol/hardhat";
+import "@typechain/hardhat";
+import { config as dotenvConfig } from "dotenv";
+import "hardhat-gas-reporter";
+import { HardhatUserConfig } from "hardhat/config";
+import { NetworksUserConfig } from "hardhat/types";
+import { resolve } from "path";
+import "solidity-coverage";
+import "./tasks/deploy";
 
-dotenvConfig({ path: resolve(__dirname, "../../.env") })
+dotenvConfig({ path: resolve(__dirname, "../../.env") });
 
 function getNetworks(): NetworksUserConfig {
     if ((!process.env.INFURA_API_KEY && !process.env.ALCHEMY_API_KEY) || !process.env.ETHEREUM_PRIVATE_KEY) {
-        return {}
+        return {};
     }
 
-    const accounts = [`0x${process.env.ETHEREUM_PRIVATE_KEY}`]
-    const [infuraApiKey, alchemyApiKey] = [process.env.INFURA_API_KEY, process.env.ALCHEMY_API_KEY]
+    const accounts = [`0x${process.env.ETHEREUM_PRIVATE_KEY}`];
+    const [infuraApiKey, alchemyApiKey] = [process.env.INFURA_API_KEY, process.env.ALCHEMY_API_KEY];
 
     return {
         sepolia: {
@@ -47,7 +47,7 @@ function getNetworks(): NetworksUserConfig {
             chainId: 42161,
             accounts
         }
-    }
+    };
 }
 
 const hardhatConfig: HardhatUserConfig = {
@@ -73,6 +73,6 @@ const hardhatConfig: HardhatUserConfig = {
     sourcify: {
         enabled: true
     }
-}
+};
 
-export default hardhatConfig
+export default hardhatConfig;

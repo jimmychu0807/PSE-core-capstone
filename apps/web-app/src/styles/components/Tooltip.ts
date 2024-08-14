@@ -1,4 +1,4 @@
-import { SystemStyleObject } from "@chakra-ui/react"
+import { SystemStyleObject } from "@chakra-ui/react";
 
 const Tooltip = {
     baseStyle: (): SystemStyleObject => ({
@@ -8,6 +8,6 @@ const Tooltip = {
         fontWeight: "bold",
         maxW: "350px"
     })
-}
+};
 
-export default Tooltip
+export default Tooltip;

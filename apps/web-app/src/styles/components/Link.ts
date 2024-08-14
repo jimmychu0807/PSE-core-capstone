@@ -4,6 +4,6 @@ const Link = {
             boxShadow: "none"
         }
     }
-}
+};
 
-export default Link
+export default Link;

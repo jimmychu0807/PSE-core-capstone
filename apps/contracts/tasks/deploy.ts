@@ -1,4 +1,4 @@
-import { task, types } from "hardhat/config"
+import { task, types } from "hardhat/config";
 
 task("deploy", "Deploy a Feedback contract")
     .addOptionalParam("semaphore", "Semaphore contract address", undefined, types.string)
@@ -7,24 +7,24 @@ task("deploy", "Deploy a Feedback contract")
         if (!semaphoreAddress) {
             const { semaphore } = await run("deploy:semaphore", {
                 logs
-            })
+            });
 
-            semaphoreAddress = await semaphore.getAddress()
+            semaphoreAddress = await semaphore.getAddress();
         }
 
-        const FeedbackFactory = await ethers.getContractFactory("Feedback")
+        const FeedbackFactory = await ethers.getContractFactory("Feedback");
 
-        const feedbackContract = await FeedbackFactory.deploy(semaphoreAddress)
+        const feedbackContract = await FeedbackFactory.deploy(semaphoreAddress);
 
-        await feedbackContract.waitForDeployment()
+        await feedbackContract.waitForDeployment();
 
-        const groupId = await feedbackContract.groupId()
+        const groupId = await feedbackContract.groupId();
 
         if (logs) {
             console.info(
                 `Feedback contract has been deployed to: ${await feedbackContract.getAddress()} (groupId: ${groupId})`
-            )
+            );
         }
 
-        return feedbackContract
-    })
+        return feedbackContract;
+    });

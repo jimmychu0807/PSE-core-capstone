@@ -1,7 +1,7 @@
-import { extendTheme } from "@chakra-ui/react"
-import colors from "./colors"
-import components from "./components"
-import styles, { font } from "./styles"
+import { extendTheme } from "@chakra-ui/react";
+import colors from "./colors";
+import components from "./components";
+import styles, { font } from "./styles";
 
 const config = {
     fonts: {
@@ -11,6 +11,6 @@ const config = {
     colors,
     styles,
     components
-}
+};
 
-export default extendTheme(config)
+export default extendTheme(config);

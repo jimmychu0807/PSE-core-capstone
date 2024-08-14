@@ -1,8 +1,8 @@
-import PageContainer from "@/components/PageContainer"
-import type { Metadata } from "next"
-import Providers from "./providers"
-import { LogContextProvider } from "@/context/LogContext"
-import { SemaphoreContextProvider } from "@/context/SemaphoreContext"
+import PageContainer from "@/components/PageContainer";
+import type { Metadata } from "next";
+import Providers from "./providers";
+import { LogContextProvider } from "@/context/LogContext";
+import { SemaphoreContextProvider } from "@/context/SemaphoreContext";
 
 export const metadata: Metadata = {
     title: "Semaphore Demo",
@@ -22,12 +22,12 @@ export const metadata: Metadata = {
         ]
     },
     twitter: { card: "summary_large_image", images: "https://demo.semaphore.pse.dev/social-media.png" }
-}
+};
 
 export default function RootLayout({
     children
 }: Readonly<{
-    children: React.ReactNode
+    children: React.ReactNode;
 }>) {
     return (
         <html lang="en" suppressHydrationWarning>
@@ -41,5 +41,5 @@ export default function RootLayout({
                 </Providers>
             </body>
         </html>
-    )
+    );
 }

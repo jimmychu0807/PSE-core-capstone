@@ -1,17 +1,8 @@
 <h1 align="center">
-    Semaphore Boilerplate
+    PSE Core Hackathon
 </h1>
 
 <p align="center">
-    <a href="https://github.com/semaphore-protocol" target="_blank">
-        <img src="https://img.shields.io/badge/project-Semaphore-blue.svg?style=flat-square">
-    </a>
-    <a href="https://github.com/semaphore-protocol/boilerplate/blob/main/LICENSE">
-        <img alt="Github license" src="https://img.shields.io/github/license/semaphore-protocol/boilerplate.svg?style=flat-square">
-    </a>
-    <a href="https://github.com/semaphore-protocol/boilerplate/actions?query=workflow%3Astyle">
-        <img alt="GitHub Workflow style" src="https://img.shields.io/github/actions/workflow/status/semaphore-protocol/boilerplate/style.yml?branch=main&label=style&style=flat-square&logo=github">
-    </a>
     <a href="https://eslint.org/">
         <img alt="Linter eslint" src="https://img.shields.io/badge/linter-eslint-8080f2?style=flat-square&logo=eslint">
     </a>
@@ -23,8 +14,10 @@
     </a>
 </p>
 
-| The repository is divided into two components: [web app](./apps/web-app) and [contracts](./apps/contracts). The app allows users to create their own Semaphore identity, join a group and then send their feedback anonymously (currently on Sepolia). |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| The repository is divided into two components: [web app](./apps/web-app) and [contracts](./apps/contracts). Hopefully the app will be deployed on Sepolia. |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+
+This repo is modified from [Semaphore Boilerplate Template](https://github.com/semaphore-protocol/boilerplate)
 
 ## 🛠 Install
 
