@@ -10,7 +10,6 @@ interface IGuessingGame {
     GameState state;
     // player move list
     mapping(address => uint8[]) moves;
-    address initiator;
     address winner;
     uint256 startTime;
     uint256 lastUpdate;

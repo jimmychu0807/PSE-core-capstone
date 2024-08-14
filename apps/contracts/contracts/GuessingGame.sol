@@ -46,7 +46,7 @@ contract GuessingGame is IGuessingGame, Ownable {
 
   function newGame() external override returns (uint32 gameId) {
     Game storage game = games.push();
-    game.initiator = msg.sender;
+    game.players.push(msg.sender);
     gameId = nextGameId++;
     _updateGameState(gameId, GameState.GameInitiated);
 
