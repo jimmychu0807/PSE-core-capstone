@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import { useLogContext } from "@/context/LogContext"
-import shortenString from "@/utils/shortenString"
-import { Container, HStack, Icon, IconButton, Link, Spinner, Stack, Text } from "@chakra-ui/react"
-import { usePathname } from "next/navigation"
-import { FaGithub } from "react-icons/fa"
+import { useLogContext } from "@/context/LogContext";
+import shortenString from "@/utils/shortenString";
+import { Container, HStack, Icon, IconButton, Link, Spinner, Stack, Text } from "@chakra-ui/react";
+import { usePathname } from "next/navigation";
+import { FaGithub } from "react-icons/fa";
 
 export default function PageContainer({
     children
 }: Readonly<{
-    children: React.ReactNode
+    children: React.ReactNode;
 }>) {
-    const pathname = usePathname()
-    const { log } = useLogContext()
+    const pathname = usePathname();
+    const { log } = useLogContext();
 
     function getExplorerLink(network: string, address: string) {
         switch (network) {
             case "sepolia":
-                return `https://sepolia.etherscan.io/address/${address}`
+                return `https://sepolia.etherscan.io/address/${address}`;
             case "arbitrum-sepolia":
-                return `https://sepolia.arbiscan.io/address/${address}`
+                return `https://sepolia.arbiscan.io/address/${address}`;
             default:
-                return ""
+                return "";
         }
     }
 
@@ -68,5 +68,5 @@ export default function PageContainer({
                 <Text>{log || `Current step: ${pathname}`}</Text>
             </HStack>
         </>
-    )
+    );
 }

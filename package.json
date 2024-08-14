@@ -1,10 +1,9 @@
 {
-    "name": "semaphore-boilerplate",
-    "description": "A simple DApp to use as a starting point for your project.",
+    "description": "A mini-game of guessing number",
     "license": "MIT",
-    "repository": "git@github.com:semaphore-protocol/boilerplate.git",
-    "homepage": "https://github.com/semaphore-protocol/boilerplate",
-    "bugs": "https://github.com/semaphore-protocol/boilerplate/issues",
+    "repository": "https://github.com/jimmychu0807/PSE-core-hackathon.git",
+    "homepage": "https://github.com/jimmychu0807/PSE-core-hackathon",
+    "bugs": "https://github.com/jimmychu0807/PSE-core-hackathon/issues",
     "private": true,
     "scripts": {
         "dev": "yarn workspaces foreach -A -pi run dev",
@@ -24,7 +23,7 @@
     "workspaces": [
         "apps/*"
     ],
-    "packageManager": "yarn@4.1.0",
+    "packageManager": "yarn@4.4.0",
     "devDependencies": {
         "prettier": "^2.5.1"
     }

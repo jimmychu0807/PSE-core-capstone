@@ -1,58 +1,58 @@
-"use client"
+"use client";
 
-import Stepper from "@/components/Stepper"
-import { useLogContext } from "@/context/LogContext"
-import { useSemaphoreContext } from "@/context/SemaphoreContext"
-import IconRefreshLine from "@/icons/IconRefreshLine"
-import { Box, Button, Divider, Heading, HStack, Link, Text, useBoolean, VStack } from "@chakra-ui/react"
-import { generateProof, Group } from "@semaphore-protocol/core"
-import { encodeBytes32String, ethers } from "ethers"
-import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo } from "react"
-import Feedback from "../../../contract-artifacts/Feedback.json"
-import useSemaphoreIdentity from "@/hooks/useSemaphoreIdentity"
+import Stepper from "@/components/Stepper";
+import { useLogContext } from "@/context/LogContext";
+import { useSemaphoreContext } from "@/context/SemaphoreContext";
+import IconRefreshLine from "@/icons/IconRefreshLine";
+import { Box, Button, Divider, Heading, HStack, Link, Text, useBoolean, VStack } from "@chakra-ui/react";
+import { generateProof, Group } from "@semaphore-protocol/core";
+import { encodeBytes32String, ethers } from "ethers";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo } from "react";
+import Feedback from "../../../contract-artifacts/Feedback.json";
+import useSemaphoreIdentity from "@/hooks/useSemaphoreIdentity";
 
 export default function ProofsPage() {
-    const router = useRouter()
-    const { setLog } = useLogContext()
-    const { _users, _feedback, refreshFeedback, addFeedback } = useSemaphoreContext()
-    const [_loading, setLoading] = useBoolean()
-    const { _identity } = useSemaphoreIdentity()
+    const router = useRouter();
+    const { setLog } = useLogContext();
+    const { _users, _feedback, refreshFeedback, addFeedback } = useSemaphoreContext();
+    const [_loading, setLoading] = useBoolean();
+    const { _identity } = useSemaphoreIdentity();
 
     useEffect(() => {
         if (_feedback.length > 0) {
-            setLog(`${_feedback.length} feedback retrieved from the group 🤙🏽`)
+            setLog(`${_feedback.length} feedback retrieved from the group 🤙🏽`);
         }
-    }, [_feedback, setLog])
+    }, [_feedback, setLog]);
 
-    const feedback = useMemo(() => [..._feedback].reverse(), [_feedback])
+    const feedback = useMemo(() => [..._feedback].reverse(), [_feedback]);
 
     const sendFeedback = useCallback(async () => {
         if (!_identity) {
-            return
+            return;
         }
 
-        const feedback = prompt("Please enter your feedback:")
+        const feedback = prompt("Please enter your feedback:");
 
         if (feedback && _users) {
-            setLoading.on()
+            setLoading.on();
 
-            setLog(`Posting your anonymous feedback...`)
+            setLog(`Posting your anonymous feedback...`);
 
             try {
-                const group = new Group(_users)
+                const group = new Group(_users);
 
-                const message = encodeBytes32String(feedback)
+                const message = encodeBytes32String(feedback);
 
                 const { points, merkleTreeDepth, merkleTreeRoot, nullifier } = await generateProof(
                     _identity,
                     group,
                     message,
                     process.env.NEXT_PUBLIC_GROUP_ID as string
-                )
+                );
 
-                let feedbackSent: boolean = false
-                const params = [merkleTreeDepth, merkleTreeRoot, nullifier, message, points]
+                let feedbackSent: boolean = false;
+                const params = [merkleTreeDepth, merkleTreeRoot, nullifier, message, points];
                 if (process.env.NEXT_PUBLIC_OPENZEPPELIN_AUTOTASK_WEBHOOK) {
                     const response = await fetch(process.env.NEXT_PUBLIC_OPENZEPPELIN_AUTOTASK_WEBHOOK, {
                         method: "POST",
@@ -63,31 +63,31 @@ export default function ProofsPage() {
                             functionName: "sendFeedback",
                             functionParameters: params
                         })
-                    })
+                    });
 
                     if (response.status === 200) {
-                        feedbackSent = true
+                        feedbackSent = true;
                     }
                 } else if (
                     process.env.NEXT_PUBLIC_GELATO_RELAYER_ENDPOINT &&
                     process.env.NEXT_PUBLIC_GELATO_RELAYER_CHAIN_ID &&
                     process.env.GELATO_RELAYER_API_KEY
                 ) {
-                    const iface = new ethers.Interface(Feedback.abi)
+                    const iface = new ethers.Interface(Feedback.abi);
                     const request = {
                         chainId: process.env.NEXT_PUBLIC_GELATO_RELAYER_CHAIN_ID,
                         target: process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS,
                         data: iface.encodeFunctionData("sendFeedback", params),
                         sponsorApiKey: process.env.GELATO_RELAYER_API_KEY
-                    }
+                    };
                     const response = await fetch(process.env.NEXT_PUBLIC_GELATO_RELAYER_ENDPOINT, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(request)
-                    })
+                    });
 
                     if (response.status === 201) {
-                        feedbackSent = true
+                        feedbackSent = true;
                     }
                 } else {
                     const response = await fetch("api/feedback", {
@@ -100,29 +100,29 @@ export default function ProofsPage() {
                             nullifier,
                             points
                         })
-                    })
+                    });
 
                     if (response.status === 200) {
-                        feedbackSent = true
+                        feedbackSent = true;
                     }
                 }
 
                 if (feedbackSent) {
-                    addFeedback(feedback)
+                    addFeedback(feedback);
 
-                    setLog(`Your feedback has been posted 🎉`)
+                    setLog(`Your feedback has been posted 🎉`);
                 } else {
-                    setLog("Some error occurred, please try again!")
+                    setLog("Some error occurred, please try again!");
                 }
             } catch (error) {
-                console.error(error)
+                console.error(error);
 
-                setLog("Some error occurred, please try again!")
+                setLog("Some error occurred, please try again!");
             } finally {
-                setLoading.off()
+                setLoading.off();
             }
         }
-    }, [_identity, _users, addFeedback, setLoading, setLog])
+    }, [_identity, _users, addFeedback, setLoading, setLog]);
 
     return (
         <>
@@ -176,5 +176,5 @@ export default function ProofsPage() {
 
             <Stepper step={3} onPrevClick={() => router.push("/group")} />
         </>
-    )
+    );
 }

@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { Button, HStack, Text } from "@chakra-ui/react"
-import IconChevronLeft from "../icons/IconChevronLeft"
-import IconChevronRight from "../icons/IconChevronRight"
+import { Button, HStack, Text } from "@chakra-ui/react";
+import IconChevronLeft from "../icons/IconChevronLeft";
+import IconChevronRight from "../icons/IconChevronRight";
 
 export type StepperProps = {
-    step: number
-    onPrevClick?: () => void
-    onNextClick?: () => void
-}
+    step: number;
+    onPrevClick?: () => void;
+    onNextClick?: () => void;
+};
 
 export default function Stepper({ step, onPrevClick, onNextClick }: StepperProps) {
     return (
@@ -45,5 +45,5 @@ export default function Stepper({ step, onPrevClick, onNextClick }: StepperProps
                 Next
             </Button>
         </HStack>
-    )
+    );
 }

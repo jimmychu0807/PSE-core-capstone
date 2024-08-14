@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import React, { createContext, ReactNode, useContext, useState } from "react"
+import React, { createContext, ReactNode, useContext, useState } from "react";
 
 export type LogContextType = {
-    log: string
-    setLog: (logs: string) => void
-}
+    log: string;
+    setLog: (logs: string) => void;
+};
 
-const LogContext = createContext<LogContextType | null>(null)
+const LogContext = createContext<LogContextType | null>(null);
 
 interface ProviderProps {
-    children: ReactNode
+    children: ReactNode;
 }
 
 export const LogContextProvider: React.FC<ProviderProps> = ({ children }) => {
-    const [log, setLog] = useState<string>("")
+    const [log, setLog] = useState<string>("");
 
     return (
         <LogContext.Provider
@@ -25,13 +25,13 @@ export const LogContextProvider: React.FC<ProviderProps> = ({ children }) => {
         >
             {children}
         </LogContext.Provider>
-    )
-}
+    );
+};
 
 export const useLogContext = () => {
-    const context = useContext(LogContext)
+    const context = useContext(LogContext);
     if (context === null) {
-        throw new Error("LogContext must be used within a LogContextProvider")
+        throw new Error("LogContext must be used within a LogContextProvider");
     }
-    return context
-}
+    return context;
+};

@@ -1,8 +1,8 @@
-import { SystemStyleObject } from "@chakra-ui/react"
-import { Styles } from "@chakra-ui/theme-tools"
-import { Outfit } from "next/font/google"
+import { SystemStyleObject } from "@chakra-ui/react";
+import { Styles } from "@chakra-ui/theme-tools";
+import { Outfit } from "next/font/google";
 
-export const font = Outfit({ subsets: ["latin"] })
+export const font = Outfit({ subsets: ["latin"] });
 
 const styles: Styles = {
     global: (): SystemStyleObject => ({
@@ -20,6 +20,6 @@ const styles: Styles = {
             color: "primary.400 !important"
         }
     })
-}
+};
 
-export default styles
+export default styles;
