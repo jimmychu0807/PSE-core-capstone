@@ -1,9 +1,9 @@
 const Link = {
-    baseStyle: {
-        _focus: {
-            boxShadow: "none"
-        }
+  baseStyle: {
+    _focus: {
+      boxShadow: "none"
     }
+  }
 };
 
 export default Link;

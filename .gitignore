@@ -55,5 +55,8 @@ node_modules/
 !.yarn/sdks
 !.yarn/versions
 
+# Circuit artifacts
+circuits/artifacts
+
 # own misc notes
 project-todo.md

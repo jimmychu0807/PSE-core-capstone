@@ -6,64 +6,64 @@ import { run } from "hardhat";
 import { Feedback } from "../typechain-types";
 
 describe("Feedback", () => {
-    let feedbackContract: Feedback;
-    let semaphoreContract: string;
+  let feedbackContract: Feedback;
+  let semaphoreContract: string;
 
-    const groupId = 0;
-    const group = new Group();
-    const users: Identity[] = [];
+  const groupId = 0;
+  const group = new Group();
+  const users: Identity[] = [];
 
-    before(async () => {
-        const { semaphore } = await run("deploy:semaphore", {
-            logs: false
-        });
-
-        feedbackContract = await run("deploy", { logs: false, semaphore: await semaphore.getAddress() });
-        semaphoreContract = semaphore;
-
-        users.push(new Identity());
-        users.push(new Identity());
+  before(async () => {
+    const { semaphore } = await run("deploy:semaphore", {
+      logs: false
     });
 
-    describe("# joinGroup", () => {
-        it("Should allow users to join the group", async () => {
-            for await (const [i, user] of users.entries()) {
-                const transaction = feedbackContract.joinGroup(user.commitment);
+    feedbackContract = await run("deploy", { logs: false, semaphore: await semaphore.getAddress() });
+    semaphoreContract = semaphore;
 
-                group.addMember(user.commitment);
+    users.push(new Identity());
+    users.push(new Identity());
+  });
 
-                await expect(transaction)
-                    .to.emit(semaphoreContract, "MemberAdded")
-                    .withArgs(groupId, i, user.commitment, group.root);
-            }
-        });
+  describe("# joinGroup", () => {
+    it("Should allow users to join the group", async () => {
+      for await (const [i, user] of users.entries()) {
+        const transaction = feedbackContract.joinGroup(user.commitment);
+
+        group.addMember(user.commitment);
+
+        await expect(transaction)
+          .to.emit(semaphoreContract, "MemberAdded")
+          .withArgs(groupId, i, user.commitment, group.root);
+      }
     });
+  });
 
-    describe("# sendFeedback", () => {
-        it("Should allow users to send feedback anonymously", async () => {
-            const feedback = encodeBytes32String("Hello World");
+  describe("# sendFeedback", () => {
+    it("Should allow users to send feedback anonymously", async () => {
+      const feedback = encodeBytes32String("Hello World");
 
-            const fullProof = await generateProof(users[1], group, feedback, groupId);
+      const fullProof = await generateProof(users[1], group, feedback, groupId);
 
-            const transaction = feedbackContract.sendFeedback(
-                fullProof.merkleTreeDepth,
-                fullProof.merkleTreeRoot,
-                fullProof.nullifier,
-                feedback,
-                fullProof.points
-            );
+      const transaction = feedbackContract.sendFeedback(
+        fullProof.merkleTreeDepth,
+        fullProof.merkleTreeRoot,
+        fullProof.nullifier,
+        feedback,
+        fullProof.points
+      );
 
-            await expect(transaction)
-                .to.emit(semaphoreContract, "ProofValidated")
-                .withArgs(
-                    groupId,
-                    fullProof.merkleTreeDepth,
-                    fullProof.merkleTreeRoot,
-                    fullProof.nullifier,
-                    fullProof.message,
-                    groupId,
-                    fullProof.points
-                );
-        });
+      await expect(transaction)
+        .to.emit(semaphoreContract, "ProofValidated")
+        .withArgs(
+          groupId,
+          fullProof.merkleTreeDepth,
+          fullProof.merkleTreeRoot,
+          fullProof.nullifier,
+          fullProof.message,
+          groupId,
+          fullProof.points
+        );
     });
+  });
 });
