@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 interface IGuessingGame {
   struct Game {
-    // p1 and p2 addr, only they can send the missile
+    // game players. The first player is the game host
     address[] players;
     mapping(address => uint8[]) winning;
     uint8 currentRound;
@@ -27,10 +27,17 @@ interface IGuessingGame {
   // Error declaration
   error GuessingGame__InvalidGameId();
   error GuessingGame__GameHasEnded();
+  error GuessingGame__UnexpectedGameState(GameState expected, GameState actual);
+  error GuessingGame__PlayerAlreadyJoin(address p);
+  error GuessingGame__SenderIsNotGameHost();
 
   // Emitted Events
   event NewGame(uint32 indexed gameId, address indexed sender);
+  event PlayerJoinGame(uint32 indexed gameId, address indexed sender);
+  event GameStarted(uint32 gameId);
 
   // External Functions
   function newGame() external returns (uint32 gameId);
+  function joinGame(uint32 gameId) external;
+  function startGame(uint32 gameId) external;
 }

@@ -7,7 +7,7 @@ describe("GuessingGame", () => {
   let contract: GuessingGame;
   let owner;
 
-  before(async() => {
+  before(async () => {
     contract = await hre.ethers.deployContract("GuessingGame", []);
     owner = (await hre.ethers.getSigners())[0];
 
@@ -17,12 +17,11 @@ describe("GuessingGame", () => {
   });
 
   describe("# newGame", () => {
-    it("should create a new game", async() => {
+    it("should create a new game", async () => {
       await contract.newGame();
       const game = await contract.games(0);
 
       console.log(game);
     });
-  })
-
-})
+  });
+});
