@@ -8,9 +8,13 @@ import Stepper from "../components/Stepper";
 import { useLogContext } from "../context/LogContext";
 
 export default function HomePage() {
-  return <>
-    <Heading as="h2" size="xl">Guessing Game</Heading>
-  </>
+  return (
+    <>
+      <Heading as="h2" size="xl" textAlign="center">
+        Guessing Game
+      </Heading>
+    </>
+  );
 }
 
 export function IdentitiesPage() {

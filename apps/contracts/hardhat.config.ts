@@ -61,7 +61,7 @@ const hardhatConfig: HardhatUserConfig = {
       //   ref: https://hardhat.org/hardhat-runner/docs/reference/solidity-support#support-for-ir-based-codegen
       viaIR: true,
       optimizer: {
-        enabled: false,
+        enabled: false
         // enabled: true,
         // runs: 77,
         // details: {
@@ -69,14 +69,14 @@ const hardhatConfig: HardhatUserConfig = {
         //     optimizerSteps: "u",
         //   },
         // },
-      },
+      }
     }
   },
   defaultNetwork: process.env.DEFAULT_NETWORK || "localhost",
   networks: {
     hardhat: {
       chainId: 1337,
-      allowUnlimitedContractSize: true,
+      allowUnlimitedContractSize: true
     },
     ...getNetworks()
   },

@@ -1,27 +1,27 @@
 import PageContainer from "@/components/PageContainer";
 import type { Metadata } from "next";
 import Providers from "./providers";
-import { LogContextProvider } from "@/context/LogContext";
 import { SemaphoreContextProvider } from "@/context/SemaphoreContext";
+import { project } from "../consts";
 
 export const metadata: Metadata = {
-  title: "PSE Hackathon - Guessing Game",
-  description: "Guessing game using zero-knowledge protocol.",
+  title: project.name,
+  description: project.desc,
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
-  metadataBase: new URL("https://github.com/jimmychu0807/PSE-core-hackathon"),
+  metadataBase: new URL(project.homepage),
   openGraph: {
     type: "website",
-    url: "https://github.com/jimmychu0807/PSE-core-hackathon",
-    title: "PSE Hackathon - Guessing Game",
-    description: "Guessing game using zero-knowledge protocol.",
-    siteName: "PSE Hackathon - Guessing Game",
+    url: project.homepage,
+    title: project.name,
+    description: project.desc,
+    siteName: project.name,
     images: [
       {
-        url: "https://avatars.githubusercontent.com/u/898091?v=4"
+        url: project.image
       }
     ]
   },
-  twitter: { card: "summary_large_image", images: "https://avatars.githubusercontent.com/u/898091?v=4" }
+  twitter: { card: "summary_large_image", images: project.image }
 };
 
 export default function RootLayout({
@@ -33,9 +33,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Providers>
-          <LogContextProvider>
-            <PageContainer>{children}</PageContainer>
-          </LogContextProvider>
+          <PageContainer>{children}</PageContainer>
         </Providers>
       </body>
     </html>

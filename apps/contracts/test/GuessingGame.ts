@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre, {run} from "hardhat";
+import hre, { run } from "hardhat";
 
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { GuessingGame } from "../typechain-types";
