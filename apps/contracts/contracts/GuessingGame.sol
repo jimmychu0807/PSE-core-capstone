@@ -70,6 +70,13 @@ contract GuessingGame is IGuessingGame, Ownable {
     _;
   }
 
+  modifier BidInRange(uint8 bid) {
+    if (bid < MIN_NUM || bid > MAX_NUM) {
+      revert GuessingGame__BidOutOfRange(msg.sender, bid);
+    }
+    _;
+  }
+
   // Helper functions
   function _updateGameState(uint32 gameId, GameState state) internal validGameId(gameId) nonEndState(gameId) {
     Game storage game = games[gameId];
@@ -143,8 +150,44 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  function revealBid() {
+  function _verifyBidProof(bytes32 proof, uint8 bid, uint256 nullifier) internal returns (bool) {
+    return false;
+  }
+
+  function revealBid(
+    uint32 gameId,
+    bytes32 proof,
+    uint8 bid,
+    uint256 nullifier
+  ) external override validGameId(gameId) oneOfPlayers(gameId) gameStateEq(gameId, GameState.RoundReveal) BidInRange(bid) {
+    Game storage game = games[gameId];
+
     // each player reveal a bid. The last player that reveal a bid will change the game state
+
+    // TODO: verify proof
+    bool proofVerified = _verifyBidProof(proof, bid, nullifier);
+    if (!proofVerified) {
+      revert GuessingGame__BidProofRejected(msg.sender, gameId, game.currentRound);
+    }
+
+    uint8 round = game.currentRound;
+    game.revelations[round][msg.sender] = bid;
+    emit BidRevealed(gameId, round, msg.sender);
+
+    // If all players have submitted revelation, update game state
+    bool notYetReveal = false;
+    for (uint i = 0; i < game.players.length; i++) {
+      address p = game.players[i];
+      if (game.revelations[round][p] == 0) {
+        notYetReveal = true;
+        break;
+      }
+    }
+
+    if (!notYetReveal) {
+      _updateGameState(gameId, GameState.RoundEnd);
+    }
+
   }
 
   function endRound() {
