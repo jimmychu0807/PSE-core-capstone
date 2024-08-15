@@ -37,7 +37,7 @@ export default function PageContainer({
         >
           <Text>{shortenString(process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS as string, [6, 4])}</Text>
         </Link>
-        <Link href="https://github.com/semaphore-protocol/boilerplate" isExternal>
+        <Link href="https://github.com/jimmychu0807/PSE-core-hackathon" isExternal>
           <IconButton
             aria-label="Github repository"
             variant="link"
