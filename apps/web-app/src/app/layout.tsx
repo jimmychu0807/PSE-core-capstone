@@ -1,30 +1,47 @@
 import PageContainer from "@/components/PageContainer";
 import type { Metadata } from "next";
 import Providers from "./providers";
-import { LogContextProvider } from "@/context/LogContext";
 import { SemaphoreContextProvider } from "@/context/SemaphoreContext";
+import { project } from "../consts";
 
 export const metadata: Metadata = {
-  title: "Semaphore Demo",
-  description: "A zero-knowledge protocol for anonymous signaling on Ethereum.",
+  title: project.name,
+  description: project.desc,
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
-  metadataBase: new URL("https://demo.semaphore.pse.dev"),
+  metadataBase: new URL(project.homepage),
   openGraph: {
     type: "website",
-    url: "https://demo.semaphore.pse.dev",
-    title: "Semaphore Demo",
-    description: "A zero-knowledge protocol for anonymous signaling on Ethereum.",
-    siteName: "Semaphore Demo",
+    url: project.homepage,
+    title: project.name,
+    description: project.desc,
+    siteName: project.name,
     images: [
       {
-        url: "https://demo.semaphore.pse.dev/social-media.png"
+        url: project.image
       }
     ]
   },
-  twitter: { card: "summary_large_image", images: "https://demo.semaphore.pse.dev/social-media.png" }
+  twitter: { card: "summary_large_image", images: project.image }
 };
 
 export default function RootLayout({
+  children
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <Providers>
+          <PageContainer>{children}</PageContainer>
+        </Providers>
+      </body>
+    </html>
+  );
+}
+
+// Archieving Semaphore original rootlayout
+export function SemaphoreRootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;

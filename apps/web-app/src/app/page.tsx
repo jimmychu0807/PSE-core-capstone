@@ -7,7 +7,17 @@ import { useCallback, useEffect, useState } from "react";
 import Stepper from "../components/Stepper";
 import { useLogContext } from "../context/LogContext";
 
-export default function IdentitiesPage() {
+export default function HomePage() {
+  return (
+    <>
+      <Heading as="h2" size="xl" textAlign="center">
+        Guessing Game
+      </Heading>
+    </>
+  );
+}
+
+export function IdentitiesPage() {
   const router = useRouter();
   const { setLog } = useLogContext();
   const [_identity, setIdentity] = useState<Identity>();

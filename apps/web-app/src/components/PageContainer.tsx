@@ -6,6 +6,18 @@ import { Container, HStack, Icon, IconButton, Link, Spinner, Stack, Text } from 
 import { usePathname } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
 
+import { useWalletInfo, useWeb3ModalState } from "@web3modal/wagmi/react";
+
+function PromptForWalletConnect() {
+  return (
+    <>
+      <Text fontSize="xl" textAlign="center">
+        Please connect with your wallet
+      </Text>
+    </>
+  );
+}
+
 export default function PageContainer({
   children
 }: Readonly<{
@@ -13,31 +25,13 @@ export default function PageContainer({
 }>) {
   const pathname = usePathname();
   const { log } = useLogContext();
-
-  function getExplorerLink(network: string, address: string) {
-    switch (network) {
-      case "sepolia":
-        return `https://sepolia.etherscan.io/address/${address}`;
-      case "arbitrum-sepolia":
-        return `https://sepolia.arbiscan.io/address/${address}`;
-      default:
-        return "";
-    }
-  }
+  const { walletInfo } = useWalletInfo();
 
   return (
     <>
       <HStack align="center" justify="right" p="2">
-        <Link
-          href={getExplorerLink(
-            process.env.NEXT_PUBLIC_DEFAULT_NETWORK as string,
-            process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS as string
-          )}
-          isExternal
-        >
-          <Text>{shortenString(process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS as string, [6, 4])}</Text>
-        </Link>
-        <Link href="https://github.com/semaphore-protocol/boilerplate" isExternal>
+        <w3m-button size="sm" />
+        <Link href="https://github.com/jimmychu0807/PSE-core-hackathon" isExternal>
           <IconButton
             aria-label="Github repository"
             variant="link"
@@ -50,7 +44,7 @@ export default function PageContainer({
 
       <Container maxW="xl" flex="1" display="flex" alignItems="center">
         <Stack pt="8" pb="24" display="flex" width="100%">
-          {children}
+          {walletInfo ? <>{children}</> : <PromptForWalletConnect />}
         </Stack>
       </Container>
 

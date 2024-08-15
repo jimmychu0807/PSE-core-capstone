@@ -1,6 +1,25 @@
 import { task, types } from "hardhat/config";
 
-task("deploy", "Deploy a Feedback contract")
+task("deploy", "Deploy a contract")
+  .addOptionalParam("logs", "Print the logs", true, types.boolean)
+  .setAction(async ({ logs }, { ethers, run }) => {
+    const addr = await run("deploy:game", { logs });
+    return addr;
+  });
+
+task("deploy:game", "Deploy a GuessingGame contract")
+  .addOptionalParam("logs", "Print the logs", true, types.boolean)
+  .setAction(async ({ logs }, { ethers, run }) => {
+    const factory = await ethers.getContractFactory("GuessingGame");
+    const contract = await factory.deploy();
+    await contract.waitForDeployment();
+
+    logs && console.info(`GuessingGame contract: ${await contract.getAddress()}`);
+
+    return contract;
+  });
+
+task("deploy:feedback", "Deploy a Feedback contract")
   .addOptionalParam("semaphore", "Semaphore contract address", undefined, types.string)
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
   .setAction(async ({ logs, semaphore: semaphoreAddress }, { ethers, run }) => {
