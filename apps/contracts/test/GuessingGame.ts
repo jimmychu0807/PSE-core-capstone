@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import hre from "hardhat";
+import hre, {run} from "hardhat";
+
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { GuessingGame } from "../typechain-types";
 
@@ -8,12 +9,9 @@ describe("GuessingGame", () => {
   let owner;
 
   before(async () => {
-    contract = await hre.ethers.deployContract("GuessingGame", []);
+    contract = await run("deploy:game", { logs: true });
     owner = (await hre.ethers.getSigners())[0];
-
-    console.info(`owner addr: ${await owner.getAddress()}`);
-
-    console.info(`GuessingGame contract has been deployed to: ${await contract.getAddress()}`);
+    contract.connect(owner);
   });
 
   describe("# newGame", () => {
