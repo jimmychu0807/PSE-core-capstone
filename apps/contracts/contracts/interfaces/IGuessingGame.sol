@@ -10,7 +10,7 @@ interface IGuessingGame {
   struct Game {
     // game players. The first player is the game host
     address[] players;
-    mapping(address => uint8[]) winning;
+    mapping(address => uint8) roundWon;
     uint8 currentRound;
     GameState state;
     // player bid list
@@ -48,11 +48,14 @@ interface IGuessingGame {
   event GameStateUpdated(uint32 gameId, GameState state);
   event BidSubmitted(uint32 gameId, uint8 round, address sender);
   event BidRevealed(uint32 gameId, uint8 round, address sender);
+  event RoundWinner(uint32 gameId, uint8 round, address winner);
+  event GameWinner(uint32 gameId, address winner);
 
   // External Functions
   function newGame() external returns (uint32 gameId);
   function joinGame(uint32 gameId) external;
-  function startRound(uint32 gameId) external;
+  function startGame(uint32 gameId) external;
   function submitBid(uint32 gameId, bytes32 bid_nullifier_hash, bytes32 nullifier_hash) external;
   function revealBid(uint32 gameId, bytes32 proof, uint8 bid, uint256 nullifier) external;
+  function endRound(uint32 gameId) external;
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IGuessingGame} from "./interfaces/IGuessingGame.sol";
-import {MIN_NUM, MAX_NUM} from "./base/Constants.sol";
+import {MIN_NUM, MAX_NUM, ROUND_TO_WIN} from "./base/Constants.sol";
 
 contract GuessingGame is IGuessingGame, Ownable {
   Game[] public games;
@@ -30,18 +30,10 @@ contract GuessingGame is IGuessingGame, Ownable {
     _;
   }
 
-  modifier gameStateIn2(uint32 gameId, GameState[2] memory gss) {
-    Game storage game = games[gameId];
-    if (game.state != gss[0] && game.state != gss[1]) {
-      revert GuessingGame__UnexpectedGameState(game.state);
-    }
-    _;
-  }
-
   modifier oneOfPlayers(uint32 gameId) {
     Game storage game = games[gameId];
     bool found = false;
-    for (uint8 i = 0; i < game.players.length; i++) {
+    for (uint8 i = 0; i < game.players.length; ++i) {
       if (game.players[i] == msg.sender) {
         found = true;
         break;
@@ -102,12 +94,10 @@ contract GuessingGame is IGuessingGame, Ownable {
     emit NewGame(gameId, msg.sender);
   }
 
-  // IMPROVE: the gameStateIn() modifier code is bad. It is restricted to take
-  //   two params.
   function joinGame(uint32 gameId) external override validGameId(gameId) gameStateEq(gameId, GameState.GameInitiated) {
     Game storage game = games[gameId];
     // check the player has not been added to the game
-    for (uint8 i = 0; i < game.players.length; i++) {
+    for (uint8 i = 0; i < game.players.length; ++i) {
       if (game.players[i] == msg.sender) {
         revert GuessingGame__PlayerAlreadyJoin(msg.sender);
       }
@@ -117,9 +107,9 @@ contract GuessingGame is IGuessingGame, Ownable {
     emit PlayerJoinGame(gameId, msg.sender);
   }
 
-  function startRound(
+  function startGame(
     uint32 gameId
-  ) external override validGameId(gameId) byGameHost(gameId) gameStateIn2(gameId, [GameState.GameInitiated, GameState.RoundEnd]) {
+  ) external override validGameId(gameId) byGameHost(gameId) gameStateEq(gameId, GameState.GameInitiated) {
     _updateGameState(gameId, GameState.RoundBid);
     emit GameStarted(gameId);
   }
@@ -137,7 +127,7 @@ contract GuessingGame is IGuessingGame, Ownable {
 
     // If all players have submitted bid, update game state
     bool notYetBid = false;
-    for (uint i = 0; i < game.players.length; i++) {
+    for (uint i = 0; i < game.players.length; ++i) {
       address p = game.players[i];
       if (game.bids[round][p].bid_null_hash == bytes32(0)) {
         notYetBid = true;
@@ -150,8 +140,14 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  function _verifyBidProof(bytes32 proof, uint8 bid, uint256 nullifier) internal returns (bool) {
-    return false;
+  function _verifyBidProof(bytes32 proof, uint8 bid, uint256 nullifier) internal pure returns (bool) {
+    /**
+     * TODO: verify proof
+     **/
+    proof;
+    bid;
+    nullifier;
+    return true;
   }
 
   function revealBid(
@@ -159,12 +155,17 @@ contract GuessingGame is IGuessingGame, Ownable {
     bytes32 proof,
     uint8 bid,
     uint256 nullifier
-  ) external override validGameId(gameId) oneOfPlayers(gameId) gameStateEq(gameId, GameState.RoundReveal) BidInRange(bid) {
+  )
+    external
+    override
+    validGameId(gameId)
+    oneOfPlayers(gameId)
+    gameStateEq(gameId, GameState.RoundReveal)
+    BidInRange(bid)
+  {
     Game storage game = games[gameId];
 
     // each player reveal a bid. The last player that reveal a bid will change the game state
-
-    // TODO: verify proof
     bool proofVerified = _verifyBidProof(proof, bid, nullifier);
     if (!proofVerified) {
       revert GuessingGame__BidProofRejected(msg.sender, gameId, game.currentRound);
@@ -176,7 +177,7 @@ contract GuessingGame is IGuessingGame, Ownable {
 
     // If all players have submitted revelation, update game state
     bool notYetReveal = false;
-    for (uint i = 0; i < game.players.length; i++) {
+    for (uint i = 0; i < game.players.length; ++i) {
       address p = game.players[i];
       if (game.revelations[round][p] == 0) {
         notYetReveal = true;
@@ -187,10 +188,32 @@ contract GuessingGame is IGuessingGame, Ownable {
     if (!notYetReveal) {
       _updateGameState(gameId, GameState.RoundEnd);
     }
-
   }
 
-  function endRound() {
-    // the average will be cmoputed, the winner will be determined. Update the game state.
+  function endRound(
+    uint32 gameId
+  ) external override validGameId(gameId) byGameHost(gameId) gameStateEq(gameId, GameState.RoundEnd) {
+    Game storage game = games[gameId];
+
+    /**
+     * TODO: calc the average of all bids, determine the winnder
+     **/
+
+    // Assume the game host is winner for now
+    address roundWinner = game.players[0];
+
+    // Notice we also update the game.currentRound here
+    uint8 round = game.currentRound++;
+    ++game.roundWon[roundWinner];
+
+    // update the game.state or end the game
+    if (game.roundWon[roundWinner] == ROUND_TO_WIN) {
+      game.finalWinner = roundWinner;
+      emit GameWinner(gameId, roundWinner);
+      _updateGameState(gameId, GameState.GameEnd);
+    } else {
+      emit RoundWinner(gameId, round, roundWinner);
+      _updateGameState(gameId, GameState.RoundBid);
+    }
   }
 }

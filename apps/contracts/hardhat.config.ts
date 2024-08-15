@@ -52,7 +52,25 @@ function getNetworks(): NetworksUserConfig {
 }
 
 const hardhatConfig: HardhatUserConfig = {
-  solidity: "0.8.23",
+  solidity: {
+    version: "0.8.23",
+    settings: {
+      // We hit the "Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent
+      //   `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing
+      //   local variables." problem. So we enable it.
+      //   ref: https://hardhat.org/hardhat-runner/docs/reference/solidity-support#support-for-ir-based-codegen
+      viaIR: true
+      // optimizer: {
+      //   enabled: true,
+      //   runs: 77,
+      //   details: {
+      //     yulDetails: {
+      //       optimizerSteps: "u",
+      //     },
+      //   },
+      // },
+    }
+  },
   defaultNetwork: process.env.DEFAULT_NETWORK || "localhost",
   networks: {
     hardhat: {
