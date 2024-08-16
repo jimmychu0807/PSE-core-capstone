@@ -83,16 +83,19 @@ export default function HomePage() {
         setGames([]);
       }
 
-      const result = await readContracts(wagmiConfig, {
-        contracts: zeroToNArr(nextGameId).map((i) => ({
+      const contracts = [
+        ...zeroToNArr(nextGameId).map((i) => ({
           ...contractCfg,
-          functionName: "games",
+          functionName: "getGame",
           args: [i],
         })),
-      });
+      ];
+
+      const result = await readContracts(wagmiConfig, { contracts });
 
       if (setState) {
-        setGames(result.map((r) => r.result));
+        const games = result.map((r) => r.result);
+        setGames(games);
       }
     };
     readAllGames(nextGameId);
@@ -152,14 +155,14 @@ function GameCard({ id, game }) {
     <Card w={500}>
       <CardHeader>Game ID: {id}</CardHeader>
       <CardBody>
-        <Text># of Players: {}</Text>
+        <Text># of Players: {game.players.join(", ")}</Text>
         <Text>
-          State: <strong>{GameState[game[1]]}</strong>
+          State: <strong>{GameState[game.state]}</strong>
         </Text>
-        <Text>Created: {formatter.dateTime(game[3])}</Text>
+        <Text>Created: {formatter.dateTime(game.startTime)}</Text>
       </CardBody>
       <CardFooter justifyContent="center">
-        {game[1] === GameState.GameInitiated && (
+        {game.state === GameState.GameInitiated && (
           <Button variant="outline" colorScheme="blue">
             Join Game
           </Button>

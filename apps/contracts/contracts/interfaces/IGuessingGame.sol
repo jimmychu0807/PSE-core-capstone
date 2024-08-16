@@ -3,19 +3,30 @@ pragma solidity ^0.8.23;
 
 interface IGuessingGame {
   struct Bid {
-    bytes32 bid_null_hash;
-    bytes32 null_hash;
+    bytes32 bid_null_commitment;
+    bytes32 null_commitment;
   }
 
   struct Game {
     // game players. The first player is the game host
     address[] players;
-    mapping(address => uint8) roundWon;
+    address[] roundWinners;
     uint8 currentRound;
     GameState state;
     // player bid list
     mapping(uint8 => mapping(address => Bid)) bids;
     mapping(uint8 => mapping(address => uint8)) revelations;
+    address finalWinner;
+    uint256 startTime;
+    uint256 lastUpdate;
+    uint256 endTime;
+  }
+
+  struct GameView {
+    address[] players;
+    address[] roundWinners;
+    uint8 currentRound;
+    GameState state;
     address finalWinner;
     uint256 startTime;
     uint256 lastUpdate;
@@ -55,7 +66,7 @@ interface IGuessingGame {
   function newGame() external returns (uint32 gameId);
   function joinGame(uint32 gameId) external;
   function startGame(uint32 gameId) external;
-  function submitBid(uint32 gameId, bytes32 bid_nullifier_hash, bytes32 nullifier_hash) external;
-  function revealBid(uint32 gameId, bytes32 proof, uint8 bid, uint256 nullifier) external;
+  function submitCommitment(uint32 gameId, bytes32, bytes32) external;
+  function revealCommitment(uint32 gameId, bytes32 proof, uint8 bid, uint256 nullifier) external;
   function endRound(uint32 gameId) external;
 }

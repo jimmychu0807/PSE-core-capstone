@@ -69,7 +69,39 @@ contract GuessingGame is IGuessingGame, Ownable {
     _;
   }
 
+  // View functions
+  function getGame(uint32 gameId) public view validGameId(gameId) returns (GameView memory) {
+    Game storage game = games[gameId];
+
+    return
+      GameView({
+        players: game.players,
+        roundWinners: game.roundWinners,
+        currentRound: game.currentRound,
+        state: game.state,
+        finalWinner: game.finalWinner,
+        startTime: game.startTime,
+        lastUpdate: game.lastUpdate,
+        endTime: game.endTime
+      });
+  }
+
   // Helper functions
+
+  function _verifyBidProof(
+    bytes32 proof,
+    uint8 bid,
+    uint256 nullifier
+  ) internal pure returns (bool) {
+    /**
+     * TODO: verify proof
+     **/
+    proof;
+    bid;
+    nullifier;
+    return true;
+  }
+
   function _updateGameState(
     uint32 gameId,
     GameState state
@@ -87,6 +119,22 @@ contract GuessingGame is IGuessingGame, Ownable {
 
     emit GameStateUpdated(gameId, state);
   }
+
+  function _countWinningRound(
+    uint32 gameId,
+    address roundWinner
+  ) internal view returns (uint8 cnt) {
+    Game storage game = games[gameId];
+    cnt = 0;
+
+    for (uint8 i = 0; i < game.roundWinners.length; ++i) {
+      if (game.roundWinners[i] == roundWinner) {
+        ++cnt;
+      }
+    }
+  }
+
+  // Main functions
 
   function newGame() external override returns (uint32 gameId) {
     Game storage game = games.push();
@@ -125,10 +173,10 @@ contract GuessingGame is IGuessingGame, Ownable {
     emit GameStarted(gameId);
   }
 
-  function submitBid(
+  function submitCommitment(
     uint32 gameId,
-    bytes32 bid_null_hash,
-    bytes32 null_hash
+    bytes32 bid_null_commitment,
+    bytes32 null_commitment
   )
     external
     override
@@ -139,14 +187,14 @@ contract GuessingGame is IGuessingGame, Ownable {
     // each player submit a bid. The last player that submit a bid will change the game state
     Game storage game = games[gameId];
     uint8 round = game.currentRound;
-    game.bids[round][msg.sender] = Bid(bid_null_hash, null_hash);
+    game.bids[round][msg.sender] = Bid(bid_null_commitment, null_commitment);
     emit BidSubmitted(gameId, round, msg.sender);
 
     // If all players have submitted bid, update game state
     bool notYetBid = false;
     for (uint i = 0; i < game.players.length; ++i) {
       address p = game.players[i];
-      if (game.bids[round][p].bid_null_hash == bytes32(0)) {
+      if (game.bids[round][p].bid_null_commitment == bytes32(0)) {
         notYetBid = true;
         break;
       }
@@ -157,21 +205,7 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  function _verifyBidProof(
-    bytes32 proof,
-    uint8 bid,
-    uint256 nullifier
-  ) internal pure returns (bool) {
-    /**
-     * TODO: verify proof
-     **/
-    proof;
-    bid;
-    nullifier;
-    return true;
-  }
-
-  function revealBid(
+  function revealCommitment(
     uint32 gameId,
     bytes32 proof,
     uint8 bid,
@@ -231,10 +265,10 @@ contract GuessingGame is IGuessingGame, Ownable {
 
     // Notice we also update the game.currentRound here
     uint8 round = game.currentRound++;
-    ++game.roundWon[roundWinner];
+    game.roundWinners.push(roundWinner);
 
     // update the game.state or end the game
-    if (game.roundWon[roundWinner] == ROUND_TO_WIN) {
+    if (_countWinningRound(gameId, roundWinner) == ROUND_TO_WIN) {
       game.finalWinner = roundWinner;
       emit GameWinner(gameId, roundWinner);
       _updateGameState(gameId, GameState.GameEnd);
