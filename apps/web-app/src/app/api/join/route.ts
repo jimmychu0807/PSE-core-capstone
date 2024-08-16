@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     console.error(error);
 
     return new Response(`Server error: ${error}`, {
-      status: 500
+      status: 500,
     });
   }
 }

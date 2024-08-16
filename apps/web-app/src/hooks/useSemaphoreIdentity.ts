@@ -18,6 +18,6 @@ export default function useSemaphoreIdentity() {
   }, [router]);
 
   return {
-    _identity
+    _identity,
   };
 }

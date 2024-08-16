@@ -7,7 +7,11 @@ export type IconChevronRightProps = {
   color?: string;
 };
 
-export default function IconChevronRight({ width, height, color }: IconChevronRightProps): JSX.Element {
+export default function IconChevronRight({
+  width,
+  height,
+  color,
+}: IconChevronRightProps): JSX.Element {
   return (
     <Icon width={width} height={height} color={color}>
       <path

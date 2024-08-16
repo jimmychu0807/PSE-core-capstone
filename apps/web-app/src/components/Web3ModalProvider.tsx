@@ -5,7 +5,7 @@ import { WagmiProvider } from "wagmi";
 import {
   sepolia, // Ethereum
   optimismSepolia, // Optimism
-  arbitrumSepolia // Arbirtrum
+  arbitrumSepolia, // Arbirtrum
 } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -23,7 +23,7 @@ const metadata = {
   name: project.name,
   description: project.desc,
   url: project.homepage,
-  icons: [project.image]
+  icons: [project.image],
 };
 
 const supportedChains = { sepolia, optimismSepolia, arbitrumSepolia };
@@ -33,14 +33,14 @@ const chains = process.env.NEXT_PUBLIC_ENV ? { ...supportedChains, devChain } : 
 const wagmiConfig = defaultWagmiConfig({
   chains: Object.values(chains),
   projectId: walletConnectProjectId,
-  metadata
+  metadata,
 });
 
 // create the modal
 createWeb3Modal({
   wagmiConfig,
   projectId: walletConnectProjectId,
-  enableAnalytics: true
+  enableAnalytics: true,
 });
 
 export function Web3ModalProvider({ children }: Props) {

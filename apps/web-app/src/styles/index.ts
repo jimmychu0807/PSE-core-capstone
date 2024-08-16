@@ -6,11 +6,11 @@ import styles, { font } from "./styles";
 const config = {
   fonts: {
     heading: font.style.fontFamily,
-    body: "DM Sans, sans-serif"
+    body: "DM Sans, sans-serif",
   },
   colors,
   styles,
-  components
+  components,
 };
 
 export default extendTheme(config);

@@ -4,16 +4,16 @@ import { font } from "../styles";
 const Button = {
   baseStyle: {
     _focus: {
-      boxShadow: "none"
+      boxShadow: "none",
     },
     borderRadius: "100px",
     fontFamily: font.style.fontFamily,
     fontWeight: "400",
     paddingLeft: "18px !important",
-    paddingRight: "18px !important"
+    paddingRight: "18px !important",
   },
   defaultProps: {
-    colorScheme: "white"
+    colorScheme: "white",
   },
   variants: {
     solid: (props: StyleFunctionProps): SystemStyleObject => {
@@ -31,10 +31,10 @@ const Button = {
           _hover: {
             bg: `${c}.800`,
             _disabled: {
-              bgGradient
-            }
+              bgGradient,
+            },
           },
-          _active: { bg: `${c}.800` }
+          _active: { bg: `${c}.800` },
         };
       }
 
@@ -48,10 +48,10 @@ const Button = {
         _hover: {
           bg: `primary.200`,
           _disabled: {
-            bg
-          }
+            bg,
+          },
         },
-        _active: { bg: `primary.200` }
+        _active: { bg: `primary.200` },
       };
     },
     outline: (props: StyleFunctionProps): SystemStyleObject => {
@@ -67,11 +67,11 @@ const Button = {
           color: c,
           borderColor: "primary.200",
           _disabled: {
-            bg: c
-          }
-        }
+            bg: c,
+          },
+        },
       };
-    }
-  }
+    },
+  },
 };
 export default Button;

@@ -20,7 +20,7 @@ export const LogContextProvider: React.FC<ProviderProps> = ({ children }) => {
     <LogContext.Provider
       value={{
         log,
-        setLog
+        setLog,
       }}
     >
       {children}

@@ -70,7 +70,10 @@ contract GuessingGame is IGuessingGame, Ownable {
   }
 
   // Helper functions
-  function _updateGameState(uint32 gameId, GameState state) internal validGameId(gameId) nonEndState(gameId) {
+  function _updateGameState(
+    uint32 gameId,
+    GameState state
+  ) internal validGameId(gameId) nonEndState(gameId) {
     Game storage game = games[gameId];
     game.state = state;
 
@@ -94,7 +97,9 @@ contract GuessingGame is IGuessingGame, Ownable {
     emit NewGame(gameId, msg.sender);
   }
 
-  function joinGame(uint32 gameId) external override validGameId(gameId) gameStateEq(gameId, GameState.GameInitiated) {
+  function joinGame(
+    uint32 gameId
+  ) external override validGameId(gameId) gameStateEq(gameId, GameState.GameInitiated) {
     Game storage game = games[gameId];
     // check the player has not been added to the game
     for (uint8 i = 0; i < game.players.length; ++i) {
@@ -109,7 +114,13 @@ contract GuessingGame is IGuessingGame, Ownable {
 
   function startGame(
     uint32 gameId
-  ) external override validGameId(gameId) byGameHost(gameId) gameStateEq(gameId, GameState.GameInitiated) {
+  )
+    external
+    override
+    validGameId(gameId)
+    byGameHost(gameId)
+    gameStateEq(gameId, GameState.GameInitiated)
+  {
     _updateGameState(gameId, GameState.RoundBid);
     emit GameStarted(gameId);
   }
@@ -118,7 +129,13 @@ contract GuessingGame is IGuessingGame, Ownable {
     uint32 gameId,
     bytes32 bid_null_hash,
     bytes32 null_hash
-  ) external override validGameId(gameId) oneOfPlayers(gameId) gameStateEq(gameId, GameState.RoundBid) {
+  )
+    external
+    override
+    validGameId(gameId)
+    oneOfPlayers(gameId)
+    gameStateEq(gameId, GameState.RoundBid)
+  {
     // each player submit a bid. The last player that submit a bid will change the game state
     Game storage game = games[gameId];
     uint8 round = game.currentRound;
@@ -140,7 +157,11 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  function _verifyBidProof(bytes32 proof, uint8 bid, uint256 nullifier) internal pure returns (bool) {
+  function _verifyBidProof(
+    bytes32 proof,
+    uint8 bid,
+    uint256 nullifier
+  ) internal pure returns (bool) {
     /**
      * TODO: verify proof
      **/
@@ -192,7 +213,13 @@ contract GuessingGame is IGuessingGame, Ownable {
 
   function endRound(
     uint32 gameId
-  ) external override validGameId(gameId) byGameHost(gameId) gameStateEq(gameId, GameState.RoundEnd) {
+  )
+    external
+    override
+    validGameId(gameId)
+    byGameHost(gameId)
+    gameStateEq(gameId, GameState.RoundEnd)
+  {
     Game storage game = games[gameId];
 
     /**

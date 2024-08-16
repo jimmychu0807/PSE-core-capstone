@@ -23,7 +23,13 @@ export async function POST(req: NextRequest) {
   const { feedback, merkleTreeDepth, merkleTreeRoot, nullifier, points } = await req.json();
 
   try {
-    const transaction = await contract.sendFeedback(merkleTreeDepth, merkleTreeRoot, nullifier, feedback, points);
+    const transaction = await contract.sendFeedback(
+      merkleTreeDepth,
+      merkleTreeRoot,
+      nullifier,
+      feedback,
+      points
+    );
 
     await transaction.wait();
 
@@ -32,7 +38,7 @@ export async function POST(req: NextRequest) {
     console.error(error);
 
     return new Response(`Server error: ${error}`, {
-      status: 500
+      status: 500,
     });
   }
 }

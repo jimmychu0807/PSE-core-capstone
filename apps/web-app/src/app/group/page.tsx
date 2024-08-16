@@ -3,7 +3,17 @@ import Stepper from "@/components/Stepper";
 import { useLogContext } from "@/context/LogContext";
 import { useSemaphoreContext } from "@/context/SemaphoreContext";
 import IconRefreshLine from "@/icons/IconRefreshLine";
-import { Box, Button, Divider, Heading, HStack, Link, Text, useBoolean, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Divider,
+  Heading,
+  HStack,
+  Link,
+  Text,
+  useBoolean,
+  VStack,
+} from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import Feedback from "../../../contract-artifacts/Feedback.json";
@@ -43,8 +53,8 @@ export default function GroupsPage() {
           abi: Feedback.abi,
           address: process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS as string,
           functionName: "joinGroup",
-          functionParameters: [_identity.commitment.toString()]
-        })
+          functionParameters: [_identity.commitment.toString()],
+        }),
       });
 
       if (response.status === 200) {
@@ -60,12 +70,12 @@ export default function GroupsPage() {
         chainId: process.env.NEXT_PUBLIC_GELATO_RELAYER_CHAIN_ID,
         target: process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS,
         data: iface.encodeFunctionData("joinGroup", [_identity.commitment.toString()]),
-        sponsorApiKey: process.env.GELATO_RELAYER_API_KEY
+        sponsorApiKey: process.env.GELATO_RELAYER_API_KEY,
       };
       const response = await fetch(process.env.NEXT_PUBLIC_GELATO_RELAYER_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(request)
+        body: JSON.stringify(request),
       });
 
       if (response.status === 201) {
@@ -76,8 +86,8 @@ export default function GroupsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          identityCommitment: _identity.commitment.toString()
-        })
+          identityCommitment: _identity.commitment.toString(),
+        }),
       });
 
       if (response.status === 200) {
@@ -115,8 +125,8 @@ export default function GroupsPage() {
         <Link href="https://zkkit.pse.dev/modules/_zk_kit_lean_imt.html" isExternal>
           Lean incremental Merkle trees
         </Link>{" "}
-        in which each leaf contains an identity commitment for a user. Groups can be abstracted to represent events,
-        polls, or organizations.
+        in which each leaf contains an identity commitment for a user. Groups can be abstracted to
+        represent events, polls, or organizations.
       </Text>
 
       <Divider pt="5" borderColor="gray.500" />
@@ -125,7 +135,13 @@ export default function GroupsPage() {
         <Text fontWeight="bold" fontSize="lg">
           Group users ({_users.length})
         </Text>
-        <Button leftIcon={<IconRefreshLine />} variant="link" color="text.300" onClick={refreshUsers} size="lg">
+        <Button
+          leftIcon={<IconRefreshLine />}
+          variant="link"
+          color="text.300"
+          onClick={refreshUsers}
+          size="lg"
+        >
           Refresh
         </Button>
       </HStack>
@@ -133,7 +149,12 @@ export default function GroupsPage() {
       {_users.length > 0 && (
         <VStack spacing="3" pb="3" align="left" maxHeight="300px" overflowY="scroll">
           {users.map((user, i) => (
-            <HStack key={i} pb="3" borderBottomWidth={i < _users.length - 1 ? 1 : 0} whiteSpace="nowrap">
+            <HStack
+              key={i}
+              pb="3"
+              borderBottomWidth={i < _users.length - 1 ? 1 : 0}
+              whiteSpace="nowrap"
+            >
               <Text textOverflow="ellipsis" overflow="hidden">
                 {_identity?.commitment.toString() === user ? <b>{user}</b> : user}
               </Text>
@@ -143,7 +164,12 @@ export default function GroupsPage() {
       )}
 
       <Box pb="5">
-        <Button w="full" colorScheme="primary" isDisabled={_loading || !_identity || userHasJoined} onClick={joinGroup}>
+        <Button
+          w="full"
+          colorScheme="primary"
+          isDisabled={_loading || !_identity || userHasJoined}
+          onClick={joinGroup}
+        >
           Join group
         </Button>
       </Box>

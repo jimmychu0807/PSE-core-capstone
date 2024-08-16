@@ -15,7 +15,10 @@ import "./tasks/deploy";
 dotenvConfig({ path: resolve(__dirname, "../../.env") });
 
 function getNetworks(): NetworksUserConfig {
-  if ((!process.env.INFURA_API_KEY && !process.env.ALCHEMY_API_KEY) || !process.env.ETHEREUM_PRIVATE_KEY) {
+  if (
+    (!process.env.INFURA_API_KEY && !process.env.ALCHEMY_API_KEY) ||
+    !process.env.ETHEREUM_PRIVATE_KEY
+  ) {
     return {};
   }
 
@@ -26,28 +29,28 @@ function getNetworks(): NetworksUserConfig {
     sepolia: {
       url: `https://sepolia.infura.io/v3/${infuraApiKey}`,
       chainId: 11155111,
-      accounts
+      accounts,
     },
     mumbai: {
       url: `https://polygon-mumbai.infura.io/v3/${infuraApiKey}`,
       chainId: 80001,
-      accounts
+      accounts,
     },
     "optimism-sepolia": {
       url: "https://opt-sepolia.g.alchemy.com/v2/${alchemyApiKey}",
       chainId: 11155420,
-      accounts
+      accounts,
     },
     "arbitrum-sepolia": {
       url: "https://sepolia-rollup.arbitrum.io/rpc",
       chainId: 421614,
-      accounts
+      accounts,
     },
     arbitrum: {
       url: "https://arb1.arbitrum.io/rpc",
       chainId: 42161,
-      accounts
-    }
+      accounts,
+    },
   };
 }
 
@@ -61,7 +64,7 @@ const hardhatConfig: HardhatUserConfig = {
       //   ref: https://hardhat.org/hardhat-runner/docs/reference/solidity-support#support-for-ir-based-codegen
       viaIR: true,
       optimizer: {
-        enabled: false
+        enabled: false,
         // enabled: true,
         // runs: 77,
         // details: {
@@ -69,30 +72,30 @@ const hardhatConfig: HardhatUserConfig = {
         //     optimizerSteps: "u",
         //   },
         // },
-      }
-    }
+      },
+    },
   },
   defaultNetwork: process.env.DEFAULT_NETWORK || "localhost",
   networks: {
     hardhat: {
       chainId: 1337,
-      allowUnlimitedContractSize: true
+      allowUnlimitedContractSize: true,
     },
-    ...getNetworks()
+    ...getNetworks(),
   },
   gasReporter: {
     currency: "USD",
     enabled: process.env.REPORT_GAS === "true",
-    coinmarketcap: process.env.COINMARKETCAP_API_KEY
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },
   typechain: {
-    target: "ethers-v6"
+    target: "ethers-v6",
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   sourcify: {
-    enabled: true
+    enabled: true,
   },
   circom: {
     inputBasePath: "./circuits",
@@ -102,10 +105,10 @@ const hardhatConfig: HardhatUserConfig = {
     circuits: [
       {
         name: "lib",
-        protocol: "plonk"
-      }
-    ]
-  }
+        protocol: "plonk",
+      },
+    ],
+  },
 };
 
 export default hardhatConfig;
