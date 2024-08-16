@@ -4,7 +4,17 @@ import Stepper from "@/components/Stepper";
 import { useLogContext } from "@/context/LogContext";
 import { useSemaphoreContext } from "@/context/SemaphoreContext";
 import IconRefreshLine from "@/icons/IconRefreshLine";
-import { Box, Button, Divider, Heading, HStack, Link, Text, useBoolean, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Divider,
+  Heading,
+  HStack,
+  Link,
+  Text,
+  useBoolean,
+  VStack,
+} from "@chakra-ui/react";
 import { generateProof, Group } from "@semaphore-protocol/core";
 import { encodeBytes32String, ethers } from "ethers";
 import { useRouter } from "next/navigation";
@@ -61,8 +71,8 @@ export default function ProofsPage() {
               abi: Feedback.abi,
               address: process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS,
               functionName: "sendFeedback",
-              functionParameters: params
-            })
+              functionParameters: params,
+            }),
           });
 
           if (response.status === 200) {
@@ -78,12 +88,12 @@ export default function ProofsPage() {
             chainId: process.env.NEXT_PUBLIC_GELATO_RELAYER_CHAIN_ID,
             target: process.env.NEXT_PUBLIC_FEEDBACK_CONTRACT_ADDRESS,
             data: iface.encodeFunctionData("sendFeedback", params),
-            sponsorApiKey: process.env.GELATO_RELAYER_API_KEY
+            sponsorApiKey: process.env.GELATO_RELAYER_API_KEY,
           };
           const response = await fetch(process.env.NEXT_PUBLIC_GELATO_RELAYER_ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(request)
+            body: JSON.stringify(request),
           });
 
           if (response.status === 201) {
@@ -98,8 +108,8 @@ export default function ProofsPage() {
               merkleTreeDepth,
               merkleTreeRoot,
               nullifier,
-              points
-            })
+              points,
+            }),
           });
 
           if (response.status === 200) {
@@ -135,8 +145,8 @@ export default function ProofsPage() {
         <Link href="https://docs.semaphore.pse.dev/guides/proofs" isExternal>
           prove
         </Link>{" "}
-        that they are part of a group and send their anonymous messages. Messages could be votes, leaks, reviews, or
-        feedback.
+        that they are part of a group and send their anonymous messages. Messages could be votes,
+        leaks, reviews, or feedback.
       </Text>
 
       <Divider pt="5" borderColor="gray.500" />
@@ -145,7 +155,13 @@ export default function ProofsPage() {
         <Text fontWeight="bold" fontSize="lg">
           Feedback ({_feedback.length})
         </Text>
-        <Button leftIcon={<IconRefreshLine />} variant="link" color="text.300" onClick={refreshFeedback} size="lg">
+        <Button
+          leftIcon={<IconRefreshLine />}
+          variant="link"
+          color="text.300"
+          onClick={refreshFeedback}
+          size="lg"
+        >
           Refresh
         </Button>
       </HStack>

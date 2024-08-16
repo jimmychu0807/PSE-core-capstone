@@ -1,7 +1,6 @@
 import PageContainer from "@/components/PageContainer";
 import type { Metadata } from "next";
 import Providers from "./providers";
-import { SemaphoreContextProvider } from "@/context/SemaphoreContext";
 import { project } from "../consts";
 
 export const metadata: Metadata = {
@@ -17,15 +16,15 @@ export const metadata: Metadata = {
     siteName: project.name,
     images: [
       {
-        url: project.image
-      }
-    ]
+        url: project.image,
+      },
+    ],
   },
-  twitter: { card: "summary_large_image", images: project.image }
+  twitter: { card: "summary_large_image", images: project.image },
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -34,27 +33,6 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <Providers>
           <PageContainer>{children}</PageContainer>
-        </Providers>
-      </body>
-    </html>
-  );
-}
-
-// Archieving Semaphore original rootlayout
-export function SemaphoreRootLayout({
-  children
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
-        <Providers>
-          <SemaphoreContextProvider>
-            <LogContextProvider>
-              <PageContainer>{children}</PageContainer>
-            </LogContextProvider>
-          </SemaphoreContextProvider>
         </Providers>
       </body>
     </html>

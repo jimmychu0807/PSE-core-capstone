@@ -15,10 +15,13 @@ describe("Feedback", () => {
 
   before(async () => {
     const { semaphore } = await run("deploy:semaphore", {
-      logs: false
+      logs: false,
     });
 
-    feedbackContract = await run("deploy:feedback", { logs: false, semaphore: await semaphore.getAddress() });
+    feedbackContract = await run("deploy:feedback", {
+      logs: false,
+      semaphore: await semaphore.getAddress(),
+    });
     semaphoreContract = semaphore;
 
     users.push(new Identity());

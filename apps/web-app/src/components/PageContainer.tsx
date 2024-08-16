@@ -19,7 +19,7 @@ function PromptForWalletConnect() {
 }
 
 export default function PageContainer({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -48,19 +48,21 @@ export default function PageContainer({
         </Stack>
       </Container>
 
-      <HStack
-        flexBasis="56px"
-        borderTopWidth="1px"
-        borderTopColor="text.600"
-        backgroundColor="darkBlueBg"
-        align="center"
-        justify="center"
-        spacing="4"
-        p="4"
-      >
-        {log.endsWith("...") && <Spinner color="primary.400" />}
-        <Text>{log || `Current step: ${pathname}`}</Text>
-      </HStack>
+      {log && (
+        <HStack
+          flexBasis="56px"
+          borderTopWidth="1px"
+          borderTopColor="text.600"
+          backgroundColor="darkBlueBg"
+          align="center"
+          justify="center"
+          spacing="4"
+          p="4"
+        >
+          {log.endsWith("...") && <Spinner color="primary.400" />}
+          <Text>{log}</Text>
+        </HStack>
+      )}
     </>
   );
 }

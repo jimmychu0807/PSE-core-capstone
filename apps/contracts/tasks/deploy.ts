@@ -25,7 +25,7 @@ task("deploy:feedback", "Deploy a Feedback contract")
   .setAction(async ({ logs, semaphore: semaphoreAddress }, { ethers, run }) => {
     if (!semaphoreAddress) {
       const { semaphore } = await run("deploy:semaphore", {
-        logs
+        logs,
       });
 
       semaphoreAddress = await semaphore.getAddress();

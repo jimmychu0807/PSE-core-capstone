@@ -7,7 +7,11 @@ export type IconRefreshLineProps = {
   color?: string;
 };
 
-export default function IconRefreshLine({ width, height, color }: IconRefreshLineProps): JSX.Element {
+export default function IconRefreshLine({
+  width,
+  height,
+  color,
+}: IconRefreshLineProps): JSX.Element {
   return (
     <Icon width={width} height={height} color={color}>
       <path

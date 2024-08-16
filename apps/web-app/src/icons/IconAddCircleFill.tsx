@@ -7,7 +7,11 @@ export type IconAddCircleFillProps = {
   color?: string;
 };
 
-export default function IconAddCircleFill({ width, height, color }: IconAddCircleFillProps): JSX.Element {
+export default function IconAddCircleFill({
+  width,
+  height,
+  color,
+}: IconAddCircleFillProps): JSX.Element {
   return (
     <Icon width={width} height={height} color={color}>
       <path

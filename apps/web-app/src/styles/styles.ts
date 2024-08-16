@@ -11,15 +11,15 @@ const styles: Styles = {
       color: "text.100",
       minHeight: "100vh",
       display: "flex",
-      flexDirection: "column"
+      flexDirection: "column",
     },
     "h1, h2, h3, h4": {
-      fontWeight: "500 !important"
+      fontWeight: "500 !important",
     },
     a: {
-      color: "primary.400 !important"
-    }
-  })
+      color: "primary.400 !important",
+    },
+  }),
 };
 
 export default styles;

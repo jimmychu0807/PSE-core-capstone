@@ -6,8 +6,8 @@ const Tooltip = {
     py: "10px",
     px: "15px",
     fontWeight: "bold",
-    maxW: "350px"
-  })
+    maxW: "350px",
+  }),
 };
 
 export default Tooltip;
