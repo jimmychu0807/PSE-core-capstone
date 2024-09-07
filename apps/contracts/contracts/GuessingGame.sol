@@ -69,24 +69,33 @@ contract GuessingGame is IGuessingGame, Ownable {
     _;
   }
 
-  // View functions
+  /**
+   * View functions
+   **/
+
   function getGame(uint32 gameId) public view validGameId(gameId) returns (GameView memory) {
     Game storage game = games[gameId];
 
-    return
-      GameView({
-        players: game.players,
-        roundWinners: game.roundWinners,
-        currentRound: game.currentRound,
-        state: game.state,
-        finalWinner: game.finalWinner,
-        startTime: game.startTime,
-        lastUpdate: game.lastUpdate,
-        endTime: game.endTime
-      });
+    return GameView({
+      players: game.players,
+      roundWinners: game.roundWinners,
+      currentRound: game.currentRound,
+      state: game.state,
+      finalWinner: game.finalWinner,
+      startTime: game.startTime,
+      lastUpdate: game.lastUpdate,
+      endTime: game.endTime
+    });
   }
 
-  // Helper functions
+  function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {
+    Game storage game = games[gameId];
+    return game.players[0];
+  }
+
+  /**
+   * Helpers functions
+   **/
 
   function _verifyBidProof(
     bytes32 proof,
@@ -134,7 +143,9 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  // Main functions
+  /**
+   * Main functions
+   **/
 
   function newGame() external override returns (uint32 gameId) {
     Game storage game = games.push();
