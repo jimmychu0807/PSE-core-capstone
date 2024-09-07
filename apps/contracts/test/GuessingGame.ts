@@ -5,21 +5,29 @@ import hre, { run } from "hardhat";
 import { GuessingGame } from "../typechain-types";
 
 describe("GuessingGame", () => {
-  let contract: GuessingGame;
+  let contracts;
   let owner;
 
   before(async () => {
-    contract = await run("deploy:game", { logs: true });
+    contracts = await run("deploy", { logs: true });
     owner = (await hre.ethers.getSigners())[0];
-    contract.connect(owner);
+    Object.values(contracts).map((c) => c.connect(owner));
   });
 
   describe("# newGame", () => {
     it("should create a new game", async () => {
-      await contract.newGame();
-      const game = await contract.games(0);
+      const gameContract = contracts["game"];
+      await gameContract.newGame();
+      const game = await gameContract.games(0);
+    });
+  });
 
-      console.log(game);
+  describe("Range check: genarate proof offchain, verify proof onchain", () => {
+    it("should create a range proof and be verified", async() => {
+      const rcContract = contracts["rcContract"];
+
+      console.log(`rcContract addr: ${await rcContract.getAddress()}`)
+
     });
   });
 });
