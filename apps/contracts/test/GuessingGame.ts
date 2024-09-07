@@ -31,13 +31,12 @@ describe("GuessingGame", () => {
   });
 
   describe("L Range check: genarate proof offchain, verify proof onchain", () => {
-    it("should create a range proof and be verified", async() => {
+    it("should create a range proof and be verified", async () => {
       const rcContract = contracts.rcContract;
 
       // generate proof
-      const input = { "in": 99 };
+      const input = { in: 99 };
       const proof = await prove(input, `./artifacts/circuits/submit-rangecheck`);
-
     });
   });
 });

@@ -106,10 +106,11 @@ const hardhatConfig: HardhatUserConfig = {
       {
         name: "lib",
         protocol: "plonk",
-      }, {
+      },
+      {
         name: "submit-rangecheck",
         protocol: "plonk",
-      }
+      },
     ],
   },
 };

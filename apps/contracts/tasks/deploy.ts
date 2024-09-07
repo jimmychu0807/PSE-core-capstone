@@ -23,7 +23,9 @@ task("deploy:game", "Deploy a GuessingGame contract")
 task("deploy:verifiers", "Deploy all verifier contracts")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
   .setAction(async ({ logs }, { ethers, run }) => {
-    const rcFactory = await ethers.getContractFactory("contracts/SubmitRangecheckVerifier.sol:PlonkVerifier");
+    const rcFactory = await ethers.getContractFactory(
+      "contracts/SubmitRangecheckVerifier.sol:PlonkVerifier"
+    );
     const rcContract = await rcFactory.deploy();
     await rcContract.waitForDeployment();
 

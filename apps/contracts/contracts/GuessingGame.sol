@@ -76,16 +76,17 @@ contract GuessingGame is IGuessingGame, Ownable {
   function getGame(uint32 gameId) public view validGameId(gameId) returns (GameView memory) {
     Game storage game = games[gameId];
 
-    return GameView({
-      players: game.players,
-      roundWinners: game.roundWinners,
-      currentRound: game.currentRound,
-      state: game.state,
-      finalWinner: game.finalWinner,
-      startTime: game.startTime,
-      lastUpdate: game.lastUpdate,
-      endTime: game.endTime
-    });
+    return
+      GameView({
+        players: game.players,
+        roundWinners: game.roundWinners,
+        currentRound: game.currentRound,
+        state: game.state,
+        finalWinner: game.finalWinner,
+        startTime: game.startTime,
+        lastUpdate: game.lastUpdate,
+        endTime: game.endTime
+      });
   }
 
   function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {

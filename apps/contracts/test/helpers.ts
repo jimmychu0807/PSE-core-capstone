@@ -4,5 +4,5 @@ export enum GameState {
   RoundBid,
   RoundReveal,
   RoundEnd,
-  GameEnd
+  GameEnd,
 }
