@@ -1,0 +1,8 @@
+{
+  "submit-rangecheck": {
+    "file": "submit-rangecheck",
+    "template": "SubmissionRangeCheck",
+    "pubs": [],
+    "params": [1, 100, 7]
+  }
+}

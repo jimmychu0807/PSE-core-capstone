@@ -1,5 +1,5 @@
 <h1 align="center">
-    PSE Core Hackathon
+    PSE Core Stage 2: Number Guessing Game
 </h1>
 
 <p align="center">
@@ -14,7 +14,7 @@
     </a>
 </p>
 
-| The repository is divided into two components: [web app](./apps/web-app) and [contracts](./apps/contracts). Hopefully the app will be deployed on Sepolia. |
+| The repository is divided into two components: [web app](./apps/web-app), [contracts](./apps/contracts), and [circuits](./apps/circuits). Hopefully the app will be deployed on Sepolia. |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 This repo is modified from [Semaphore Boilerplate Template](https://github.com/semaphore-protocol/boilerplate)
@@ -92,3 +92,9 @@ or to automatically format the code:
 ```bash
 yarn prettier:write
 ```
+
+### Key Components
+
+Key components for writing circuits
+- [circomkit](https://github.com/erhant/circomkit/tree/main)
+- [hardhat-circom](https://github.com/projectsophon/hardhat-circom)

@@ -1,0 +1,31 @@
+{
+  "name": "circuits",
+  "version": "0.0.1",
+  "description": "Guessing game circuits",
+  "license": "MIT",
+  "files": [
+    "**/*.circom",
+    "!main",
+    "!test",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "compile": "circomkit compile submit-rangecheck",
+    "setup": "circomkit setup submit-rangecheck",
+    "test": "mocha"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "circomlib": "2.0.5"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@zk-kit/baby-jubjub": "1.0.1",
+    "circomkit": "^0.2.1",
+    "mocha": "^10.2.0",
+    "poseidon-lite": "^0.2.0"
+  }
+}
