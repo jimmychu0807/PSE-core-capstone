@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre, { run } from "hardhat";
-import { GameState } from "./helpers";
+import { GameState, prove } from "./helpers";
 
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { GuessingGame } from "../typechain-types";
@@ -22,7 +22,6 @@ describe("GuessingGame", () => {
 
       const gameId = 0;
       const game = await gameContract.getGame(gameId);
-
       expect(game.state).to.be.equal(GameState.GameInitiated);
 
       const gameHost = await gameContract.getGameHost(gameId);
@@ -36,7 +35,9 @@ describe("GuessingGame", () => {
 
       // generate proof
       const input = { in: 99 };
-      const proof = await prove(input, `./artifacts/circuits/submit-rangecheck`);
+      const { proof, publicSignals } = await prove(input, `./artifacts/circuits/submit-rangecheck`);
+
+      await rcContract.verifyProof(proof, publicSignals);
     });
   });
 });

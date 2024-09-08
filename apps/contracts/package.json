@@ -13,9 +13,9 @@
     "test:coverage": "hardhat coverage",
     "typechain": "hardhat typechain",
     "lint": "solhint 'contracts/**/*.sol'",
-    "circom:dev": "hardhat circom --deterministic --verbose",
-    "circom:dev:circuit": "hardhat circom --deterministic --verbose --circuit",
-    "circom:prod": "hardhat circom --verbose"
+    "circom:compile": "hardhat circom --deterministic --verbose",
+    "circom:compile:circuit": "hardhat circom --deterministic --verbose --circuit",
+    "circom:compile:prod": "hardhat circom --verbose"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.3",

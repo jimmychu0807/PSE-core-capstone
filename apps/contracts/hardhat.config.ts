@@ -99,7 +99,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   circom: {
     inputBasePath: "./circuits",
-    outputBasePath: "./circuits/artifacts",
+    outputBasePath: "./artifacts/circuits",
     // ptau files: https://github.com/iden3/snarkjs?tab=readme-ov-file#7-prepare-phase-2
     ptau: "https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_17.ptau",
     circuits: [
