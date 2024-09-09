@@ -1,10 +1,14 @@
 pragma circom 2.1.6;
 
 include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/poseidon.circom";
 
 template SubmissionRangeCheck(min, max, nBit) {
   signal input in;
-  signal output out;
+  signal input rand;
+
+  signal output submission;
+  signal output nullifier;
 
   component lessEqThan = LessEqThan(nBit);
   lessEqThan.in <== [in, max];
@@ -12,6 +16,9 @@ template SubmissionRangeCheck(min, max, nBit) {
   component greaterEqThan = GreaterEqThan(nBit);
   greaterEqThan.in <== [in, min];
 
-  out <== lessEqThan.out * greaterEqThan.out;
-  out === 1;
+  // assert the value must be within range
+  lessEqThan.out * greaterEqThan.out === 1;
+
+  submission <== Poseidon(2)([in, rand]);
+  nullifier <== Poseidon(1)([rand]);
 }

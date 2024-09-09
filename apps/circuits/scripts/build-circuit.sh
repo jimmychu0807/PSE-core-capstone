@@ -1,18 +1,25 @@
 #!/bin/bash -e
 CIRCUIT=$1
 TIMEOUT_SEC="6s"
+POWERS_OF_TAU=15
 
 # Yellow color escape code
 YELLOW='\033[1;33m'
-# Reset Color
+# Reset color
 NC='\033[0m'
 
+echo -e "${YELLOW}Downloading ptau${POWERS_OF_TAU}${NC}"
+ptau_path="artifacts/ptau/ptau${POWERS_OF_TAU}.ptau"
+if [ ! -f ${ptau_path} ]; then
+  echo "Downloading powers of tau file"
+  curl -L https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${POWERS_OF_TAU}.ptau --create-dirs -o ${ptau_path}
+fi
 
-echo -e "${YELLOW}Compiling ${CIRCUIT}${NC}"
+echo -e "\n${YELLOW}Compiling ${CIRCUIT}${NC}"
 yarn circomkit compile ${CIRCUIT}
 
 echo -e "\n${YELLOW}Setting up ${CIRCUIT}${NC}"
-timeout ${TIMEOUT_SEC} yarn circomkit setup ${CIRCUIT} || true
+timeout ${TIMEOUT_SEC} yarn circomkit setup ${CIRCUIT} ${ptau_path} || true
 timeout ${TIMEOUT_SEC} yarn circomkit contract ${CIRCUIT} || true
 
 echo -e "\n${YELLOW}Copying circuit assets from app/circuits to app/contracts ${NC}"
