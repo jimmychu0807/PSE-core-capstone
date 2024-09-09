@@ -11,18 +11,23 @@
     "README.md"
   ],
   "scripts": {
-    "compile": "circomkit compile submit-rangecheck",
-    "setup": "circomkit setup submit-rangecheck",
+    "compile": "circomkit compile submit-rangecheck-1-100",
+    "setup": "timeout 5s circomkit setup submit-rangecheck-1-100; timeout 5s circomkit contract submit-rangecheck-1-100",
+    "prove": "timeout 5s circomkit witness submit-rangecheck-1-100 in-range; timeout 5s circomkit prove submit-rangecheck-1-100 in-range",
+    "verify": "timeout 5s circomkit verify submit-rangecheck-1-100 in-range",
+    "clear": "circomkit clear submit-rangecheck-1-100",
     "test": "mocha"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "circomlib": "2.0.5"
+    "circomlib": "2.0.5",
+    "snarkjs": "^0.7.4"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
+    "@types/snarkjs": "^0.7.4",
     "@zk-kit/baby-jubjub": "1.0.1",
     "circomkit": "^0.2.1",
     "mocha": "^10.2.0",

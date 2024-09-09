@@ -3,8 +3,7 @@ import { circomkit } from "./common";
 
 describe("submit-rangecheck", () => {
   let circuit: WitnessTester<
-    ["in"], // private inputs
-    [] // public inputs
+    ["in"] // private inputs
   >;
 
   const [MIN, MAX, NBITS] = [1, 100, 7];
@@ -17,15 +16,16 @@ describe("submit-rangecheck", () => {
     });
   });
 
-  it("Should return 1 when the value is within range", async () => {
+  it("Should pass when the value is within range", async () => {
     let INPUT = { in: MIN };
-    await circuit.expectPass(INPUT);
+    const OUT = { out: 1 };
+    await circuit.expectPass(INPUT, OUT);
 
     INPUT = { in: MAX };
-    await circuit.expectPass(INPUT);
+    await circuit.expectPass(INPUT, OUT);
   });
 
-  it("Should return 0 when the value is out of range", async () => {
+  it("Should fail when the value is out of range", async () => {
     let INPUT = { in: MIN - 1 };
     await circuit.expectFail(INPUT);
 

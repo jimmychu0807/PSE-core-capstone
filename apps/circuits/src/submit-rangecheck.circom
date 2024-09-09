@@ -4,6 +4,7 @@ include "../../../node_modules/circomlib/circuits/comparators.circom";
 
 template SubmissionRangeCheck(min, max, nBit) {
   signal input in;
+  signal output out;
 
   component lessEqThan = LessEqThan(nBit);
   lessEqThan.in <== [in, max];
@@ -11,7 +12,6 @@ template SubmissionRangeCheck(min, max, nBit) {
   component greaterEqThan = GreaterEqThan(nBit);
   greaterEqThan.in <== [in, min];
 
-  lessEqThan.out * greaterEqThan.out === 1;
+  out <== lessEqThan.out * greaterEqThan.out;
+  out === 1;
 }
-
-// component main  = SubmissionRangeCheck(1, 100, 7);
