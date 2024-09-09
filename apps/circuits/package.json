@@ -11,11 +11,10 @@
     "README.md"
   ],
   "scripts": {
-    "compile": "circomkit compile submit-rangecheck-1-100",
-    "setup": "timeout 5s circomkit setup submit-rangecheck-1-100; timeout 5s circomkit contract submit-rangecheck-1-100",
+    "compile": "./scripts/build-circuit.sh",
     "prove": "timeout 5s circomkit witness submit-rangecheck-1-100 in-range; timeout 5s circomkit prove submit-rangecheck-1-100 in-range",
     "verify": "timeout 5s circomkit verify submit-rangecheck-1-100 in-range",
-    "clear": "circomkit clear submit-rangecheck-1-100",
+    "clear": "circomkit clear",
     "test": "mocha"
   },
   "publishConfig": {
