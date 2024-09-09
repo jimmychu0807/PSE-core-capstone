@@ -9,7 +9,6 @@ import { HardhatUserConfig } from "hardhat/config";
 import { NetworksUserConfig } from "hardhat/types";
 import { resolve } from "path";
 import "solidity-coverage";
-import "hardhat-circom";
 import "./tasks/deploy";
 
 dotenvConfig({ path: resolve(__dirname, "../../.env") });
@@ -96,18 +95,6 @@ const hardhatConfig: HardhatUserConfig = {
   },
   sourcify: {
     enabled: true,
-  },
-  circom: {
-    inputBasePath: "./circuits",
-    outputBasePath: "./circuits/artifacts",
-    // ptau files: https://github.com/iden3/snarkjs?tab=readme-ov-file#7-prepare-phase-2
-    ptau: "https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_17.ptau",
-    circuits: [
-      {
-        name: "lib",
-        protocol: "plonk",
-      },
-    ],
   },
 };
 

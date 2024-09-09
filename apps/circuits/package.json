@@ -1,0 +1,35 @@
+{
+  "name": "circuits",
+  "version": "0.0.1",
+  "description": "Guessing game circuits",
+  "license": "MIT",
+  "files": [
+    "**/*.circom",
+    "!main",
+    "!test",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "compile": "./scripts/build-circuit.sh",
+    "prove": "timeout 5s circomkit witness submit-rangecheck-1-100 in-range; timeout 5s circomkit prove submit-rangecheck-1-100 in-range",
+    "verify": "timeout 5s circomkit verify submit-rangecheck-1-100 in-range",
+    "clear": "circomkit clear",
+    "test": "mocha"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "circomlib": "2.0.5",
+    "snarkjs": "^0.7.4"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/snarkjs": "^0.7.4",
+    "@zk-kit/baby-jubjub": "1.0.1",
+    "circomkit": "^0.2.1",
+    "mocha": "^10.2.0",
+    "poseidon-lite": "^0.2.0"
+  }
+}

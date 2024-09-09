@@ -69,7 +69,10 @@ contract GuessingGame is IGuessingGame, Ownable {
     _;
   }
 
-  // View functions
+  /**
+   * View functions
+   **/
+
   function getGame(uint32 gameId) public view validGameId(gameId) returns (GameView memory) {
     Game storage game = games[gameId];
 
@@ -86,7 +89,14 @@ contract GuessingGame is IGuessingGame, Ownable {
       });
   }
 
-  // Helper functions
+  function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {
+    Game storage game = games[gameId];
+    return game.players[0];
+  }
+
+  /**
+   * Helpers functions
+   **/
 
   function _verifyBidProof(
     bytes32 proof,
@@ -134,7 +144,9 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  // Main functions
+  /**
+   * Main functions
+   **/
 
   function newGame() external override returns (uint32 gameId) {
     Game storage game = games.push();

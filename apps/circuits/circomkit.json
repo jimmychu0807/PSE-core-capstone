@@ -1,0 +1,17 @@
+{
+  "protocol": "plonk",
+  "optimization": 1,
+  "prime": "bn128",
+  "version": "2.1.6",
+  "circuits": "./circuits.json",
+
+  "dirCircuits": "./src",
+  "dirInputs": "./src/inputs",
+  "dirPtau": "./artifacts/ptau",
+  "dirBuild": "./artifacts/build",
+
+  "prettyCalldata": true,
+  "inspect": true,
+  "logLevel": "INFO",
+  "verbose": true
+}
