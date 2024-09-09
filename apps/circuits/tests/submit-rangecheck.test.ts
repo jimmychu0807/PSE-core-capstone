@@ -29,7 +29,7 @@ describe("submit-rangecheck", () => {
     let INPUT = { in: MIN - 1 };
     await circuit.expectFail(INPUT);
 
-    INPUT = { in: MAX + 1};
+    INPUT = { in: MAX + 1 };
     await circuit.expectFail(INPUT);
   });
 });

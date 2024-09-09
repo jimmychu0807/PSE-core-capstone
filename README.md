@@ -15,7 +15,7 @@
 </p>
 
 | The repository is divided into two components: [web app](./apps/web-app), [contracts](./apps/contracts), and [circuits](./apps/circuits). Hopefully the app will be deployed on Sepolia. |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 This repo is modified from [Semaphore Boilerplate Template](https://github.com/semaphore-protocol/boilerplate)
 
@@ -96,5 +96,6 @@ yarn prettier:write
 ### Key Components
 
 Key components for writing circuits
+
 - [circomkit](https://github.com/erhant/circomkit/tree/main)
 - [hardhat-circom](https://github.com/projectsophon/hardhat-circom)

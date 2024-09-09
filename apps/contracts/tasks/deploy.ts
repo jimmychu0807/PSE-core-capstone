@@ -24,12 +24,13 @@ task("deploy:verifiers", "Deploy all verifier contracts")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
   .setAction(async ({ logs }, { ethers, run }) => {
     const rcFactory = await ethers.getContractFactory(
-      "contracts/SubmitRangecheckVerifier.sol:PlonkVerifier"
+      "contracts/submit-rangecheck-1-100_verifier.sol:PlonkVerifier"
     );
     const rcContract = await rcFactory.deploy();
     await rcContract.waitForDeployment();
 
-    logs && console.info(`SubmitRangecheckVerifier contract: ${await rcContract.getAddress()}`);
+    logs &&
+      console.info(`submit-rangecheck-1-100_verifier contract: ${await rcContract.getAddress()}`);
 
     return { rcContract };
   });

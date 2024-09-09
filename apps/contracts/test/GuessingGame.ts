@@ -1,9 +1,13 @@
-import { expect } from "chai";
+import * as chai from "chai";
+import chaiAsPromised from "chai-as-promised";
 import hre, { run } from "hardhat";
-import { GameState, prove } from "./helpers";
+import { GameState, prove, toOnChainProof } from "./helpers";
 
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { GuessingGame } from "../typechain-types";
+
+chai.use(chaiAsPromised);
+const expect = chai.expect;
 
 describe("GuessingGame", () => {
   let contracts;
@@ -35,9 +39,20 @@ describe("GuessingGame", () => {
 
       // generate proof
       const input = { in: 99 };
-      const { proof, publicSignals } = await prove(input, `./artifacts/circuits/submit-rangecheck`);
+      const { proof, publicSignals } = await prove(
+        input,
+        `./artifacts/circuits/submit-rangecheck-1-100`
+      );
+      const result = await rcContract.verifyProof(toOnChainProof(proof), publicSignals);
+      expect(result).to.be.true;
+    });
 
-      await rcContract.verifyProof(proof, publicSignals);
+    it("should not generate a proof when value is out of range", async () => {
+      const rcContract = contracts.rcContract;
+
+      const input = { in: 0 };
+      expect(prove(input, `./artifacts/circuits/submit-rangecheck-1-100`)).to.eventually.be
+        .rejected;
     });
   });
 });
