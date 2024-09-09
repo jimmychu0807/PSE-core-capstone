@@ -1,6 +1,6 @@
 import { WitnessTester } from "circomkit";
 import { circomkit } from "./common";
-const { randomInt } = require('node:crypto');
+const { randomInt } = require("node:crypto");
 
 // Check test here on how to build poseidon and use it:
 //   https://github.com/iden3/circomlib/blob/master/test/poseidoncircuit.js
