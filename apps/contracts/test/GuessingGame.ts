@@ -1,6 +1,8 @@
 import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import hre, { run } from "hardhat";
+const { randomInt } = require("node:crypto");
+
 import { GameState, prove, toOnChainProof } from "./helpers";
 
 // @ts-ignore: typechain folder will be generated after contracts compilation
@@ -36,9 +38,10 @@ describe("GuessingGame", () => {
   describe("L Range check: genarate proof offchain, verify proof onchain", () => {
     it("should create a range proof and be verified", async () => {
       const rcContract = contracts.rcContract;
+      const rand = randomInt(281474976710655);
 
       // generate proof
-      const input = { in: 99 };
+      const input = { in: 99, rand };
       const { proof, publicSignals } = await prove(
         input,
         `./artifacts/circuits/submit-rangecheck-1-100`
@@ -49,8 +52,9 @@ describe("GuessingGame", () => {
 
     it("should not generate a proof when value is out of range", async () => {
       const rcContract = contracts.rcContract;
+      const rand = randomInt(281474976710655);
 
-      const input = { in: 0 };
+      const input = { in: 0, rand };
       expect(prove(input, `./artifacts/circuits/submit-rangecheck-1-100`)).to.eventually.be
         .rejected;
     });
