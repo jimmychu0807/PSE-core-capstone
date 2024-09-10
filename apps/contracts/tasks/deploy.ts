@@ -1,18 +1,23 @@
 import { task, types } from "hardhat/config";
 
-task("deploy", "Deploy a contract")
+task("deploy", "Deploy all Number Guessing Game contracts")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
   .setAction(async ({ logs }, { ethers, run }) => {
-    const game = await run("deploy:game", { logs });
-    const verifiers = await run("deploy:verifiers", { logs });
-    return { game, ...verifiers };
+    const verifiers = await run("deploy:game-verifiers", { logs });
+
+    const rcVerifier = await verifiers.rcContract.getAddress();
+    const gameContract = await run("deploy:game", { logs, rcVerifier });
+
+    return { gameContract, ...verifiers };
   });
 
-task("deploy:game", "Deploy a GuessingGame contract")
+task("deploy:game", "Deploy Number Guessing Game main contract")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
-  .setAction(async ({ logs }, { ethers, run }) => {
+  .addParam("rcVerifier", "submit-rangecheck verifier address", undefined, types.string)
+  .setAction(async ({ logs, rcVerifier }, { ethers, run }) => {
     const factory = await ethers.getContractFactory("GuessingGame");
-    const contract = await factory.deploy();
+
+    const contract = await factory.deploy(rcVerifier);
     await contract.waitForDeployment();
 
     logs && console.info(`GuessingGame contract: ${await contract.getAddress()}`);
@@ -20,7 +25,7 @@ task("deploy:game", "Deploy a GuessingGame contract")
     return contract;
   });
 
-task("deploy:verifiers", "Deploy all verifier contracts")
+task("deploy:game-verifiers", "Deploy all Number Guessing Game verifier contracts")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
   .setAction(async ({ logs }, { ethers, run }) => {
     const rcFactory = await ethers.getContractFactory(

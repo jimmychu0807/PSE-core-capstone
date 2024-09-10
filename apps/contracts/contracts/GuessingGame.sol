@@ -3,15 +3,21 @@ pragma solidity ^0.8.23;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IGuessingGame} from "./interfaces/IGuessingGame.sol";
+import {ISubmitRangeCheckVerifier} from "./interfaces/ISubmitRangeCheckVerifier.sol";
 import {MIN_NUM, MAX_NUM, ROUND_TO_WIN} from "./base/Constants.sol";
 
 contract GuessingGame is IGuessingGame, Ownable {
+  ISubmitRangeCheckVerifier public submitRangeCheckVerifier;
+
+  // Storing all the game info. Refer to the interface to see the game struct
   Game[] public games;
   uint32 public nextGameId = 0;
 
   // Constructor
-  constructor() Ownable(msg.sender) {
+  // @param srAddr: submit-rangecheck verifier address
+  constructor(ISubmitRangeCheckVerifier srAddr) Ownable(msg.sender) {
     // Initialization happens here
+    submitRangeCheckVerifier = srAddr;
   }
 
   // Modifiers declaration
@@ -40,7 +46,7 @@ contract GuessingGame is IGuessingGame, Ownable {
       }
     }
     if (!found) {
-      revert GuessingGame__SenderNotOneOfPlayers();
+      revert GuessingGame__NotOneOfPlayers();
     }
     _;
   }
@@ -48,7 +54,7 @@ contract GuessingGame is IGuessingGame, Ownable {
   modifier gameStateEq(uint32 gameId, GameState gs) {
     Game storage game = games[gameId];
     if (game.state != gs) {
-      revert GuessingGame__UnexpectedGameState(game.state);
+      revert GuessingGame__UnexpectedGameState(gs, game.state);
     }
     _;
   }
@@ -57,14 +63,7 @@ contract GuessingGame is IGuessingGame, Ownable {
     Game storage game = games[gameId];
     address host = game.players[0];
     if (host != msg.sender) {
-      revert GuessingGame__SenderIsNotGameHost();
-    }
-    _;
-  }
-
-  modifier BidInRange(uint8 bid) {
-    if (bid < MIN_NUM || bid > MAX_NUM) {
-      revert GuessingGame__BidOutOfRange(msg.sender, bid);
+      revert GuessingGame__NotGameHost(gameId, msg.sender);
     }
     _;
   }
@@ -89,27 +88,19 @@ contract GuessingGame is IGuessingGame, Ownable {
       });
   }
 
+  function getPlayerCommitment(
+    uint32 gameId,
+    uint8 round,
+    address player
+  ) public view validGameId(gameId) returns (Bid memory) {
+    Game storage game = games[gameId];
+
+    return game.bids[round][player];
+  }
+
   function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {
     Game storage game = games[gameId];
     return game.players[0];
-  }
-
-  /**
-   * Helpers functions
-   **/
-
-  function _verifyBidProof(
-    bytes32 proof,
-    uint8 bid,
-    uint256 nullifier
-  ) internal pure returns (bool) {
-    /**
-     * TODO: verify proof
-     **/
-    proof;
-    bid;
-    nullifier;
-    return true;
   }
 
   function _updateGameState(
@@ -195,8 +186,8 @@ contract GuessingGame is IGuessingGame, Ownable {
 
   function submitCommitment(
     uint32 gameId,
-    bytes32 bid_null_commitment,
-    bytes32 null_commitment
+    uint256[24] calldata proof,
+    uint256[2] calldata pubSignals
   )
     external
     override
@@ -207,14 +198,20 @@ contract GuessingGame is IGuessingGame, Ownable {
     // each player submit a bid. The last player that submit a bid will change the game state
     Game storage game = games[gameId];
     uint8 round = game.currentRound;
-    game.bids[round][msg.sender] = Bid(bid_null_commitment, null_commitment);
+
+    // Verify the computation and proof
+    if (!submitRangeCheckVerifier.verifyProof(proof, pubSignals)) {
+      revert GuessingGame__InvalidSubmitRangeCheckProof(gameId, round, msg.sender);
+    }
+
+    game.bids[round][msg.sender] = Bid(pubSignals[0], pubSignals[1]);
     emit BidSubmitted(gameId, round, msg.sender);
 
     // If all players have submitted bid, update game state
     bool notYetBid = false;
     for (uint i = 0; i < game.players.length; ++i) {
       address p = game.players[i];
-      if (game.bids[round][p].bid_null_commitment == bytes32(0)) {
+      if (game.bids[round][p].nullifier == 0) {
         notYetBid = true;
         break;
       }
@@ -225,26 +222,20 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  function revealCommitment(
+  function openCommitment(
     uint32 gameId,
     bytes32 proof,
-    uint8 bid,
-    uint256 nullifier
+    uint16 bid
   )
     external
     override
     validGameId(gameId)
     oneOfPlayers(gameId)
     gameStateEq(gameId, GameState.RoundReveal)
-    BidInRange(bid)
   {
     Game storage game = games[gameId];
 
     // each player reveal a bid. The last player that reveal a bid will change the game state
-    bool proofVerified = _verifyBidProof(proof, bid, nullifier);
-    if (!proofVerified) {
-      revert GuessingGame__BidProofRejected(msg.sender, gameId, game.currentRound);
-    }
 
     uint8 round = game.currentRound;
     game.revelations[round][msg.sender] = bid;
