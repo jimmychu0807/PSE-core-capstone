@@ -181,6 +181,11 @@ contract GuessingGame is IGuessingGame, Ownable {
     byGameHost(gameId)
     gameStateEq(gameId, GameState.GameInitiated)
   {
+    Game storage game = games[gameId];
+    if (game.players.length == 1) {
+      revert GuessingGame__NoOtherPlayer(gameId);
+    }
+
     _updateGameState(gameId, GameState.RoundBid);
     emit GameStarted(gameId);
   }
