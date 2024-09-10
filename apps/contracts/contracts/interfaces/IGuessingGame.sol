@@ -44,6 +44,7 @@ interface IGuessingGame {
 
   // Error declaration
   error GuessingGame__InvalidGameId();
+  error GuessingGame__NoOtherPlayer(uint32 gameId);
   error GuessingGame__GameHasEnded();
   error GuessingGame__UnexpectedGameState(GameState actual);
   error GuessingGame__PlayerAlreadyJoin(address p);
