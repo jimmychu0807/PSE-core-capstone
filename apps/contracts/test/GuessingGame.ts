@@ -24,6 +24,14 @@ describe("GuessingGame", () => {
     return { contracts, players: { host, bob, charlie } };
   }
 
+  async function deployContractsGameStarted() {
+    contracts = await run("deploy", { logs: false });
+    [host, bob, charlie] = await hre.ethers.getSigners();
+    Object.values(contracts).map((c) => c.connect(host));
+
+    return { contracts, players: { host, bob, charlie } };
+  }
+
   describe("L New Game", () => {
     it("should create a new game", async () => {
       const { contracts, players } = await loadFixture(deployContractsCleanSlate);
@@ -61,21 +69,21 @@ describe("GuessingGame", () => {
       expect(game.players).to.deep.equal([host.address, bob.address]);
     });
 
-    it("can start game by host once there are more than one player", async () => {
+    it("can start game by host once there are more than two players", async () => {
       const { contracts, players } = await loadFixture(deployContractsCleanSlate);
       const { game: gameContract } = contracts;
-      const { host, bob } = players;
+      const { host, bob, charlie } = players;
 
       await gameContract.newGame();
 
       const GAME_ID = 0;
+      await gameContract.connect(bob).joinGame(GAME_ID);
       await expect(gameContract.startGame(GAME_ID)).to.be.revertedWithCustomError(
         gameContract,
-        "GuessingGame__NoOtherPlayer"
+        "GuessingGame__NotEnoughPlayers"
       );
 
-      gameContract.connect(bob).joinGame(GAME_ID);
-
+      await gameContract.connect(charlie).joinGame(GAME_ID);
       await expect(gameContract.connect(host).startGame(GAME_ID))
         .to.emit(gameContract, "GameStarted")
         .withArgs(GAME_ID);
