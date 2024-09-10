@@ -26,16 +26,26 @@ describe("GuessingGame", () => {
 
   async function deployContractsGameStarted() {
     contracts = await run("deploy", { logs: false });
-    [host, bob, charlie] = await hre.ethers.getSigners();
+    [host, bob, charlie, dave] = await hre.ethers.getSigners();
     Object.values(contracts).map((c) => c.connect(host));
 
-    return { contracts, players: { host, bob, charlie } };
+    const { gameContract } = contracts;
+
+    const GAME_ID = 0;
+    await gameContract.newGame();
+    await Promise.all([
+      gameContract.connect(bob).joinGame(GAME_ID),
+      gameContract.connect(charlie).joinGame(GAME_ID),
+    ]);
+    await gameContract.startGame(GAME_ID);
+
+    return { contracts, players: { host, bob, charlie, dave } };
   }
 
   describe("L New Game", () => {
     it("should create a new game", async () => {
       const { contracts, players } = await loadFixture(deployContractsCleanSlate);
-      const { game: gameContract } = contracts;
+      const { gameContract } = contracts;
       const { host } = players;
 
       await gameContract.newGame();
@@ -50,7 +60,7 @@ describe("GuessingGame", () => {
 
     it("host can't join the game again, but other players can", async () => {
       const { contracts, players } = await loadFixture(deployContractsCleanSlate);
-      const { game: gameContract } = contracts;
+      const { gameContract } = contracts;
       const { host, bob } = players;
 
       await gameContract.newGame();
@@ -71,7 +81,7 @@ describe("GuessingGame", () => {
 
     it("can start game by host once there are more than two players", async () => {
       const { contracts, players } = await loadFixture(deployContractsCleanSlate);
-      const { game: gameContract } = contracts;
+      const { gameContract } = contracts;
       const { host, bob, charlie } = players;
 
       await gameContract.newGame();
@@ -93,7 +103,15 @@ describe("GuessingGame", () => {
     });
   });
 
-  describe("L Players submitting and revealing bid for a round", () => {});
+  describe("L After a game started", () => {
+    it("players can submit a commitment", async () => {
+      const { contracts, players } = await loadFixture(deployContractsGameStarted);
+      const { gameContract } = contracts;
+      const { host, bob, charlie } = players;
+
+
+    });
+  });
 
   describe("L Range check: genarate proof offchain, verify proof onchain", () => {
     it("should create a range proof and be verified", async () => {

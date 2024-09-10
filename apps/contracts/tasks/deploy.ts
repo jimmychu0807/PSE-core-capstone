@@ -3,9 +3,9 @@ import { task, types } from "hardhat/config";
 task("deploy", "Deploy a contract")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
   .setAction(async ({ logs }, { ethers, run }) => {
-    const game = await run("deploy:game", { logs });
+    const gameContract = await run("deploy:game", { logs });
     const verifiers = await run("deploy:verifiers", { logs });
-    return { game, ...verifiers };
+    return { gameContract, ...verifiers };
   });
 
 task("deploy:game", "Deploy a GuessingGame contract")

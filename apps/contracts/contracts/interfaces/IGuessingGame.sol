@@ -3,8 +3,8 @@ pragma solidity ^0.8.23;
 
 interface IGuessingGame {
   struct Bid {
-    bytes32 bid_null_commitment;
-    bytes32 null_commitment;
+    uint256 submission;
+    uint256 nullifier;
   }
 
   struct Game {
