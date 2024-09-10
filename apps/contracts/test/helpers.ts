@@ -10,12 +10,12 @@ export enum GameState {
   GameEnd,
 }
 
-export async function prove(input, keyBasePath) {
+export async function prove(input, circuitPath) {
   const fullProof = await plonk.fullProve(
     // utils.stringifyBitInts(input),
     input,
-    `${keyBasePath}.wasm`,
-    `${keyBasePath}.zkey`
+    `${circuitPath}.wasm`,
+    `${circuitPath}.zkey`
   );
 
   return fullProof;

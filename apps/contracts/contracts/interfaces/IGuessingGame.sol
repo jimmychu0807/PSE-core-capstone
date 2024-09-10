@@ -15,7 +15,7 @@ interface IGuessingGame {
     GameState state;
     // player bid list
     mapping(uint8 => mapping(address => Bid)) bids;
-    mapping(uint8 => mapping(address => uint8)) revelations;
+    mapping(uint8 => mapping(address => uint16)) revelations;
     address finalWinner;
     uint256 startTime;
     uint256 lastUpdate;
@@ -46,12 +46,11 @@ interface IGuessingGame {
   error GuessingGame__InvalidGameId();
   error GuessingGame__NotEnoughPlayers(uint32 gameId);
   error GuessingGame__GameHasEnded();
-  error GuessingGame__UnexpectedGameState(GameState actual);
+  error GuessingGame__UnexpectedGameState(GameState expected, GameState actual);
   error GuessingGame__PlayerAlreadyJoin(address p);
-  error GuessingGame__SenderIsNotGameHost();
-  error GuessingGame__SenderNotOneOfPlayers();
-  error GuessingGame__BidProofRejected(address, uint32, uint8);
-  error GuessingGame__BidOutOfRange(address, uint8);
+  error GuessingGame__NotGameHost(uint32 gameId, address addr);
+  error GuessingGame__InvalidSubmitRangeCheckProof(uint32 gameId, uint8 round, address addr);
+  error GuessingGame__NotOneOfPlayers();
 
   // Emitted Events
   event NewGame(uint32 indexed gameId, address indexed sender);
@@ -67,7 +66,11 @@ interface IGuessingGame {
   function newGame() external returns (uint32 gameId);
   function joinGame(uint32 gameId) external;
   function startGame(uint32 gameId) external;
-  function submitCommitment(uint32 gameId, bytes32, bytes32) external;
-  function revealCommitment(uint32 gameId, bytes32 proof, uint8 bid, uint256 nullifier) external;
+  function submitCommitment(
+    uint32 gameId,
+    uint256[24] calldata _proof,
+    uint256[2] calldata _pubSignals
+  ) external;
+  function openCommitment(uint32 gameId, bytes32 proof, uint16 bid) external;
   function endRound(uint32 gameId) external;
 }

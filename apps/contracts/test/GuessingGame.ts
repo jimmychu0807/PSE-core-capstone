@@ -11,22 +11,21 @@ import { GuessingGame } from "../typechain-types";
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-describe("GuessingGame", () => {
-  let contracts;
-  let host;
-  let bob, charlie;
+// Defining circuit base paths
+const SUBMIT_RANGECHECK_CIRCUIT_BASEPATH = "./artifacts/circuits/submit-rangecheck-1-100";
 
+describe("GuessingGame", () => {
   async function deployContractsCleanSlate() {
-    contracts = await run("deploy", { logs: false });
-    [host, bob, charlie] = await hre.ethers.getSigners();
+    const contracts = await run("deploy", { logs: false });
+    const [host, bob, charlie] = await hre.ethers.getSigners();
     Object.values(contracts).map((c) => c.connect(host));
 
     return { contracts, players: { host, bob, charlie } };
   }
 
   async function deployContractsGameStarted() {
-    contracts = await run("deploy", { logs: false });
-    [host, bob, charlie, dave] = await hre.ethers.getSigners();
+    const contracts = await run("deploy", { logs: false });
+    const [host, bob, charlie, dave] = await hre.ethers.getSigners();
     Object.values(contracts).map((c) => c.connect(host));
 
     const { gameContract } = contracts;
@@ -104,12 +103,31 @@ describe("GuessingGame", () => {
   });
 
   describe("L After a game started", () => {
-    it("players can submit a commitment", async () => {
+    it("only players can submit a commitment, non-players cannot", async () => {
       const { contracts, players } = await loadFixture(deployContractsGameStarted);
       const { gameContract } = contracts;
-      const { host, bob, charlie } = players;
+      const { host, dave } = players;
 
+      const GAME_ID = 0;
+      const rand = randomInt(281474976710655);
+      // generate proof
+      const input = { in: 99, rand };
+      const { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
 
+      // host can submit a commitment
+      await expect(gameContract.submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals))
+        .to.emit(gameContract, "BidSubmitted")
+        .withArgs(GAME_ID, 0, host.address);
+
+      // check the relevant game state on-chain
+      const bid = await gameContract.getPlayerCommitment(GAME_ID, 0, host.address);
+      expect(bid).to.deep.equal(publicSignals);
+
+      // dave couldn't submit a commitment
+      const daveGameContract = gameContract.connect(dave);
+      await expect(
+        daveGameContract.submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
+      ).to.be.revertedWithCustomError(gameContract, "GuessingGame__NotOneOfPlayers");
     });
   });
 
@@ -122,10 +140,7 @@ describe("GuessingGame", () => {
 
       // generate proof
       const input = { in: 99, rand };
-      const { proof, publicSignals } = await prove(
-        input,
-        `./artifacts/circuits/submit-rangecheck-1-100`
-      );
+      const { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
       const result = await rcContract.verifyProof(toOnChainProof(proof), publicSignals);
       expect(result).to.be.true;
     });
