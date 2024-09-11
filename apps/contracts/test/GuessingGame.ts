@@ -150,6 +150,40 @@ describe("GuessingGame", () => {
         gameContract.submitCommitment(GAME_ID, onChainProof, publicSignals)
       ).to.be.revertedWithCustomError(gameContract, "GuessingGame__InvalidSubmitRangeCheckProof");
     });
+
+    it("when all players have submitted bids, the game state is updated", async () => {
+      const { contracts, players } = await loadFixture(deployContractsGameStarted);
+      const { gameContract } = contracts;
+      const { host, bob, charlie } = players;
+
+      const GAME_ID = 0;
+      const rands = [randomInt(281474976710655), randomInt(281474976710655), randomInt(281474976710655)];
+
+      // host generates a commitment and submit on-chain
+      let input = { in: 1, rand: rands[0] };
+      let { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
+      await gameContract
+        .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals);
+
+      // Bob's turn
+      input = { in: 3, rand: rands[1] };
+      ({ proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH));
+      await gameContract.connect(bob)
+        .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals);
+
+      // Charlie's turn
+      input = { in: 5, rand: rands[2] };
+      ({ proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH));
+      await expect(
+        gameContract.connect(charlie)
+          .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
+      ).to.emit(gameContract, "GameStateUpdated")
+        .withArgs(GAME_ID, GameState.RoundReveal);
+
+      // check the game state
+      const game = await gameContract.getGame(GAME_ID);
+      expect(game.state).to.be.equal(GameState.RoundReveal);
+    });
   });
 
   describe("L Range check: genarate proof offchain, verify proof onchain", () => {
