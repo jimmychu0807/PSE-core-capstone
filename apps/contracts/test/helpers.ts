@@ -21,7 +21,7 @@ export async function prove(input, circuitPath) {
   return fullProof;
 }
 
-function zeroPadNBytes(input, n, withPrefix = true) {
+export function zeroPadNBytes(input, n, withPrefix = true) {
   let in16 = BigInt(input).toString(16);
   in16 = in16.length % 2 === 1 ? `0x0${in16}` : `0x${in16}`;
   const padded = ethers.zeroPadValue(in16, n);

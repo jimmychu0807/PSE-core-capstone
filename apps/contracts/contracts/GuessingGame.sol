@@ -200,8 +200,12 @@ contract GuessingGame is IGuessingGame, Ownable {
     uint8 round = game.currentRound;
 
     // Verify the computation and proof
-    if (!submitRangeCheckVerifier.verifyProof(proof, pubSignals)) {
-      revert GuessingGame__InvalidSubmitRangeCheckProof(gameId, round, msg.sender);
+    try submitRangeCheckVerifier.verifyProof(proof, pubSignals) returns (bool result) {
+      if (!result) {
+        revert GuessingGame__InvalidSubmitRangeCheckProof(gameId, round, msg.sender);
+      }
+    } catch {
+      revert GuessingGame__SubmitRangeCheckProofFailed(gameId, round, msg.sender);
     }
 
     game.bids[round][msg.sender] = Bid(pubSignals[0], pubSignals[1]);

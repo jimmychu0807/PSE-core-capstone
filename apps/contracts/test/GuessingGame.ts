@@ -4,7 +4,7 @@ import hre, { run } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 const { randomInt } = require("node:crypto");
 
-import { GameState, prove, toOnChainProof } from "./helpers";
+import { GameState, prove, toOnChainProof, zeroPadNBytes } from "./helpers";
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { GuessingGame } from "../typechain-types";
 
@@ -128,6 +128,27 @@ describe("GuessingGame", () => {
       await expect(
         daveGameContract.submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
       ).to.be.revertedWithCustomError(gameContract, "GuessingGame__NotOneOfPlayers");
+    });
+
+    it("invalid submit-rangecheck proof will be rejected", async () => {
+      const { contracts, players } = await loadFixture(deployContractsGameStarted);
+      const { gameContract } = contracts;
+      const { host } = players;
+
+      const GAME_ID = 0;
+      const rand = randomInt(281474976710655);
+
+      // generate a proof
+      const input = { in: 99, rand };
+      const { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
+      let onChainProof = toOnChainProof(proof);
+      // meddle the proof
+      onChainProof[0] = zeroPadNBytes(BigInt(onChainProof[0]) + BigInt(1), 32);
+
+      // submit on-chain
+      await expect(
+        gameContract.submitCommitment(GAME_ID, onChainProof, publicSignals)
+      ).to.be.revertedWithCustomError(gameContract, "GuessingGame__InvalidSubmitRangeCheckProof");
     });
   });
 
