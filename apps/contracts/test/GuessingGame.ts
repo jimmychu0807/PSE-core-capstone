@@ -49,7 +49,7 @@ describe("GuessingGame", () => {
     const inputs = {
       host: { in: 1, rand },
       bob: { in: 3, rand },
-      charlie: { in: 5, rand }
+      charlie: { in: 5, rand },
     };
     // const fullProofs = await Promise.all(inputs.map((i) => prove(i, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH)));
     const fullProofs = {
@@ -64,11 +64,12 @@ describe("GuessingGame", () => {
     });
 
     await Promise.all([
+      gameContract.submitCommitment(GAME_ID, fullProofs.host.proof, fullProofs.host.publicSignals),
       gameContract
-        .submitCommitment(GAME_ID, fullProofs.host.proof, fullProofs.host.publicSignals),
-      gameContract.connect(bob)
+        .connect(bob)
         .submitCommitment(GAME_ID, fullProofs.bob.proof, fullProofs.bob.publicSignals),
-      gameContract.connect(charlie)
+      gameContract
+        .connect(charlie)
         .submitCommitment(GAME_ID, fullProofs.charlie.proof, fullProofs.charlie.publicSignals),
     ]);
 
@@ -228,7 +229,9 @@ describe("GuessingGame", () => {
 
   describe("L After all players submitted bids (GamteState.RoundReveal)", () => {
     it("should allow player to reveal their commitments", async () => {
-      const { contracts, players, inputs, fullProofs } = await loadFixture(deployContractsGameRoundReveal);
+      const { contracts, players, inputs, fullProofs } = await loadFixture(
+        deployContractsGameRoundReveal
+      );
       const { gameContract } = contracts;
       const { host } = players;
     });
