@@ -52,7 +52,7 @@ describe("GuessingGame", () => {
       bob: { in: 3, rand },
       charlie: { in: 5, rand },
     };
-    // const fullProofs = await Promise.all(inputs.map((i) => prove(i, COMMITMENT_VERIFIER_BASEPATH)));
+
     const fullProofs = {
       host: await prove(inputs.host, COMMITMENT_VERIFIER_BASEPATH),
       bob: await prove(inputs.bob, COMMITMENT_VERIFIER_BASEPATH),
@@ -229,12 +229,42 @@ describe("GuessingGame", () => {
   });
 
   describe("L After all players submitted bids (GamteState.RoundOpen)", () => {
-    it("should allow player to reveal their commitments", async () => {
-      const { contracts, players, inputs, fullProofs } = await loadFixture(
-        deployContractsGameRoundReveal
-      );
+    it("should allow player to open their commitments", async () => {
+      const { contracts, players, inputs } = await loadFixture(deployContractsGameRoundReveal);
       const { gameContract } = contracts;
       const { host } = players;
+      const GAME_ID = 0;
+
+      const { proof, publicSignals } = await prove(inputs.host, OPENING_VERIFIER_BASEPATH);
+      await expect(
+        gameContract.openCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
+      ).to.emit(gameContract, "CommitmentOpened");
+
+      const opening = await gameContract.getPlayerOpening(GAME_ID, 0, host.address);
+      expect(opening).to.be.equal(inputs.host.in);
+    });
+
+    it("shouldn't allow players to meddling with the commitment", async () => {
+      const { contracts, players, inputs } = await loadFixture(deployContractsGameRoundReveal);
+      const { gameContract } = contracts;
+      const { host } = players;
+      const GAME_ID = 0;
+
+      // meddling with the public signals
+      let { proof, publicSignals } = await prove(inputs.host, OPENING_VERIFIER_BASEPATH);
+      publicSignals[2] = publicSignals[2] + 1;
+      await expect(
+        gameContract.openCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
+      ).to.be.revertedWithCustomError(gameContract, "GuessingGame__InvalidOpeningProof");
+
+      // Using an entirely new input
+      ({ proof, publicSignals } = await prove(
+        { in: 99, rand: randomInt(281474976710655) },
+        OPENING_VERIFIER_BASEPATH
+      ));
+      await expect(
+        gameContract.openCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
+      ).to.be.revertedWithCustomError(gameContract, "GuessingGame__UnmatchedCommitment");
     });
   });
 });

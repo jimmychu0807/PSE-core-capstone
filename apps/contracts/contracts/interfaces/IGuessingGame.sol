@@ -50,9 +50,8 @@ interface IGuessingGame {
   error GuessingGame__PlayerAlreadyJoin(address p);
   error GuessingGame__NotGameHost(uint32 gameId, address addr);
   error GuessingGame__InvalidCommitmentProof(uint32 gameId, uint8 round, address addr);
-  error GuessingGame__CommitmentVerificationTerminated(uint32 gameId, uint8 round, address addr);
+  error GuessingGame__UnmatchedCommitment(uint32 gameId, uint8 round, address addr);
   error GuessingGame__InvalidOpeningProof(uint32 gameId, uint8 round, address addr);
-  error GuessingGame__OpeningVerificationTerminated(uint32 gameId, uint8 round, address addr);
   error GuessingGame__NotOneOfPlayers();
 
   // Emitted Events

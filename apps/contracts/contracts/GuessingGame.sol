@@ -101,10 +101,24 @@ contract GuessingGame is IGuessingGame, Ownable {
     return game.commitments[round][player];
   }
 
+  function getPlayerOpening(
+    uint32 gameId,
+    uint8 round,
+    address player
+  ) public view validGameId(gameId) returns (uint16) {
+    Game storage game = games[gameId];
+
+    return game.openings[round][player];
+  }
+
   function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {
     Game storage game = games[gameId];
     return game.players[0];
   }
+
+  /**
+   * Internal helper functions
+   **/
 
   function _updateGameState(
     uint32 gameId,
@@ -202,13 +216,13 @@ contract GuessingGame is IGuessingGame, Ownable {
     Game storage game = games[gameId];
     uint8 round = game.currentRound;
 
-    // Verify the computation and proof
+    // Verify the commitment
     try commitmentVerifier.verifyProof(proof, pubSignals) returns (bool result) {
       if (!result) {
         revert GuessingGame__InvalidCommitmentProof(gameId, round, msg.sender);
       }
     } catch {
-      revert GuessingGame__CommitmentVerificationTerminated(gameId, round, msg.sender);
+      revert GuessingGame__InvalidCommitmentProof(gameId, round, msg.sender);
     }
 
     game.commitments[round][msg.sender] = Commitment(pubSignals[0], pubSignals[1]);
@@ -243,8 +257,24 @@ contract GuessingGame is IGuessingGame, Ownable {
     Game storage game = games[gameId];
     uint8 round = game.currentRound;
 
-    // game.revelations[round][msg.sender] = bid;
-    // emit BidRevealed(gameId, round, msg.sender);
+    // First, check the 1st two pubSignals the same as the commitment
+    Commitment storage pc = game.commitments[round][msg.sender];
+    if (pc.submission != pubSignals[0] || pc.nullifier != pubSignals[1]) {
+      revert GuessingGame__UnmatchedCommitment(gameId, round, msg.sender);
+    }
+
+    // Then, check if it pass the zk verifier
+    try openingVerifier.verifyProof(proof, pubSignals) returns (bool result) {
+      if (!result) {
+        revert GuessingGame__InvalidOpeningProof(gameId, round, msg.sender);
+      }
+    } catch {
+      revert GuessingGame__InvalidOpeningProof(gameId, round, msg.sender);
+    }
+
+    // Save the openings and emit an event
+    game.openings[round][msg.sender] = uint16(pubSignals[2]);
+    emit CommitmentOpened(gameId, round, msg.sender);
 
     // If all players have submitted revelation, update game state
     bool notYetOpen = false;
