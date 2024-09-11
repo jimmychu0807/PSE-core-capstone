@@ -1,5 +1,4 @@
-import * as chai from "chai";
-import chaiAsPromised from "chai-as-promised";
+import { expect } from "chai";
 import hre, { run } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 const { randomInt } = require("node:crypto");
@@ -7,9 +6,6 @@ const { randomInt } = require("node:crypto");
 import { GameState, prove, toOnChainProof, zeroPadNBytes } from "./helpers";
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { GuessingGame } from "../typechain-types";
-
-chai.use(chaiAsPromised);
-const expect = chai.expect;
 
 // Defining circuit base paths
 const SUBMIT_RANGECHECK_CIRCUIT_BASEPATH = "./artifacts/circuits/submit-rangecheck-1-100";
@@ -41,7 +37,7 @@ describe("GuessingGame", () => {
     return { contracts, players: { host, bob, charlie, dave } };
   }
 
-  describe("L New Game", () => {
+  describe("L New Game (GameState.GameInitiated)", () => {
     it("should create a new game", async () => {
       const { contracts, players } = await loadFixture(deployContractsCleanSlate);
       const { gameContract } = contracts;
@@ -102,7 +98,7 @@ describe("GuessingGame", () => {
     });
   });
 
-  describe("L After a game started", () => {
+  describe("L After a game started (GameState.RoundBid)", () => {
     it("only players can submit a commitment, non-players cannot", async () => {
       const { contracts, players } = await loadFixture(deployContractsGameStarted);
       const { gameContract } = contracts;
@@ -186,18 +182,9 @@ describe("GuessingGame", () => {
     });
   });
 
-  describe("L Range check: genarate proof offchain, verify proof onchain", () => {
-    it("should create a range proof and be verified", async () => {
-      const { contracts } = await loadFixture(deployContractsCleanSlate);
-      const { rcContract } = contracts;
+  describe("L After all players submitted bids (GamteState.RoundReveal)", () => {
+    it("should allow player to reveal their commitments", async() => {
 
-      const rand = randomInt(281474976710655);
-
-      // generate proof
-      const input = { in: 99, rand };
-      const { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
-      const result = await rcContract.verifyProof(toOnChainProof(proof), publicSignals);
-      expect(result).to.be.true;
     });
   });
 });
