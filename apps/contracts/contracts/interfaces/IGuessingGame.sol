@@ -74,6 +74,10 @@ interface IGuessingGame {
     uint256[24] calldata _proof,
     uint256[2] calldata _pubSignals
   ) external;
-  function openCommitment(uint32 gameId, uint256[24] calldata _proof, uint256[4] calldata _pubSignals) external;
+  function openCommitment(
+    uint32 gameId,
+    uint256[24] calldata _proof,
+    uint256[4] calldata _pubSignals
+  ) external;
   function endRound(uint32 gameId) external;
 }
