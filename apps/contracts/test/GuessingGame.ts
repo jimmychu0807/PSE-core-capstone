@@ -8,7 +8,8 @@ import { GameState, prove, toOnChainProof, zeroPadNBytes } from "./helpers";
 import { GuessingGame } from "../typechain-types";
 
 // Defining circuit base paths
-const SUBMIT_RANGECHECK_CIRCUIT_BASEPATH = "./artifacts/circuits/submit-rangecheck-1-100";
+const COMMITMENT_VERIFIER_BASEPATH = "./artifacts/circuits/commit-1-100";
+const OPENING_VERIFIER_BASEPATH = "./artifacts/circuits/open-1-100";
 
 describe("GuessingGame", () => {
   async function deployContractsCleanSlate() {
@@ -51,11 +52,11 @@ describe("GuessingGame", () => {
       bob: { in: 3, rand },
       charlie: { in: 5, rand },
     };
-    // const fullProofs = await Promise.all(inputs.map((i) => prove(i, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH)));
+    // const fullProofs = await Promise.all(inputs.map((i) => prove(i, COMMITMENT_VERIFIER_BASEPATH)));
     const fullProofs = {
-      host: await prove(inputs.host, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH),
-      bob: await prove(inputs.bob, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH),
-      charlie: await prove(inputs.charlie, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH),
+      host: await prove(inputs.host, COMMITMENT_VERIFIER_BASEPATH),
+      bob: await prove(inputs.bob, COMMITMENT_VERIFIER_BASEPATH),
+      charlie: await prove(inputs.charlie, COMMITMENT_VERIFIER_BASEPATH),
     };
 
     // Flatten the plonk proof to on-chain proof format
@@ -133,11 +134,11 @@ describe("GuessingGame", () => {
         .withArgs(GAME_ID);
 
       const game = await gameContract.getGame(GAME_ID);
-      expect(game.state).to.be.equal(GameState.RoundBid);
+      expect(game.state).to.be.equal(GameState.RoundCommit);
     });
   });
 
-  describe("L After a game started (GameState.RoundBid)", () => {
+  describe("L After a game started (GameState.RoundCommit)", () => {
     it("only players can submit a commitment, non-players cannot", async () => {
       const { contracts, players } = await loadFixture(deployContractsGameStarted);
       const { gameContract } = contracts;
@@ -147,7 +148,7 @@ describe("GuessingGame", () => {
       const rand = randomInt(281474976710655);
       // generate proof
       const input = { in: 99, rand };
-      const { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
+      const { proof, publicSignals } = await prove(input, COMMITMENT_VERIFIER_BASEPATH);
 
       // host can submit a commitment
       await expect(gameContract.submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals))
@@ -165,7 +166,7 @@ describe("GuessingGame", () => {
       ).to.be.revertedWithCustomError(gameContract, "GuessingGame__NotOneOfPlayers");
     });
 
-    it("invalid submit-rangecheck proof will be rejected", async () => {
+    it("invalid commitment proof will be rejected", async () => {
       const { contracts, players } = await loadFixture(deployContractsGameStarted);
       const { gameContract } = contracts;
       const { host } = players;
@@ -175,7 +176,7 @@ describe("GuessingGame", () => {
 
       // generate a proof
       const input = { in: 99, rand };
-      const { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
+      const { proof, publicSignals } = await prove(input, COMMITMENT_VERIFIER_BASEPATH);
       let onChainProof = toOnChainProof(proof);
       // meddle the proof
       onChainProof[0] = zeroPadNBytes(BigInt(onChainProof[0]) + BigInt(1), 32);
@@ -183,10 +184,10 @@ describe("GuessingGame", () => {
       // submit on-chain
       await expect(
         gameContract.submitCommitment(GAME_ID, onChainProof, publicSignals)
-      ).to.be.revertedWithCustomError(gameContract, "GuessingGame__InvalidSubmitRangeCheckProof");
+      ).to.be.revertedWithCustomError(gameContract, "GuessingGame__InvalidCommitmentProof");
     });
 
-    it("when all players have submitted bids, the game state is updated", async () => {
+    it("when all players have submitted commitments, the game state is updated", async () => {
       const { contracts, players } = await loadFixture(deployContractsGameStarted);
       const { gameContract } = contracts;
       const { host, bob, charlie } = players;
@@ -200,34 +201,34 @@ describe("GuessingGame", () => {
 
       // host generates a commitment and submit on-chain
       let input = { in: 1, rand: rands[0] };
-      let { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
+      let { proof, publicSignals } = await prove(input, COMMITMENT_VERIFIER_BASEPATH);
       await gameContract.submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals);
 
       // Bob's turn
       input = { in: 3, rand: rands[1] };
-      ({ proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH));
+      ({ proof, publicSignals } = await prove(input, COMMITMENT_VERIFIER_BASEPATH));
       await gameContract
         .connect(bob)
         .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals);
 
       // Charlie's turn
       input = { in: 5, rand: rands[2] };
-      ({ proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH));
+      ({ proof, publicSignals } = await prove(input, COMMITMENT_VERIFIER_BASEPATH));
       await expect(
         gameContract
           .connect(charlie)
           .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
       )
         .to.emit(gameContract, "GameStateUpdated")
-        .withArgs(GAME_ID, GameState.RoundReveal);
+        .withArgs(GAME_ID, GameState.RoundOpen);
 
       // check the game state
       const game = await gameContract.getGame(GAME_ID);
-      expect(game.state).to.be.equal(GameState.RoundReveal);
+      expect(game.state).to.be.equal(GameState.RoundOpen);
     });
   });
 
-  describe("L After all players submitted bids (GamteState.RoundReveal)", () => {
+  describe("L After all players submitted bids (GamteState.RoundOpen)", () => {
     it("should allow player to reveal their commitments", async () => {
       const { contracts, players, inputs, fullProofs } = await loadFixture(
         deployContractsGameRoundReveal

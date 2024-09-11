@@ -6,7 +6,7 @@ const { randomInt } = require("node:crypto");
 //   https://github.com/iden3/circomlib/blob/master/test/poseidoncircuit.js
 const buildPoseidon = require("circomlibjs").buildPoseidon;
 
-describe("submit-rangecheck", () => {
+describe("submission-check", () => {
   let circuit: WitnessTester<
     ["in", "rand"] // private inputs
   >;
@@ -15,9 +15,9 @@ describe("submit-rangecheck", () => {
   const [MIN, MAX, NBITS] = [1, 100, 7];
 
   before(async () => {
-    circuit = await circomkit.WitnessTester("submit-rangecheck", {
-      file: "submit-rangecheck",
-      template: "SubmissionRangeCheck",
+    circuit = await circomkit.WitnessTester("submission-check", {
+      file: "submission-check",
+      template: "SubmissionCheck",
       params: [MIN, MAX, NBITS],
     });
 

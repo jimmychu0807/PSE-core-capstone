@@ -5,19 +5,23 @@ task("deploy", "Deploy all Number Guessing Game contracts")
   .setAction(async ({ logs }, { ethers, run }) => {
     const verifiers = await run("deploy:game-verifiers", { logs });
 
-    const rcVerifier = await verifiers.rcContract.getAddress();
-    const gameContract = await run("deploy:game", { logs, rcVerifier });
+    const [commitmentVerifier, openingVerifier] = await Promise.all([
+      verifiers.commitmentVerifier.getAddress(),
+      verifiers.openingVerifier.getAddress(),
+    ]);
+
+    const gameContract = await run("deploy:game", { logs, commitmentVerifier, openingVerifier });
 
     return { gameContract, ...verifiers };
   });
 
 task("deploy:game", "Deploy Number Guessing Game main contract")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
-  .addParam("rcVerifier", "submit-rangecheck verifier address", undefined, types.string)
-  .setAction(async ({ logs, rcVerifier }, { ethers, run }) => {
+  .addParam("commitmentVerifier", "commitment verifier address", undefined, types.string)
+  .addParam("openingVerifier", "opening verifier address", undefined, types.string)
+  .setAction(async ({ logs, commitmentVerifier, openingVerifier }, { ethers, run }) => {
     const factory = await ethers.getContractFactory("GuessingGame");
-
-    const contract = await factory.deploy(rcVerifier);
+    const contract = await factory.deploy(commitmentVerifier, openingVerifier);
     await contract.waitForDeployment();
 
     logs && console.info(`GuessingGame contract: ${await contract.getAddress()}`);
@@ -25,19 +29,27 @@ task("deploy:game", "Deploy Number Guessing Game main contract")
     return contract;
   });
 
-task("deploy:game-verifiers", "Deploy all Number Guessing Game verifier contracts")
+task("deploy:game-verifiers", "Deploy two Number Guessing Game verifier contracts")
   .addOptionalParam("logs", "Print the logs", true, types.boolean)
   .setAction(async ({ logs }, { ethers, run }) => {
-    const rcFactory = await ethers.getContractFactory(
-      "contracts/submit-rangecheck-1-100_verifier.sol:PlonkVerifier"
+    const cvFactory = await ethers.getContractFactory(
+      "contracts/commit-1-100_verifier.sol:PlonkVerifier"
     );
-    const rcContract = await rcFactory.deploy();
-    await rcContract.waitForDeployment();
+    const commitmentVerifier = await cvFactory.deploy();
+    await commitmentVerifier.waitForDeployment();
 
-    logs &&
-      console.info(`submit-rangecheck-1-100_verifier contract: ${await rcContract.getAddress()}`);
+    const ovFactory = await ethers.getContractFactory(
+      "contracts/open-1-100_verifier.sol:PlonkVerifier"
+    );
+    const openingVerifier = await ovFactory.deploy();
+    await openingVerifier.waitForDeployment();
 
-    return { rcContract };
+    if (logs) {
+      console.info(`commitment verifier: ${await commitmentVerifier.getAddress()}`);
+      console.info(`commitment verifier: ${await openingVerifier.getAddress()}`);
+    }
+
+    return { commitmentVerifier, openingVerifier };
   });
 
 task("deploy:feedback", "Deploy a Feedback contract")
@@ -53,9 +65,7 @@ task("deploy:feedback", "Deploy a Feedback contract")
     }
 
     const FeedbackFactory = await ethers.getContractFactory("Feedback");
-
     const feedbackContract = await FeedbackFactory.deploy(semaphoreAddress);
-
     await feedbackContract.waitForDeployment();
 
     const groupId = await feedbackContract.groupId();

@@ -36,8 +36,8 @@ interface IGuessingGame {
   // game state
   enum GameState {
     GameInitiated,
-    RoundBid,
-    RoundReveal,
+    RoundCommit,
+    RoundOpen,
     RoundEnd,
     GameEnd
   }
@@ -49,8 +49,10 @@ interface IGuessingGame {
   error GuessingGame__UnexpectedGameState(GameState expected, GameState actual);
   error GuessingGame__PlayerAlreadyJoin(address p);
   error GuessingGame__NotGameHost(uint32 gameId, address addr);
-  error GuessingGame__InvalidSubmitRangeCheckProof(uint32 gameId, uint8 round, address addr);
-  error GuessingGame__SubmitRangeCheckProofFailed(uint32 gameId, uint8 round, address addr);
+  error GuessingGame__InvalidCommitmentProof(uint32 gameId, uint8 round, address addr);
+  error GuessingGame__CommitmentVerificationTerminated(uint32 gameId, uint8 round, address addr);
+  error GuessingGame__InvalidOpeningProof(uint32 gameId, uint8 round, address addr);
+  error GuessingGame__OpeningVerificationTerminated(uint32 gameId, uint8 round, address addr);
   error GuessingGame__NotOneOfPlayers();
 
   // Emitted Events

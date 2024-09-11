@@ -1,7 +1,14 @@
 {
-  "submit-rangecheck-1-100": {
-    "file": "submit-rangecheck",
-    "template": "SubmissionRangeCheck",
+  "commit-1-100": {
+    "file": "submission-check",
+    "template": "SubmissionCheck",
+    "params": [1, 100, 7]
+  },
+
+  "open-1-100": {
+    "file": "submission-check",
+    "template": "SubmissionCheck",
+    "pubs": ["in", "rand"],
     "params": [1, 100, 7]
   }
 }

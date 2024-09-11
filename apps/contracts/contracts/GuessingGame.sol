@@ -3,21 +3,24 @@ pragma solidity ^0.8.23;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IGuessingGame} from "./interfaces/IGuessingGame.sol";
-import {ISubmitRangeCheckVerifier} from "./interfaces/ISubmitRangeCheckVerifier.sol";
+import {ICommitmentVerifier} from "./interfaces/ICommitmentVerifier.sol";
+import {IOpeningVerifier} from "./interfaces/IOpeningVerifier.sol";
 import {MIN_NUM, MAX_NUM, ROUND_TO_WIN} from "./base/Constants.sol";
 
 contract GuessingGame is IGuessingGame, Ownable {
-  ISubmitRangeCheckVerifier public submitRangeCheckVerifier;
+  ICommitmentVerifier public commitmentVerifier;
+  IOpeningVerifier public openingVerifier;
 
   // Storing all the game info. Refer to the interface to see the game struct
   Game[] public games;
   uint32 public nextGameId = 0;
 
   // Constructor
-  // @param srAddr: submit-rangecheck verifier address
-  constructor(ISubmitRangeCheckVerifier srAddr) Ownable(msg.sender) {
+  // @param cVerAddress: commitment verifier address
+  constructor(ICommitmentVerifier cVerAddr, IOpeningVerifier oVerAddr) Ownable(msg.sender) {
     // Initialization happens here
-    submitRangeCheckVerifier = srAddr;
+    commitmentVerifier = cVerAddr;
+    openingVerifier = oVerAddr;
   }
 
   // Modifiers declaration
@@ -180,7 +183,7 @@ contract GuessingGame is IGuessingGame, Ownable {
       revert GuessingGame__NotEnoughPlayers(gameId);
     }
 
-    _updateGameState(gameId, GameState.RoundBid);
+    _updateGameState(gameId, GameState.RoundCommit);
     emit GameStarted(gameId);
   }
 
@@ -193,19 +196,19 @@ contract GuessingGame is IGuessingGame, Ownable {
     override
     validGameId(gameId)
     oneOfPlayers(gameId)
-    gameStateEq(gameId, GameState.RoundBid)
+    gameStateEq(gameId, GameState.RoundCommit)
   {
     // each player submit a bid. The last player that submit a bid will change the game state
     Game storage game = games[gameId];
     uint8 round = game.currentRound;
 
     // Verify the computation and proof
-    try submitRangeCheckVerifier.verifyProof(proof, pubSignals) returns (bool result) {
+    try commitmentVerifier.verifyProof(proof, pubSignals) returns (bool result) {
       if (!result) {
-        revert GuessingGame__InvalidSubmitRangeCheckProof(gameId, round, msg.sender);
+        revert GuessingGame__InvalidCommitmentProof(gameId, round, msg.sender);
       }
     } catch {
-      revert GuessingGame__SubmitRangeCheckProofFailed(gameId, round, msg.sender);
+      revert GuessingGame__CommitmentVerificationTerminated(gameId, round, msg.sender);
     }
 
     game.bids[round][msg.sender] = Bid(pubSignals[0], pubSignals[1]);
@@ -222,7 +225,7 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
 
     if (!notYetBid) {
-      _updateGameState(gameId, GameState.RoundReveal);
+      _updateGameState(gameId, GameState.RoundOpen);
     }
   }
 
@@ -235,7 +238,7 @@ contract GuessingGame is IGuessingGame, Ownable {
     override
     validGameId(gameId)
     oneOfPlayers(gameId)
-    gameStateEq(gameId, GameState.RoundReveal)
+    gameStateEq(gameId, GameState.RoundOpen)
   {
     Game storage game = games[gameId];
 
@@ -289,7 +292,7 @@ contract GuessingGame is IGuessingGame, Ownable {
       _updateGameState(gameId, GameState.GameEnd);
     } else {
       emit RoundWinner(gameId, round, roundWinner);
-      _updateGameState(gameId, GameState.RoundBid);
+      _updateGameState(gameId, GameState.RoundCommit);
     }
   }
 }

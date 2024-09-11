@@ -3,7 +3,7 @@ pragma circom 2.1.6;
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "../../../node_modules/circomlib/circuits/poseidon.circom";
 
-template SubmissionRangeCheck(min, max, nBit) {
+template SubmissionCheck(min, max, nBit) {
   signal input in;
   signal input rand;
 
