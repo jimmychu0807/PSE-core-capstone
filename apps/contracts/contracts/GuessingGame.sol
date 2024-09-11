@@ -95,10 +95,10 @@ contract GuessingGame is IGuessingGame, Ownable {
     uint32 gameId,
     uint8 round,
     address player
-  ) public view validGameId(gameId) returns (Bid memory) {
+  ) public view validGameId(gameId) returns (Commitment memory) {
     Game storage game = games[gameId];
 
-    return game.bids[round][player];
+    return game.commitments[round][player];
   }
 
   function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {
@@ -211,28 +211,28 @@ contract GuessingGame is IGuessingGame, Ownable {
       revert GuessingGame__CommitmentVerificationTerminated(gameId, round, msg.sender);
     }
 
-    game.bids[round][msg.sender] = Bid(pubSignals[0], pubSignals[1]);
-    emit BidSubmitted(gameId, round, msg.sender);
+    game.commitments[round][msg.sender] = Commitment(pubSignals[0], pubSignals[1]);
+    emit CommitmentSubmitted(gameId, round, msg.sender);
 
     // If all players have submitted bid, update game state
-    bool notYetBid = false;
+    bool notYetCommitted = false;
     for (uint i = 0; i < game.players.length; ++i) {
       address p = game.players[i];
-      if (game.bids[round][p].nullifier == 0) {
-        notYetBid = true;
+      if (game.commitments[round][p].nullifier == 0) {
+        notYetCommitted = true;
         break;
       }
     }
 
-    if (!notYetBid) {
+    if (!notYetCommitted) {
       _updateGameState(gameId, GameState.RoundOpen);
     }
   }
 
   function openCommitment(
     uint32 gameId,
-    bytes32 proof,
-    uint16 bid
+    uint256[24] calldata proof,
+    uint256[4] calldata pubSignals
   )
     external
     override
@@ -241,24 +241,22 @@ contract GuessingGame is IGuessingGame, Ownable {
     gameStateEq(gameId, GameState.RoundOpen)
   {
     Game storage game = games[gameId];
-
-    // each player reveal a bid. The last player that reveal a bid will change the game state
-
     uint8 round = game.currentRound;
-    game.revelations[round][msg.sender] = bid;
-    emit BidRevealed(gameId, round, msg.sender);
+
+    // game.revelations[round][msg.sender] = bid;
+    // emit BidRevealed(gameId, round, msg.sender);
 
     // If all players have submitted revelation, update game state
-    bool notYetReveal = false;
+    bool notYetOpen = false;
     for (uint i = 0; i < game.players.length; ++i) {
       address p = game.players[i];
-      if (game.revelations[round][p] == 0) {
-        notYetReveal = true;
+      if (game.openings[round][p] == 0) {
+        notYetOpen = true;
         break;
       }
     }
 
-    if (!notYetReveal) {
+    if (!notYetOpen) {
       _updateGameState(gameId, GameState.RoundEnd);
     }
   }

@@ -152,7 +152,7 @@ describe("GuessingGame", () => {
 
       // host can submit a commitment
       await expect(gameContract.submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals))
-        .to.emit(gameContract, "BidSubmitted")
+        .to.emit(gameContract, "CommitmentSubmitted")
         .withArgs(GAME_ID, 0, host.address);
 
       // check the relevant game state on-chain
