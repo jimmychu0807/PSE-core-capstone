@@ -12,8 +12,6 @@
   ],
   "scripts": {
     "compile": "./scripts/build-circuit.sh",
-    "prove": "timeout 5s circomkit witness submit-rangecheck-1-100 in-range; timeout 5s circomkit prove submit-rangecheck-1-100 in-range",
-    "verify": "timeout 5s circomkit verify submit-rangecheck-1-100 in-range",
     "clear": "circomkit clear",
     "test": "mocha"
   },

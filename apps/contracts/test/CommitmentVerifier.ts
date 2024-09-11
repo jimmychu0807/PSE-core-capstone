@@ -8,9 +8,9 @@ import { prove, toOnChainProof } from "./helpers";
 import { GuessingGame } from "../typechain-types";
 
 // Defining circuit base paths
-const SUBMIT_RANGECHECK_CIRCUIT_BASEPATH = "./artifacts/circuits/submit-rangecheck-1-100";
+const COMMITMENT_CIRCUIT_BASEPATH = "./artifacts/circuits/commit-1-100";
 
-describe("Submit-Rangecheck: genarate proof offchain, verify proof onchain", () => {
+describe("Commitment Verifier: genarate proof offchain, verify proof onchain", () => {
   async function deployVerifierContracts() {
     const contracts = await run("deploy:game-verifiers", { logs: false });
     const [host, bob, charlie] = await hre.ethers.getSigners();
@@ -21,14 +21,14 @@ describe("Submit-Rangecheck: genarate proof offchain, verify proof onchain", () 
 
   it("should create a range proof and be verified", async () => {
     const { contracts } = await loadFixture(deployVerifierContracts);
-    const { rcContract } = contracts;
+    const { commitmentVerifier } = contracts;
 
     const rand = randomInt(281474976710655);
 
     // generate proof
     const input = { in: 99, rand };
-    const { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
-    const result = await rcContract.verifyProof(toOnChainProof(proof), publicSignals);
+    const { proof, publicSignals } = await prove(input, COMMITMENT_CIRCUIT_BASEPATH);
+    const result = await commitmentVerifier.verifyProof(toOnChainProof(proof), publicSignals);
     expect(result).to.be.true;
   });
 });

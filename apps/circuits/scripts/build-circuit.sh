@@ -12,11 +12,12 @@ echo -e "${YELLOW}Downloading ptau${POWERS_OF_TAU}${NC}"
 ptau_path="artifacts/ptau/ptau${POWERS_OF_TAU}.ptau"
 if [ ! -f ${ptau_path} ]; then
   echo "Downloading powers of tau file"
-  curl -L https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${POWERS_OF_TAU}.ptau --create-dirs -o ${ptau_path}
+  curl -L https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_${POWERS_OF_TAU}.ptau --create-dirs -o ${ptau_path}
 fi
 
 echo -e "\n${YELLOW}Compiling ${CIRCUIT}${NC}"
 yarn circomkit compile ${CIRCUIT}
+yarn circomkit instantiate ${CIRCUIT}
 
 echo -e "\n${YELLOW}Setting up ${CIRCUIT}${NC}"
 timeout ${TIMEOUT_SEC} yarn circomkit setup ${CIRCUIT} ${ptau_path} || true
