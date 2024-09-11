@@ -37,6 +37,44 @@ describe("GuessingGame", () => {
     return { contracts, players: { host, bob, charlie, dave } };
   }
 
+  async function deployContractsGameRoundReveal() {
+    const { contracts, players } = await deployContractsGameStarted();
+    const { host, bob, charlie } = players;
+    const { gameContract } = contracts;
+
+    const GAME_ID = 0;
+    const rand = randomInt(281474976710655);
+
+    // generate proofs
+    const inputs = {
+      host: { in: 1, rand },
+      bob: { in: 3, rand },
+      charlie: { in: 5, rand }
+    };
+    // const fullProofs = await Promise.all(inputs.map((i) => prove(i, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH)));
+    const fullProofs = {
+      host: await prove(inputs.host, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH),
+      bob: await prove(inputs.bob, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH),
+      charlie: await prove(inputs.charlie, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH),
+    };
+
+    // Flatten the plonk proof to on-chain proof format
+    Object.values(fullProofs).map((pproof) => {
+      pproof.proof = toOnChainProof(pproof.proof);
+    });
+
+    await Promise.all([
+      gameContract
+        .submitCommitment(GAME_ID, fullProofs.host.proof, fullProofs.host.publicSignals),
+      gameContract.connect(bob)
+        .submitCommitment(GAME_ID, fullProofs.bob.proof, fullProofs.bob.publicSignals),
+      gameContract.connect(charlie)
+        .submitCommitment(GAME_ID, fullProofs.charlie.proof, fullProofs.charlie.publicSignals),
+    ]);
+
+    return { contracts, players, inputs, fullProofs };
+  }
+
   describe("L New Game (GameState.GameInitiated)", () => {
     it("should create a new game", async () => {
       const { contracts, players } = await loadFixture(deployContractsCleanSlate);
@@ -153,27 +191,33 @@ describe("GuessingGame", () => {
       const { host, bob, charlie } = players;
 
       const GAME_ID = 0;
-      const rands = [randomInt(281474976710655), randomInt(281474976710655), randomInt(281474976710655)];
+      const rands = [
+        randomInt(281474976710655),
+        randomInt(281474976710655),
+        randomInt(281474976710655),
+      ];
 
       // host generates a commitment and submit on-chain
       let input = { in: 1, rand: rands[0] };
       let { proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH);
-      await gameContract
-        .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals);
+      await gameContract.submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals);
 
       // Bob's turn
       input = { in: 3, rand: rands[1] };
       ({ proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH));
-      await gameContract.connect(bob)
+      await gameContract
+        .connect(bob)
         .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals);
 
       // Charlie's turn
       input = { in: 5, rand: rands[2] };
       ({ proof, publicSignals } = await prove(input, SUBMIT_RANGECHECK_CIRCUIT_BASEPATH));
       await expect(
-        gameContract.connect(charlie)
+        gameContract
+          .connect(charlie)
           .submitCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
-      ).to.emit(gameContract, "GameStateUpdated")
+      )
+        .to.emit(gameContract, "GameStateUpdated")
         .withArgs(GAME_ID, GameState.RoundReveal);
 
       // check the game state
@@ -183,8 +227,10 @@ describe("GuessingGame", () => {
   });
 
   describe("L After all players submitted bids (GamteState.RoundReveal)", () => {
-    it("should allow player to reveal their commitments", async() => {
-
+    it("should allow player to reveal their commitments", async () => {
+      const { contracts, players, inputs, fullProofs } = await loadFixture(deployContractsGameRoundReveal);
+      const { gameContract } = contracts;
+      const { host } = players;
     });
   });
 });
