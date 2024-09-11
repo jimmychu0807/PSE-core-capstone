@@ -11,7 +11,6 @@ contract GuessingGame is IGuessingGame, Ownable {
   ICommitmentVerifier public commitmentVerifier;
   IOpeningVerifier public openingVerifier;
 
-
   // Storing all the game info. Refer to the interface to see the game struct
   Game[] public games;
   uint32 public nextGameId = 0;
