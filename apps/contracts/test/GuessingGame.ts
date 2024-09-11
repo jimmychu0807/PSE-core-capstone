@@ -228,7 +228,7 @@ describe("GuessingGame", () => {
     });
   });
 
-  describe("L After all players submitted bids (GamteState.RoundOpen)", () => {
+  describe("L After all players submitted commitments (GamteState.RoundOpen)", () => {
     it("should allow player to open their commitments", async () => {
       const { contracts, players, inputs } = await loadFixture(deployContractsGameRoundReveal);
       const { gameContract } = contracts;
@@ -265,6 +265,44 @@ describe("GuessingGame", () => {
       await expect(
         gameContract.openCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
       ).to.be.revertedWithCustomError(gameContract, "GuessingGame__UnmatchedCommitment");
+    });
+
+    it("should allow round to end when all players open their commitments", async () => {
+      const { contracts, players, inputs } = await loadFixture(deployContractsGameRoundReveal);
+      const { gameContract } = contracts;
+      const { host, bob, charlie } = players;
+      const GAME_ID = 0;
+
+      const fullProofs = await Promise.all([
+        prove(inputs.host, OPENING_VERIFIER_BASEPATH),
+        prove(inputs.bob, OPENING_VERIFIER_BASEPATH),
+        prove(inputs.charlie, OPENING_VERIFIER_BASEPATH),
+      ]);
+
+      await Promise.all([
+        gameContract.openCommitment(
+          GAME_ID,
+          toOnChainProof(fullProofs[0].proof),
+          fullProofs[0].publicSignals
+        ),
+        gameContract
+          .connect(bob)
+          .openCommitment(
+            GAME_ID,
+            toOnChainProof(fullProofs[1].proof),
+            fullProofs[1].publicSignals
+          ),
+        gameContract
+          .connect(charlie)
+          .openCommitment(
+            GAME_ID,
+            toOnChainProof(fullProofs[2].proof),
+            fullProofs[2].publicSignals
+          ),
+      ]);
+
+      const game = await gameContract.getGame(GAME_ID);
+      expect(game.state).to.be.equal(GameState.RoundEnd);
     });
   });
 });

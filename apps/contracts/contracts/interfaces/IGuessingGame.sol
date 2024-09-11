@@ -78,5 +78,5 @@ interface IGuessingGame {
     uint256[24] calldata _proof,
     uint256[4] calldata _pubSignals
   ) external;
-  function endRound(uint32 gameId) external;
+  function concludeRound(uint32 gameId) external;
 }

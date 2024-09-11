@@ -291,7 +291,7 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
   }
 
-  function endRound(
+  function concludeRound(
     uint32 gameId
   )
     external
