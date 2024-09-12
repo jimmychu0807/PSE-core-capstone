@@ -3,7 +3,14 @@ import hre, { run } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 const { randomInt } = require("node:crypto");
 
-import { GameState, prove, toOnChainProof, zeroPadNBytes } from "./helpers";
+import {
+  GameState,
+  ROUNDS_TO_WIN,
+  prove,
+  toOnChainProof,
+  toOnChainFullProofs,
+  zeroPadNBytes,
+} from "./helpers";
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { GuessingGame } from "../typechain-types";
 
@@ -53,28 +60,35 @@ describe("GuessingGame", () => {
       charlie: { in: 5, rand },
     };
 
-    const fullProofs = {
-      host: await prove(inputs.host, COMMITMENT_VERIFIER_BASEPATH),
-      bob: await prove(inputs.bob, COMMITMENT_VERIFIER_BASEPATH),
-      charlie: await prove(inputs.charlie, COMMITMENT_VERIFIER_BASEPATH),
-    };
-
-    // Flatten the plonk proof to on-chain proof format
-    Object.values(fullProofs).map((pproof) => {
-      pproof.proof = toOnChainProof(pproof.proof);
-    });
-
-    await Promise.all([
-      gameContract.submitCommitment(GAME_ID, fullProofs.host.proof, fullProofs.host.publicSignals),
-      gameContract
-        .connect(bob)
-        .submitCommitment(GAME_ID, fullProofs.bob.proof, fullProofs.bob.publicSignals),
-      gameContract
-        .connect(charlie)
-        .submitCommitment(GAME_ID, fullProofs.charlie.proof, fullProofs.charlie.publicSignals),
+    const fullProofs = await Promise.all([
+      prove(inputs.host, COMMITMENT_VERIFIER_BASEPATH),
+      prove(inputs.bob, COMMITMENT_VERIFIER_BASEPATH),
+      prove(inputs.charlie, COMMITMENT_VERIFIER_BASEPATH),
     ]);
 
-    return { contracts, players, inputs, fullProofs };
+    await Promise.all([
+      gameContract.submitCommitment(
+        GAME_ID,
+        toOnChainProof(fullProofs[0].proof),
+        fullProofs[0].publicSignals
+      ),
+      gameContract
+        .connect(bob)
+        .submitCommitment(
+          GAME_ID,
+          toOnChainProof(fullProofs[1].proof),
+          fullProofs[1].publicSignals
+        ),
+      gameContract
+        .connect(charlie)
+        .submitCommitment(
+          GAME_ID,
+          toOnChainProof(fullProofs[2].proof),
+          fullProofs[2].publicSignals
+        ),
+    ]);
+
+    return { contracts, players, inputs };
   }
 
   async function deployContractsRoundEnd() {
@@ -102,6 +116,82 @@ describe("GuessingGame", () => {
         .connect(charlie)
         .openCommitment(GAME_ID, toOnChainProof(fullProofs[2].proof), fullProofs[2].publicSignals),
     ]);
+
+    return { contracts, players, inputs };
+  }
+
+  async function deployContractsGameAlmostEnd() {
+    const { contracts, players } = await deployContractsGameStarted();
+    const { host, bob, charlie } = players;
+    const { gameContract } = contracts;
+    const GAME_ID = 0;
+    const rand = randomInt(281474976710655);
+
+    const inputs = {
+      host: { in: 1, rand },
+      bob: { in: 3, rand },
+      charlie: { in: 5, rand },
+    };
+
+    // generate commitment proofs
+    const commitmentFullProofs = toOnChainFullProofs(
+      await Promise.all([
+        prove(inputs.host, COMMITMENT_VERIFIER_BASEPATH),
+        prove(inputs.bob, COMMITMENT_VERIFIER_BASEPATH),
+        prove(inputs.charlie, COMMITMENT_VERIFIER_BASEPATH),
+      ])
+    );
+
+    // generate opening proofs
+    const openingFullProofs = toOnChainFullProofs(
+      await Promise.all([
+        prove(inputs.host, OPENING_VERIFIER_BASEPATH),
+        prove(inputs.bob, OPENING_VERIFIER_BASEPATH),
+        prove(inputs.charlie, OPENING_VERIFIER_BASEPATH),
+      ])
+    );
+
+    for (let r = 0; r < ROUNDS_TO_WIN; r++) {
+      await Promise.all([
+        gameContract.submitCommitment(
+          GAME_ID,
+          commitmentFullProofs[0].proof,
+          commitmentFullProofs[0].publicSignals
+        ),
+        gameContract
+          .connect(bob)
+          .submitCommitment(
+            GAME_ID,
+            commitmentFullProofs[1].proof,
+            commitmentFullProofs[1].publicSignals
+          ),
+        gameContract
+          .connect(charlie)
+          .submitCommitment(
+            GAME_ID,
+            commitmentFullProofs[2].proof,
+            commitmentFullProofs[2].publicSignals
+          ),
+      ]);
+
+      await Promise.all([
+        gameContract.openCommitment(
+          GAME_ID,
+          openingFullProofs[0].proof,
+          openingFullProofs[0].publicSignals
+        ),
+        gameContract
+          .connect(bob)
+          .openCommitment(GAME_ID, openingFullProofs[1].proof, openingFullProofs[1].publicSignals),
+        gameContract
+          .connect(charlie)
+          .openCommitment(GAME_ID, openingFullProofs[2].proof, openingFullProofs[2].publicSignals),
+      ]);
+
+      if (r < ROUNDS_TO_WIN - 1) {
+        gameContract.concludeRound(GAME_ID);
+      }
+    }
 
     return { contracts, players, inputs };
   }
@@ -336,7 +426,7 @@ describe("GuessingGame", () => {
   });
 
   describe("L After all players opened commitments (GamteState.RoundEnd)", () => {
-    it("should allow game host to conclude a round", async () => {
+    it("should allow the game host to conclude a round", async () => {
       const { contracts, players, inputs } = await loadFixture(deployContractsRoundEnd);
       const { gameContract } = contracts;
       const { host, bob } = players;
@@ -354,6 +444,27 @@ describe("GuessingGame", () => {
       // check gamestate back to RoundCommit
       const game = await gameContract.getGame(GAME_ID);
       expect(game.state).to.be.equal(GameState.RoundCommit);
+    });
+  });
+
+  describe(`L After ${ROUNDS_TO_WIN} rounds have played (GameState.RoundEnd)`, () => {
+    it("should allow the game host to conclude the game", async () => {
+      const { contracts, players, inputs } = await loadFixture(deployContractsGameAlmostEnd);
+      const { gameContract } = contracts;
+      const { host, bob } = players;
+      const GAME_ID = 0;
+
+      // Concluding the round concludes the game
+      await expect(gameContract.concludeRound(GAME_ID))
+        .to.emit(gameContract, "GameWinner")
+        .withArgs(GAME_ID, bob.address);
+
+      const game = await gameContract.getGame(GAME_ID);
+      expect(game.winner).to.be.equal(bob.address);
+      expect(game.state).to.be.equal(GameState.GameEnd);
+
+      const roundsWon = await gameContract.getPlayerGameRoundsWon(GAME_ID, bob.address);
+      expect(roundsWon).to.be.equal(ROUNDS_TO_WIN);
     });
   });
 });

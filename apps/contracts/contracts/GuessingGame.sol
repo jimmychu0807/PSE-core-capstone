@@ -7,8 +7,6 @@ import {ICommitmentVerifier} from "./interfaces/ICommitmentVerifier.sol";
 import {IOpeningVerifier} from "./interfaces/IOpeningVerifier.sol";
 import {MIN_NUM, MAX_NUM, ROUNDS_TO_WIN} from "./base/Constants.sol";
 
-import "hardhat/console.sol";
-
 contract GuessingGame is IGuessingGame, Ownable {
   ICommitmentVerifier public commitmentVerifier;
   IOpeningVerifier public openingVerifier;
@@ -348,6 +346,7 @@ contract GuessingGame is IGuessingGame, Ownable {
       emit GameWinner(gameId, minPlayer);
       _updateGameState(gameId, GameState.GameEnd);
     } else {
+      game.currentRound += 1;
       _updateGameState(gameId, GameState.RoundCommit);
     }
   }

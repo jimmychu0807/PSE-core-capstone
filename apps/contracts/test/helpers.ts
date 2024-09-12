@@ -1,6 +1,11 @@
 import { ethers } from "hardhat";
 import { wtns, plonk } from "snarkjs";
 
+// Ref. to the game constants in contracts/base/Constants.sol
+export const MIN_NUM = 1;
+export const MAX_NUM = 100;
+export const ROUNDS_TO_WIN = 3;
+
 // Ref. to the game state in contracts/interfaces/IGuessingGame.sol
 export enum GameState {
   GameInitiated = 0,
@@ -56,4 +61,11 @@ export function toOnChainProof(proofJson) {
     zeroPadNBytes(proofJson.eval_s2, 32),
     zeroPadNBytes(proofJson.eval_zw, 32),
   ];
+}
+
+export function toOnChainFullProofs(fullProofs) {
+  return fullProofs.map((fp) => ({
+    proof: toOnChainProof(fp.proof),
+    publicSignals: fp.publicSignals,
+  }));
 }
