@@ -7,6 +7,8 @@ import {ICommitmentVerifier} from "./interfaces/ICommitmentVerifier.sol";
 import {IOpeningVerifier} from "./interfaces/IOpeningVerifier.sol";
 import {MIN_NUM, MAX_NUM, ROUNDS_TO_WIN} from "./base/Constants.sol";
 
+import "hardhat/console.sol";
+
 contract GuessingGame is IGuessingGame, Ownable {
   ICommitmentVerifier public commitmentVerifier;
   IOpeningVerifier public openingVerifier;
@@ -90,13 +92,17 @@ contract GuessingGame is IGuessingGame, Ownable {
       });
   }
 
+  function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {
+    Game storage game = games[gameId];
+    return game.players[0];
+  }
+
   function getPlayerCommitment(
     uint32 gameId,
     uint8 round,
     address player
   ) public view validGameId(gameId) returns (Commitment memory) {
     Game storage game = games[gameId];
-
     return game.commitments[round][player];
   }
 
@@ -106,13 +112,15 @@ contract GuessingGame is IGuessingGame, Ownable {
     address player
   ) public view validGameId(gameId) returns (uint16) {
     Game storage game = games[gameId];
-
     return game.openings[round][player];
   }
 
-  function getGameHost(uint32 gameId) public view validGameId(gameId) returns (address) {
+  function getPlayerGameRoundsWon(
+    uint32 gameId,
+    address player
+  ) public view validGameId(gameId) returns (uint8) {
     Game storage game = games[gameId];
-    return game.players[0];
+    return game.playerRoundsWon[player];
   }
 
   /**
@@ -135,6 +143,13 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
 
     emit GameStateUpdated(gameId, state);
+  }
+
+  function _diff(uint64 a, uint64 b) internal pure returns (uint64) {
+    if (a >= b) {
+      return a - b;
+    }
+    return b - a;
   }
 
   /**
@@ -286,14 +301,14 @@ contract GuessingGame is IGuessingGame, Ownable {
     gameStateEq(gameId, GameState.RoundEnd)
   {
     Game storage game = games[gameId];
-    uint256 playerCnt = game.players.length;
+    uint64 playerCnt = uint64(game.players.length);
     uint8 round = game.currentRound;
 
     // Assumption: all openings have been submitted successfully.
     // We will multiply all value by 1000 to minimize the fraction rounding error at division
 
     // Calculate out the mean of all openings
-    uint32 sum = 0;
+    uint64 sum = 0;
     for (uint64 i = 0; i < game.players.length; i++) {
       address p = game.players[i];
       sum += game.openings[round][p] * 1000;
@@ -303,22 +318,22 @@ contract GuessingGame is IGuessingGame, Ownable {
     // Finding the winner
     // When two openings have the same distance from the average, the round is draw.
     address minPlayer = game.players[0];
-    uint64 minDiff = game.openings[round][minPlayer] * 1000 - average;
-    bool multiOccur = false;
+    uint64 minDiff = _diff(game.openings[round][minPlayer] * 1000, average);
+    bool draw = false;
     for (uint64 i = 1; i < game.players.length; i++) {
       address p = game.players[i];
-      uint64 diff = game.openings[round][p] * 1000 - average;
+      uint64 diff = _diff(game.openings[round][p] * 1000, average);
       if (diff == minDiff) {
-        multiOccur = true;
+        draw = true;
       } else if (diff < minDiff) {
         minDiff = diff;
         minPlayer = p;
-        multiOccur = false;
+        draw = false;
       }
     }
 
     // Save the round winner on-chain and announce the winner
-    if (multiOccur) {
+    if (draw) {
       emit RoundDraw(gameId, round);
     } else {
       game.playerRoundsWon[minPlayer] += 1;
