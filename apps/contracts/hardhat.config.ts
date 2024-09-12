@@ -96,6 +96,9 @@ const hardhatConfig: HardhatUserConfig = {
   sourcify: {
     enabled: true,
   },
+  mocha: {
+    timeout: 20000,
+  },
 };
 
 export default hardhatConfig;

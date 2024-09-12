@@ -38,7 +38,7 @@ describe("GuessingGame", () => {
     return { contracts, players: { host, bob, charlie, dave } };
   }
 
-  async function deployContractsGameRoundReveal() {
+  async function deployContractsRoundOpen() {
     const { contracts, players } = await deployContractsGameStarted();
     const { host, bob, charlie } = players;
     const { gameContract } = contracts;
@@ -75,6 +75,35 @@ describe("GuessingGame", () => {
     ]);
 
     return { contracts, players, inputs, fullProofs };
+  }
+
+  async function deployContractsRoundEnd() {
+    const { contracts, players, inputs } = await deployContractsRoundOpen();
+    const { host, bob, charlie } = players;
+    const { gameContract } = contracts;
+    const GAME_ID = 0;
+
+    const fullProofs = await Promise.all([
+      prove(inputs.host, OPENING_VERIFIER_BASEPATH),
+      prove(inputs.bob, OPENING_VERIFIER_BASEPATH),
+      prove(inputs.charlie, OPENING_VERIFIER_BASEPATH),
+    ]);
+
+    await Promise.all([
+      gameContract.openCommitment(
+        GAME_ID,
+        toOnChainProof(fullProofs[0].proof),
+        fullProofs[0].publicSignals
+      ),
+      gameContract
+        .connect(bob)
+        .openCommitment(GAME_ID, toOnChainProof(fullProofs[1].proof), fullProofs[1].publicSignals),
+      gameContract
+        .connect(charlie)
+        .openCommitment(GAME_ID, toOnChainProof(fullProofs[2].proof), fullProofs[2].publicSignals),
+    ]);
+
+    return { contracts, players, inputs };
   }
 
   describe("L New Game (GameState.GameInitiated)", () => {
@@ -228,9 +257,9 @@ describe("GuessingGame", () => {
     });
   });
 
-  describe("L After all players submitted bids (GamteState.RoundOpen)", () => {
+  describe("L After all players submitted commitments (GamteState.RoundOpen)", () => {
     it("should allow player to open their commitments", async () => {
-      const { contracts, players, inputs } = await loadFixture(deployContractsGameRoundReveal);
+      const { contracts, players, inputs } = await loadFixture(deployContractsRoundOpen);
       const { gameContract } = contracts;
       const { host } = players;
       const GAME_ID = 0;
@@ -245,7 +274,7 @@ describe("GuessingGame", () => {
     });
 
     it("shouldn't allow players to meddling with the commitment", async () => {
-      const { contracts, players, inputs } = await loadFixture(deployContractsGameRoundReveal);
+      const { contracts, players, inputs } = await loadFixture(deployContractsRoundOpen);
       const { gameContract } = contracts;
       const { host } = players;
       const GAME_ID = 0;
@@ -265,6 +294,66 @@ describe("GuessingGame", () => {
       await expect(
         gameContract.openCommitment(GAME_ID, toOnChainProof(proof), publicSignals)
       ).to.be.revertedWithCustomError(gameContract, "GuessingGame__UnmatchedCommitment");
+    });
+
+    it("should allow round to end when all players open their commitments", async () => {
+      const { contracts, players, inputs } = await loadFixture(deployContractsRoundOpen);
+      const { gameContract } = contracts;
+      const { host, bob, charlie } = players;
+      const GAME_ID = 0;
+
+      const fullProofs = await Promise.all([
+        prove(inputs.host, OPENING_VERIFIER_BASEPATH),
+        prove(inputs.bob, OPENING_VERIFIER_BASEPATH),
+        prove(inputs.charlie, OPENING_VERIFIER_BASEPATH),
+      ]);
+
+      await Promise.all([
+        gameContract.openCommitment(
+          GAME_ID,
+          toOnChainProof(fullProofs[0].proof),
+          fullProofs[0].publicSignals
+        ),
+        gameContract
+          .connect(bob)
+          .openCommitment(
+            GAME_ID,
+            toOnChainProof(fullProofs[1].proof),
+            fullProofs[1].publicSignals
+          ),
+        gameContract
+          .connect(charlie)
+          .openCommitment(
+            GAME_ID,
+            toOnChainProof(fullProofs[2].proof),
+            fullProofs[2].publicSignals
+          ),
+      ]);
+
+      const game = await gameContract.getGame(GAME_ID);
+      expect(game.state).to.be.equal(GameState.RoundEnd);
+    });
+  });
+
+  describe("L After all players opened commitments (GamteState.RoundEnd)", () => {
+    it("should allow game host to conclude a round", async () => {
+      const { contracts, players, inputs } = await loadFixture(deployContractsRoundEnd);
+      const { gameContract } = contracts;
+      const { host, bob } = players;
+      const GAME_ID = 0;
+
+      // Expect Bob be the winner
+      await expect(gameContract.concludeRound(GAME_ID))
+        .to.emit(gameContract, "RoundWinner")
+        .withArgs(GAME_ID, 0, bob.address, inputs.bob.in);
+
+      // Check Bob has won
+      const roundsWon = await gameContract.getPlayerGameRoundsWon(GAME_ID, bob.address);
+      expect(roundsWon).to.be.equal(1);
+
+      // check gamestate back to RoundCommit
+      const game = await gameContract.getGame(GAME_ID);
+      expect(game.state).to.be.equal(GameState.RoundCommit);
     });
   });
 });
