@@ -5,7 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IGuessingGame} from "./interfaces/IGuessingGame.sol";
 import {ICommitmentVerifier} from "./interfaces/ICommitmentVerifier.sol";
 import {IOpeningVerifier} from "./interfaces/IOpeningVerifier.sol";
-import {MIN_NUM, MAX_NUM, ROUND_TO_WIN} from "./base/Constants.sol";
+import {MIN_NUM, MAX_NUM, ROUNDS_TO_WIN} from "./base/Constants.sol";
 
 contract GuessingGame is IGuessingGame, Ownable {
   ICommitmentVerifier public commitmentVerifier;
@@ -81,10 +81,9 @@ contract GuessingGame is IGuessingGame, Ownable {
     return
       GameView({
         players: game.players,
-        roundWinners: game.roundWinners,
         currentRound: game.currentRound,
         state: game.state,
-        finalWinner: game.finalWinner,
+        winner: game.winner,
         startTime: game.startTime,
         lastUpdate: game.lastUpdate,
         endTime: game.endTime
@@ -136,20 +135,6 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
 
     emit GameStateUpdated(gameId, state);
-  }
-
-  function _countWinningRound(
-    uint32 gameId,
-    address roundWinner
-  ) internal view returns (uint8 cnt) {
-    Game storage game = games[gameId];
-    cnt = 0;
-
-    for (uint8 i = 0; i < game.roundWinners.length; ++i) {
-      if (game.roundWinners[i] == roundWinner) {
-        ++cnt;
-      }
-    }
   }
 
   /**
@@ -301,25 +286,53 @@ contract GuessingGame is IGuessingGame, Ownable {
     gameStateEq(gameId, GameState.RoundEnd)
   {
     Game storage game = games[gameId];
+    uint256 playerCnt = game.players.length;
+    uint8 round = game.currentRound;
 
-    /**
-     * TODO: calc the average of all bids, determine the winnder
-     **/
+    // Assumption: all openings have been submitted successfully.
+    // We will multiply all value by 1000 to minimize the fraction rounding error at division
 
-    // Assume the game host is winner for now
-    address roundWinner = game.players[0];
+    // Calculate out the mean of all openings
+    uint32 sum = 0;
+    for (uint64 i = 0; i < game.players.length; i++) {
+      address p = game.players[i];
+      sum += game.openings[round][p] * 1000;
+    }
+    uint64 average = uint64(sum / playerCnt);
 
-    // Notice we also update the game.currentRound here
-    uint8 round = game.currentRound++;
-    game.roundWinners.push(roundWinner);
+    // Finding the winner
+    // When two openings have the same distance from the average, the round is draw.
+    address minPlayer = game.players[0];
+    uint64 minDiff = game.openings[round][minPlayer] * 1000 - average;
+    bool multiOccur = false;
+    for (uint64 i = 1; i < game.players.length; i++) {
+      address p = game.players[i];
+      uint64 diff = game.openings[round][p] * 1000 - average;
+      if (diff == minDiff) {
+        multiOccur = true;
+      } else if (diff < minDiff) {
+        minDiff = diff;
+        minPlayer = p;
+        multiOccur = false;
+      }
+    }
+
+    // Save the round winner on-chain and announce the winner
+    if (multiOccur) {
+      emit RoundDraw(gameId, round);
+    } else {
+      game.playerRoundsWon[minPlayer] += 1;
+      emit RoundWinner(gameId, round, minPlayer, game.openings[round][minPlayer]);
+    }
+
+    uint8 roundsWon = game.playerRoundsWon[minPlayer];
 
     // update the game.state or end the game
-    if (_countWinningRound(gameId, roundWinner) == ROUND_TO_WIN) {
-      game.finalWinner = roundWinner;
-      emit GameWinner(gameId, roundWinner);
+    if (roundsWon == ROUNDS_TO_WIN) {
+      game.winner = minPlayer;
+      emit GameWinner(gameId, minPlayer);
       _updateGameState(gameId, GameState.GameEnd);
     } else {
-      emit RoundWinner(gameId, round, roundWinner);
       _updateGameState(gameId, GameState.RoundCommit);
     }
   }

@@ -8,15 +8,15 @@ interface IGuessingGame {
   }
 
   struct Game {
+    GameState state;
     // game players. The first player is the game host
     address[] players;
-    address[] roundWinners;
     uint8 currentRound;
-    GameState state;
+    mapping(address => uint8) playerRoundsWon;
     // player bid list
     mapping(uint8 => mapping(address => Commitment)) commitments;
     mapping(uint8 => mapping(address => uint16)) openings;
-    address finalWinner;
+    address winner;
     uint256 startTime;
     uint256 lastUpdate;
     uint256 endTime;
@@ -24,10 +24,9 @@ interface IGuessingGame {
 
   struct GameView {
     address[] players;
-    address[] roundWinners;
     uint8 currentRound;
     GameState state;
-    address finalWinner;
+    address winner;
     uint256 startTime;
     uint256 lastUpdate;
     uint256 endTime;
@@ -61,7 +60,8 @@ interface IGuessingGame {
   event GameStateUpdated(uint32 gameId, GameState state);
   event CommitmentSubmitted(uint32 gameId, uint8 round, address sender);
   event CommitmentOpened(uint32 gameId, uint8 round, address sender);
-  event RoundWinner(uint32 gameId, uint8 round, address winner);
+  event RoundWinner(uint32 gameId, uint8 round, address winner, uint16 bid);
+  event RoundDraw(uint32 gameId, uint8 round);
   event GameWinner(uint32 gameId, address winner);
 
   // External Functions
