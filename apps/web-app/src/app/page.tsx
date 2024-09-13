@@ -9,6 +9,7 @@ import {
   VStack,
   Stack,
   Link,
+  UnorderedList, ListItem,
   Text,
   Card,
   CardHeader,
@@ -34,6 +35,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Stepper from "../components/Stepper";
 import { zeroToNArr, formatter } from "../utils";
 import { gameArtifact, GameState, gameEventTypes } from "../helpers";
+import { gameCardStyle } from "../styles";
 
 export default function HomePage() {
   const { abi, deployedAddress } = gameArtifact;
@@ -151,20 +153,28 @@ export default function HomePage() {
 }
 
 function GameCard({ id, game }) {
+  const { address: userAddr } = useAccount();
+
+  const userJoinedGame: boolean = game.players.includes(userAddr);
+
   return (
     <Card w={500}>
       <CardHeader>Game ID: {id}</CardHeader>
       <CardBody>
-        <Text># of Players: {game.players.join(", ")}</Text>
+        <Text># of Players: {game.players.length}</Text>
+        <UnorderedList styleType="- " spacing={3}>
+        { game.players.map((p) => <ListItem key={`game-${id}-${p}`} fontSize={14}>{p}</ListItem>) }
+        </UnorderedList>
         <Text>
           State: <strong>{GameState[game.state]}</strong>
         </Text>
         <Text>Created: {formatter.dateTime(game.startTime)}</Text>
+        <Text>Last Updated: {formatter.dateTime(game.lastUpdate)}</Text>
       </CardBody>
       <CardFooter justifyContent="center">
         {game.state === GameState.GameInitiated && (
-          <Button variant="outline" colorScheme="blue">
-            Join Game
+          <Button variant="outline" colorScheme="blue" isDisabled={userJoinedGame}>
+            { userJoinedGame ? "Already Joined" : "Join Game" }
           </Button>
         )}
       </CardFooter>
