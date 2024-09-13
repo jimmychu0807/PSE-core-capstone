@@ -9,7 +9,8 @@ import {
   VStack,
   Stack,
   Link,
-  UnorderedList, ListItem,
+  UnorderedList,
+  ListItem,
   Text,
   Card,
   CardHeader,
@@ -153,17 +154,33 @@ export default function HomePage() {
 }
 
 function GameCard({ id, game }) {
+  const { abi, deployedAddress } = gameArtifact;
+  const contractCfg = { abi, address: deployedAddress };
+
   const { address: userAddr } = useAccount();
+  const { isPending, writeContract } = useWriteContract();
 
   const userJoinedGame: boolean = game.players.includes(userAddr);
+
+  const userJoinGameHandler = useCallback(() => {
+    writeContract({
+      ...contractCfg,
+      functionName: "joinGame",
+      args: [id],
+    });
+  }, [writeContract]);
 
   return (
     <Card w={500}>
       <CardHeader>Game ID: {id}</CardHeader>
       <CardBody>
-        <Text># of Players: {game.players.length}</Text>
-        <UnorderedList styleType="- " spacing={3}>
-        { game.players.map((p) => <ListItem key={`game-${id}-${p}`} fontSize={14}>{p}</ListItem>) }
+        <Text>Players: {game.players.length}</Text>
+        <UnorderedList styleType="- ">
+          {game.players.map((p) => (
+            <ListItem key={`game-${id}-${p}`} fontSize={14}>
+              {p}
+            </ListItem>
+          ))}
         </UnorderedList>
         <Text>
           State: <strong>{GameState[game.state]}</strong>
@@ -173,8 +190,14 @@ function GameCard({ id, game }) {
       </CardBody>
       <CardFooter justifyContent="center">
         {game.state === GameState.GameInitiated && (
-          <Button variant="outline" colorScheme="blue" isDisabled={userJoinedGame}>
-            { userJoinedGame ? "Already Joined" : "Join Game" }
+          <Button
+            onClick={userJoinGameHandler}
+            variant="outline"
+            colorScheme="blue"
+            isDisabled={userJoinedGame}
+            isLoading={isPending}
+          >
+            {userJoinedGame ? "Already Joined" : "Join Game"}
           </Button>
         )}
       </CardFooter>

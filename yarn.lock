@@ -7306,6 +7306,7 @@ __metadata:
   resolution: "circuits@workspace:apps/circuits"
   dependencies:
     "@types/mocha": "npm:^10.0.6"
+    "@types/node": "npm:^20"
     "@types/snarkjs": "npm:^0.7.4"
     "@zk-kit/baby-jubjub": "npm:1.0.1"
     circomkit: "npm:^0.2.1"
@@ -7314,6 +7315,8 @@ __metadata:
     mocha: "npm:^10.2.0"
     poseidon-lite: "npm:^0.2.0"
     snarkjs: "npm:^0.7.4"
+    ts-node: "npm:^10.9.2"
+    typescript: "npm:5.4.5"
   languageName: unknown
   linkType: soft
 
@@ -7621,7 +7624,7 @@ __metadata:
     solidity-coverage: "npm:^0.8.0"
     ts-node: "npm:^10.9.2"
     typechain: "npm:^8.3.0"
-    typescript: "npm:^5"
+    typescript: "npm:5.4.5"
   languageName: unknown
   linkType: soft
 
@@ -15191,16 +15194,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5":
-  version: 5.5.4
-  resolution: "typescript@npm:5.5.4"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/1689ccafef894825481fc3d856b4834ba3cc185a9c2878f3c76a9a1ef81af04194849840f3c69e7961e2312771471bb3b460ca92561e1d87599b26c37d0ffb6f
-  languageName: node
-  linkType: hard
-
 "typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>":
   version: 5.4.5
   resolution: "typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"
@@ -15208,16 +15201,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/760f7d92fb383dbf7dee2443bf902f4365db2117f96f875cf809167f6103d55064de973db9f78fe8f31ec08fff52b2c969aee0d310939c0a3798ec75d0bca2e1
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A^5#optional!builtin<compat/typescript>":
-  version: 5.5.4
-  resolution: "typescript@patch:typescript@npm%3A5.5.4#optional!builtin<compat/typescript>::version=5.5.4&hash=379a07"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/746fdd0865c5ce4f15e494c57ede03a9e12ede59cfdb40da3a281807853fe63b00ef1c912d7222143499aa82f18b8b472baa1830df8804746d09b55f6cf5b1cc
   languageName: node
   linkType: hard
 

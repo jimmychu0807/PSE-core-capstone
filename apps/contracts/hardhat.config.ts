@@ -74,7 +74,7 @@ const hardhatConfig: HardhatUserConfig = {
       },
     },
   },
-  defaultNetwork: process.env.DEFAULT_NETWORK || "localhost",
+  defaultNetwork: process.env.DEFAULT_NETWORK || "hardhat",
   networks: {
     hardhat: {
       chainId: 1337,

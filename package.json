@@ -9,6 +9,7 @@
     "dev": "yarn workspaces foreach -A -pi run dev",
     "dev:web-app": "yarn workspace web-app dev",
     "dev:contracts": "yarn workspace contracts dev",
+    "test": "yarn workspaces foreach -A -pi run test",
     "prettier": "prettier -c .",
     "prettier:write": "prettier -w ."
   },
