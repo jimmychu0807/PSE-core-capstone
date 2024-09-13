@@ -8,6 +8,8 @@ import { FaGithub } from "react-icons/fa";
 
 import { useWalletInfo, useWeb3ModalState } from "@web3modal/wagmi/react";
 
+import { project } from "../consts";
+
 function PromptForWalletConnect() {
   return (
     <>
@@ -31,7 +33,7 @@ export default function PageContainer({
     <>
       <HStack align="center" justify="right" p="2">
         <w3m-button size="sm" />
-        <Link href="https://github.com/jimmychu0807/PSE-core-hackathon" isExternal>
+        <Link href={project.github} isExternal>
           <IconButton
             aria-label="Github repository"
             variant="link"
