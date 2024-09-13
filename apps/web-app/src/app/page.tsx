@@ -9,6 +9,8 @@ import {
   VStack,
   Stack,
   Link,
+  UnorderedList,
+  ListItem,
   Text,
   Card,
   CardHeader,
@@ -16,7 +18,7 @@ import {
   CardFooter,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 
 import { useWalletInfo, useWeb3ModalState } from "@web3modal/wagmi/react";
 import {
@@ -37,7 +39,7 @@ import { gameArtifact, GameState, gameEventTypes } from "../helpers";
 
 export default function HomePage() {
   const { abi, deployedAddress } = gameArtifact;
-  const contractCfg = { abi, address: deployedAddress };
+  const contractCfg = useMemo(() => ({ abi, address: deployedAddress }), [abi, deployedAddress]);
 
   const wagmiConfig = useConfig();
   const { data: wc } = useWalletClient();
@@ -70,7 +72,7 @@ export default function HomePage() {
     });
 
     setNewGameClicked(true);
-  }, [writeContract]);
+  }, [writeContract, contractCfg]);
 
   // listen for the nextGameId
   useEffect(() => {
@@ -103,7 +105,7 @@ export default function HomePage() {
     return () => {
       setState = false;
     };
-  }, [nextGameId, wc]);
+  }, [nextGameId, wc, contractCfg, wagmiConfig]);
 
   // listen for a newGame is finished created in the smart contract
   useEffect(() => {
@@ -125,7 +127,7 @@ export default function HomePage() {
     return () => {
       setState = false;
     };
-  }, [newGameClicked, txReceipt, abi]);
+  }, [newGameClicked, txReceipt, abi, queryClient, nextGameIdQK]);
 
   return (
     <VStack>
@@ -134,7 +136,7 @@ export default function HomePage() {
       </Heading>
       <Stack direction="column" spacing={8}>
         {games.map((game, idx) => (
-          <GameCard key={"game-${idx}"} id={idx} game={game} />
+          <GameCard key={`game-${idx}`} id={idx} game={game} />
         ))}
       </Stack>
       <Button
@@ -151,110 +153,53 @@ export default function HomePage() {
 }
 
 function GameCard({ id, game }) {
+  const { abi, deployedAddress } = gameArtifact;
+  const contractCfg = useMemo(() => ({ abi, address: deployedAddress }), [abi, deployedAddress]);
+
+  const { address: userAddr } = useAccount();
+  const { isPending, writeContract } = useWriteContract();
+
+  const userJoinedGame: boolean = game.players.includes(userAddr);
+
+  const userJoinGameHandler = useCallback(() => {
+    writeContract({
+      ...contractCfg,
+      functionName: "joinGame",
+      args: [id],
+    });
+  }, [writeContract, contractCfg, id]);
+
   return (
     <Card w={500}>
       <CardHeader>Game ID: {id}</CardHeader>
       <CardBody>
-        <Text># of Players: {game.players.join(", ")}</Text>
+        <Text>Players: {game.players.length}</Text>
+        <UnorderedList styleType="- ">
+          {game.players.map((p) => (
+            <ListItem key={`game-${id}-${p}`} fontSize={14}>
+              {p}
+            </ListItem>
+          ))}
+        </UnorderedList>
         <Text>
           State: <strong>{GameState[game.state]}</strong>
         </Text>
         <Text>Created: {formatter.dateTime(game.startTime)}</Text>
+        <Text>Last Updated: {formatter.dateTime(game.lastUpdate)}</Text>
       </CardBody>
       <CardFooter justifyContent="center">
         {game.state === GameState.GameInitiated && (
-          <Button variant="outline" colorScheme="blue">
-            Join Game
+          <Button
+            onClick={userJoinGameHandler}
+            variant="outline"
+            colorScheme="blue"
+            isDisabled={userJoinedGame}
+            isLoading={isPending}
+          >
+            {userJoinedGame ? "Already Joined" : "Join Game"}
           </Button>
         )}
       </CardFooter>
     </Card>
   );
 }
-
-/*
-export function IdentitiesPage() {
-  const router = useRouter();
-  const { setLog } = useLogContext();
-  const [_identity, setIdentity] = useState<Identity>();
-
-  useEffect(() => {
-    const privateKey = localStorage.getItem("identity");
-
-    if (privateKey) {
-      const identity = Identity.import(privateKey);
-
-      setIdentity(identity);
-
-      setLog("Your Semaphore identity has been retrieved from the browser cache 👌🏽");
-    } else {
-      setLog("Create your Semaphore identity 👆🏽");
-    }
-  }, [setLog]);
-
-  const createIdentity = useCallback(async () => {
-    const identity = new Identity();
-
-    setIdentity(identity);
-
-    localStorage.setItem("identity", identity.export());
-
-    setLog("Your new Semaphore identity has just been created 🎉");
-  }, [setLog]);
-
-  return (
-    <>
-      <Heading as="h2" size="xl">
-        Identities
-      </Heading>
-
-      <Text pt="2" fontSize="md">
-        The identity of a user in the Semaphore protocol. A{" "}
-        <Link href="https://docs.semaphore.pse.dev/guides/identities" isExternal>
-          Semaphore identity
-        </Link>{" "}
-        consists of an{" "}
-        <Link
-          href="https://github.com/privacy-scaling-explorations/zk-kit/tree/main/packages/eddsa-poseidon"
-          isExternal
-        >
-          EdDSA
-        </Link>{" "}
-        public/private key pair and a commitment, used as the public identifier of the identity.
-      </Text>
-
-      <Divider pt="5" borderColor="gray.500" />
-
-      <HStack py="5">
-        <Text fontWeight="bold" fontSize="lg">
-          Identity
-        </Text>
-      </HStack>
-
-      {_identity && (
-        <Box pb="6" pl="2">
-          <Text>
-            <b>Private Key (base64)</b>:<br /> {_identity.export()}
-          </Text>
-          <Text>
-            <b>Public Key</b>:<br /> [{_identity.publicKey[0].toString()}, {_identity.publicKey[1].toString()}]
-          </Text>
-          <Text>
-            <b>Commitment</b>:<br /> {_identity.commitment.toString()}
-          </Text>
-        </Box>
-      )}
-
-      <Box pb="5">
-        <Button w="full" colorScheme="primary" onClick={createIdentity}>
-          Create identity
-        </Button>
-      </Box>
-
-      <Divider pt="3" borderColor="gray.500" />
-
-      <Stepper step={1} onNextClick={_identity && (() => router.push("/group"))} />
-    </>
-  );
-}
-*/

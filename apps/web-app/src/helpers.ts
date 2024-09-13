@@ -6,8 +6,8 @@ import { deployedAddress } from "./consts";
 // IMPROVE: can you get this GameState from hardhat compilation?
 export enum GameState {
   GameInitiated = 0,
-  RoundBid,
-  RoundReveal,
+  RoundCommit,
+  RoundOpen,
   RoundEnd,
   GameEnd,
 }

@@ -3,7 +3,7 @@ import { defineChain } from "viem";
 export const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID as string;
 
 // GuessingGAme contract deployed address
-export const deployedAddress = process.env.NEXT_PUBLIC_GG_CONTRACT_ADDRESS as string;
+export const deployedAddress = process.env.NEXT_PUBLIC_GUESSING_GAME_CONTRACT_ADDRESS as string;
 
 export const RpcUrls = {
   sepolia: `https://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`,
@@ -13,11 +13,11 @@ export const RpcUrls = {
 };
 
 export const project = {
-  name: "PSE Hackathon - Guessing Game",
+  name: "PSE Capstone - Number Guessing Game",
   desc: "Guessing game using zero-knowledge protocol.",
-  homepage: "https://github.com/jimmychu0807/PSE-core-hackathon",
+  homepage: "https://github.com/jimmychu0807/PSE-core-self-capstone",
   authorHomepage: "https://jimmychu0807.hk",
-  github: "https://github.com/jimmychu0807/PSE-core-hackathon",
+  github: "https://github.com/jimmychu0807/PSE-core-self-capstone",
   image: "https://avatars.githubusercontent.com/u/898091?v=4",
 };
 
