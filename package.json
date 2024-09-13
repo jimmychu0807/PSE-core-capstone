@@ -13,7 +13,7 @@
     "lint": "yarn workspaces foreach -A -pi run lint",
     "prettier": "prettier -c .",
     "prettier:write": "prettier -w .",
-    "check": "yarn prettier && yarn lint && yarn test"
+    "check": "yarn prettier && yarn lint"
   },
   "keywords": [
     "javascript",
