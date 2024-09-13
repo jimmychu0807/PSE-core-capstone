@@ -9,6 +9,8 @@ import {
   VStack,
   Stack,
   Link,
+  LinkBox,
+  LinkOverlay,
   UnorderedList,
   ListItem,
   Text,
@@ -17,9 +19,9 @@ import {
   CardBody,
   CardFooter,
 } from "@chakra-ui/react";
+import { Link as NextLink } from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useMemo } from "react";
-
 import { useWalletInfo, useWeb3ModalState } from "@web3modal/wagmi/react";
 import {
   useAccount,
@@ -33,14 +35,15 @@ import { readContracts } from "@wagmi/core";
 import { parseEventLogs } from "viem";
 import { useQueryClient } from "@tanstack/react-query";
 
-import Stepper from "../components/Stepper";
-import { zeroToNArr, formatter } from "../utils";
-import { gameArtifact, GameState, gameEventTypes } from "../helpers";
+import Stepper from "@/components/Stepper";
+import { zeroToNArr, formatter } from "@/utils";
+import { gameArtifact, GameState, gameEventTypes } from "@/helpers";
 
 export default function HomePage() {
   const { abi, deployedAddress } = gameArtifact;
   const contractCfg = useMemo(() => ({ abi, address: deployedAddress }), [abi, deployedAddress]);
 
+  const router = useRouter();
   const wagmiConfig = useConfig();
   const { data: wc } = useWalletClient();
   const queryClient = useQueryClient();
@@ -120,14 +123,14 @@ export default function HomePage() {
       if (setState) {
         setNewGameClicked(false);
         queryClient.invalidateQueries({ queryKey: nextGameIdQK });
-        // navigate(`/game/${roundId}`);
+        router.push(`/game/${nextGameId}`);
       }
     }
 
     return () => {
       setState = false;
     };
-  }, [newGameClicked, txReceipt, abi, queryClient, nextGameIdQK]);
+  }, [newGameClicked, txReceipt, abi, queryClient, router, nextGameId, nextGameIdQK]);
 
   return (
     <VStack>
@@ -136,7 +139,7 @@ export default function HomePage() {
       </Heading>
       <Stack direction="column" spacing={8}>
         {games.map((game, idx) => (
-          <GameCard key={`game-${idx}`} id={idx} game={game} />
+          <GameCard key={`game-${idx}`} gameId={idx} game={game} />
         ))}
       </Stack>
       <Button
@@ -152,7 +155,7 @@ export default function HomePage() {
   );
 }
 
-function GameCard({ id, game }) {
+function GameCard({ gameId, game }) {
   const { abi, deployedAddress } = gameArtifact;
   const contractCfg = useMemo(() => ({ abi, address: deployedAddress }), [abi, deployedAddress]);
 
@@ -165,28 +168,35 @@ function GameCard({ id, game }) {
     writeContract({
       ...contractCfg,
       functionName: "joinGame",
-      args: [id],
+      args: [gameId],
     });
-  }, [writeContract, contractCfg, id]);
+  }, [writeContract, contractCfg, gameId]);
 
   return (
     <Card w={500}>
-      <CardHeader>Game ID: {id}</CardHeader>
-      <CardBody>
-        <Text>Players: {game.players.length}</Text>
-        <UnorderedList styleType="- ">
-          {game.players.map((p) => (
-            <ListItem key={`game-${id}-${p}`} fontSize={14}>
-              {p}
-            </ListItem>
-          ))}
-        </UnorderedList>
-        <Text>
-          State: <strong>{GameState[game.state]}</strong>
-        </Text>
-        <Text>Created: {formatter.dateTime(game.startTime)}</Text>
-        <Text>Last Updated: {formatter.dateTime(game.lastUpdate)}</Text>
-      </CardBody>
+      <LinkBox>
+        <CardHeader>
+          <LinkOverlay as={NextLink} href={`/game/${gameId}`}>
+            <strong>Game ID: {gameId}</strong>
+          </LinkOverlay>
+        </CardHeader>
+
+        <CardBody>
+          <Text>Players: {game.players.length}</Text>
+          <UnorderedList styleType="- ">
+            {game.players.map((p) => (
+              <ListItem key={`game-${gameId}-${p}`} fontSize={14}>
+                {p}
+              </ListItem>
+            ))}
+          </UnorderedList>
+          <Text>
+            State: <strong>{GameState[game.state]}</strong>
+          </Text>
+          <Text>Created: {formatter.dateTime(game.startTime)}</Text>
+          <Text>Last Updated: {formatter.dateTime(game.lastUpdate)}</Text>
+        </CardBody>
+      </LinkBox>
       <CardFooter justifyContent="center">
         {game.state === GameState.GameInitiated && (
           <Button

@@ -5,7 +5,6 @@ import { WagmiProvider } from "wagmi";
 import {
   sepolia, // Ethereum
   optimismSepolia, // Optimism
-  arbitrumSepolia, // Arbirtrum
 } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -26,7 +25,7 @@ const metadata = {
   icons: [project.image],
 };
 
-const supportedChains = { sepolia, optimismSepolia, arbitrumSepolia };
+const supportedChains = { sepolia, optimismSepolia };
 // Add the hardhat node devnet
 const chains = process.env.NEXT_PUBLIC_ENV ? { ...supportedChains, devChain } : supportedChains;
 
