@@ -209,6 +209,10 @@ function GameCard({ gameId, game }) {
             {userJoinedGame ? "Already Joined" : "Join Game"}
           </Button>
         )}
+        {game.state >= GameState.RoundCommit && game.state <= GameState.RoundEnd && (
+          <Text>Game in Progress...</Text>
+        )}
+        {game.state >= GameState.GameEnd && <Text>Game Ended</Text>}
       </CardFooter>
     </Card>
   );

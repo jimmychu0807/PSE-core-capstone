@@ -12,6 +12,8 @@ export enum GameState {
   GameEnd,
 }
 
+export const MIN_PLAYERS_TO_START = 3;
+
 export const gameEventTypes = {
   newGame: "NewGame",
 } as const;

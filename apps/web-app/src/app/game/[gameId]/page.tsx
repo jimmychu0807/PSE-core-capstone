@@ -1,14 +1,14 @@
 "use client";
 
-import { Stack, HStack, VStack, Text } from "@chakra-ui/react";
+import { Stack, HStack, VStack, Text, UnorderedList, ListItem, Button } from "@chakra-ui/react";
 
 import { Box } from "@chakra-ui/react";
 import { useConfig } from "wagmi";
-import { readContracts } from "@wagmi/core";
-import { useEffect, useState, useMemo } from "react";
+import { readContracts, writeContract } from "@wagmi/core";
+import { useEffect, useState, useMemo, useCallback } from "react";
 
 import { formatter } from "@/utils";
-import { gameArtifact, GameState, gameEventTypes } from "@/helpers";
+import { gameArtifact, GameState, gameEventTypes, MIN_PLAYERS_TO_START } from "@/helpers";
 
 export default function GamePage({ params }: { params: { gameId: number } }) {
   const { gameId } = params;
@@ -31,9 +31,8 @@ export default function GamePage({ params }: { params: { gameId: number } }) {
       ];
 
       const results = await readContracts(wagmiConfig, { contracts });
-      setGame(results[0].result);
+      setState && setGame(results[0].result);
     }
-
     getGame(gameId);
 
     return () => {
@@ -41,19 +40,50 @@ export default function GamePage({ params }: { params: { gameId: number } }) {
     };
   }, [contractCfg, gameId, wagmiConfig]);
 
-  return (
-    game && (
+  // can you use async function inside useCallback?
+  const startGameHandler = useCallback(async () => {
+    const result = await writeContract(wagmiConfig, {
+      ...contractCfg,
+      functionName: "startGame",
+      args: [gameId],
+    });
+  }, [contractCfg, gameId, wagmiConfig]);
+
+  if (!game) {
+    return <></>;
+  } else {
+    const canStartGame = game.players.length >= MIN_PLAYERS_TO_START;
+    return (
       <VStack spacing={3}>
         <Text>
           Game ID: <strong>{gameId}</strong>
         </Text>
         <Text>Players: {game.players.length}</Text>
+        <UnorderedList styleType="- ">
+          {game.players.map((p) => (
+            <ListItem key={`game-${gameId}-${p}`} fontSize={14}>
+              {p}
+            </ListItem>
+          ))}
+        </UnorderedList>
         <Text>
           State: <strong>{GameState[game.state]}</strong>
         </Text>
         <Text>Created: {formatter.dateTime(game.startTime)}</Text>
         <Text>Last Updated: {formatter.dateTime(game.lastUpdate)}</Text>
+        <HStack>
+          {game.state === GameState.GameInitiated && (
+            <Button
+              onClick={startGameHandler}
+              variant="outline"
+              colorScheme="blue"
+              isDisabled={!canStartGame}
+            >
+              {canStartGame ? "Start Game" : "Waiting for more players to join"}
+            </Button>
+          )}
+        </HStack>
       </VStack>
-    )
-  );
+    );
+  }
 }
