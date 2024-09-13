@@ -18,7 +18,7 @@ import {
   CardFooter,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 
 import { useWalletInfo, useWeb3ModalState } from "@web3modal/wagmi/react";
 import {
@@ -36,11 +36,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import Stepper from "../components/Stepper";
 import { zeroToNArr, formatter } from "../utils";
 import { gameArtifact, GameState, gameEventTypes } from "../helpers";
-import { gameCardStyle } from "../styles";
 
 export default function HomePage() {
   const { abi, deployedAddress } = gameArtifact;
-  const contractCfg = { abi, address: deployedAddress };
+  const contractCfg = useMemo(() => ({ abi, address: deployedAddress }), [abi, deployedAddress]);
 
   const wagmiConfig = useConfig();
   const { data: wc } = useWalletClient();
@@ -73,7 +72,7 @@ export default function HomePage() {
     });
 
     setNewGameClicked(true);
-  }, [writeContract]);
+  }, [writeContract, contractCfg]);
 
   // listen for the nextGameId
   useEffect(() => {
@@ -106,7 +105,7 @@ export default function HomePage() {
     return () => {
       setState = false;
     };
-  }, [nextGameId, wc]);
+  }, [nextGameId, wc, contractCfg, wagmiConfig]);
 
   // listen for a newGame is finished created in the smart contract
   useEffect(() => {
@@ -128,7 +127,7 @@ export default function HomePage() {
     return () => {
       setState = false;
     };
-  }, [newGameClicked, txReceipt, abi]);
+  }, [newGameClicked, txReceipt, abi, queryClient, nextGameIdQK]);
 
   return (
     <VStack>
@@ -155,7 +154,7 @@ export default function HomePage() {
 
 function GameCard({ id, game }) {
   const { abi, deployedAddress } = gameArtifact;
-  const contractCfg = { abi, address: deployedAddress };
+  const contractCfg = useMemo(() => ({ abi, address: deployedAddress }), [abi, deployedAddress]);
 
   const { address: userAddr } = useAccount();
   const { isPending, writeContract } = useWriteContract();
@@ -168,7 +167,7 @@ function GameCard({ id, game }) {
       functionName: "joinGame",
       args: [id],
     });
-  }, [writeContract]);
+  }, [writeContract, contractCfg, id]);
 
   return (
     <Card w={500}>
