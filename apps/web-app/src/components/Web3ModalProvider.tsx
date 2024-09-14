@@ -19,15 +19,13 @@ const queryClient = new QueryClient();
 // create the modal
 const { config, metadata } = wagmi;
 createWeb3Modal({
-  metadata,
   wagmiConfig: config,
   projectId: metadata.projectId,
-  enableAnalytics: true,
 });
 
 export function Web3ModalProvider({ children, initialState }: Props) {
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   );

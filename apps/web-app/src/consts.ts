@@ -79,9 +79,10 @@ export const wagmi = {
     chains: Object.values(supportedChains),
     projectId: walletConnectProjectId,
     metadata: wagmiMetadata,
+    enableWalletConnect: true,
     ssr: true,
-    // storage: createStorage({
-    //   storage: cookieStorage,
-    // }),
+    storage: createStorage({
+      storage: cookieStorage,
+    }),
   }),
 };
