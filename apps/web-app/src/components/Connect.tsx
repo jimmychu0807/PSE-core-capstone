@@ -1,5 +1,5 @@
 'use client'
 
-export default function Web3Connect() {
+export default function Connect() {
   return <w3m-button />
 }
