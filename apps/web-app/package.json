@@ -16,12 +16,10 @@
     "@chakra-ui/theme-tools": "^2.1.2",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
-    "@semaphore-protocol/core": "4.0.0",
-    "@semaphore-protocol/data": "4.0.0",
-    "@tanstack/react-query": "^5.51.23",
+    "@tanstack/react-query": "^5.56.2",
     "@wagmi/connectors": "^5.1.5",
     "@wagmi/core": "^2.13.4",
-    "@web3modal/wagmi": "^5.0.11",
+    "@web3modal/wagmi": "^5.1.8",
     "ethers": "^6.11.0",
     "framer-motion": "^11.0.5",
     "next": "^14.2.11",
@@ -29,8 +27,8 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^4.8.0",
-    "viem": "^2.19.4",
-    "wagmi": "^2.12.5"
+    "viem": "^2.21.6",
+    "wagmi": "^2.12.11"
   },
   "devDependencies": {
     "@types/node": "^20",

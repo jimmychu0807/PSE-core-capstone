@@ -37,7 +37,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import Stepper from "@/components/Stepper";
 import { zeroToNArr, formatter } from "@/utils";
-import { gameArtifact, GameState, gameEventTypes } from "@/helpers";
+import { gameArtifact, GameState, gameEventTypes } from "@/consts";
 
 export default function HomePage() {
   const { abi, deployedAddress } = gameArtifact;

@@ -17,9 +17,13 @@ const nextConfig = withPWA({
     ETHEREUM_PRIVATE_KEY: process.env.ETHEREUM_PRIVATE_KEY,
     GELATO_RELAYER_API_KEY: process.env.GELATO_RELAYER_API_KEY,
   },
+  webpack: (config) => {
+    config.externals.push("pino-pretty", "lokijs", "encoding");
+    return config;
+  },
+  reactStrictMode: true,
   // basePath: "/semaphore-template",
   // output: "export",
-  // reactStrictMode: true
 });
 
 export default nextConfig;

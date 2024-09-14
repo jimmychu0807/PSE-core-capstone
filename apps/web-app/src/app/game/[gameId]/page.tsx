@@ -8,7 +8,7 @@ import { readContracts, writeContract } from "@wagmi/core";
 import { useEffect, useState, useMemo, useCallback } from "react";
 
 import { formatter } from "@/utils";
-import { gameArtifact, GameState, gameEventTypes, MIN_PLAYERS_TO_START } from "@/helpers";
+import { gameArtifact, GameState, gameEventTypes, MIN_PLAYERS_TO_START } from "@/consts";
 
 export default function GamePage({ params }: { params: { gameId: number } }) {
   const { gameId } = params;

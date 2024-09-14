@@ -6,7 +6,7 @@ import { Container, HStack, Icon, IconButton, Link, Spinner, Stack, Text } from 
 import { usePathname } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
 
-import { useWalletInfo, useWeb3ModalState } from "@web3modal/wagmi/react";
+import { useWalletInfo } from "@web3modal/wagmi/react";
 
 import { project } from "../consts";
 
@@ -28,6 +28,8 @@ export default function PageContainer({
   const pathname = usePathname();
   const { log } = useLogContext();
   const { walletInfo } = useWalletInfo();
+
+  console.log(`loading the header bar`);
 
   return (
     <>

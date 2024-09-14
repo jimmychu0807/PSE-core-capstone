@@ -1,12 +1,16 @@
-import PageContainer from "@/components/PageContainer";
 import type { Metadata } from "next";
-import Providers from "./providers";
-import { project } from "../consts";
+import { headers } from "next/headers";
+import { cookieToInitialState } from "wagmi";
+
+import { Web3ModalProvider } from "@/components/Web3ModalProvider";
+import Providers from "@/app/providers";
+import { project, wagmi } from "@/consts";
+import PageContainer from "@/components/PageContainer";
 
 export const metadata: Metadata = {
   title: project.name,
   description: project.desc,
-  icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
+  icons: { icon: "/icon.png", apple: "/apple-icon.png" },
   metadataBase: new URL(project.homepage),
   openGraph: {
     type: "website",
@@ -28,11 +32,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // const initialState = cookieToInitialState(wagmi.config, headers().get("cookie"));
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <html lang="en">
+      <body>
         <Providers>
-          <PageContainer>{children}</PageContainer>
+          <Web3ModalProvider>
+            <PageContainer>{children}</PageContainer>
+          </Web3ModalProvider>
         </Providers>
       </body>
     </html>
