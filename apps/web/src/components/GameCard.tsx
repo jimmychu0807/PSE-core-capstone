@@ -42,14 +42,13 @@ export default function GameCard({ gameId }: GameCardProps) {
   const joinGameHandler = useCallback(() => {
     let setState = true;
     const joinGame = async () => {
-      const res = await writeContractAsync({
+      await writeContractAsync({
         ...contractCfg,
         functionName: "joinGame",
         args: [gameId],
       });
 
       if (setState) {
-        console.log("res", res);
         router.push(`/game/${gameId}`);
       }
     };
