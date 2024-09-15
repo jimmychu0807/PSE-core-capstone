@@ -5,8 +5,8 @@ import { cookieToInitialState } from "wagmi";
 import { headers } from "next/headers";
 
 import { wagmi, projectInfo } from "@/config";
-import { Web3ModalProvider } from "@/context";
-import { Web3Connect } from "@/components";
+import { Web3ModalProvider, ChakraProvider, LogContextProvider } from "@/context";
+import { PageContainer } from "@/components";
 
 const inter = interFonts({ subsets: ["latin"] });
 
@@ -41,8 +41,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Web3ModalProvider initialState={initialState}>
-          <Web3Connect />
-          {children}
+          <LogContextProvider>
+            <ChakraProvider>
+              <PageContainer>{children}</PageContainer>
+            </ChakraProvider>
+          </LogContextProvider>
         </Web3ModalProvider>
       </body>
     </html>

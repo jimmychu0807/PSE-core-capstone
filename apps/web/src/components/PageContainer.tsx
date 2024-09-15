@@ -5,6 +5,7 @@ import { Container, HStack, Icon, IconButton, Link, Spinner, Stack, Text } from 
 import { FaGithub } from "react-icons/fa";
 import { useWalletInfo } from "@web3modal/wagmi/react";
 import { projectInfo } from "@/config";
+import { Web3Connect } from "@/components";
 
 function PromptForWalletConnect() {
   return (
@@ -27,6 +28,7 @@ export default function PageContainer({
   return (
     <>
       <HStack align="center" justify="right" p="2">
+        <Web3Connect />
         <Link href={projectInfo.github} isExternal>
           <IconButton
             aria-label="Github repository"
