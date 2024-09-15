@@ -134,9 +134,7 @@ contract GuessingGame is IGuessingGame, Ownable {
 
     // Dealing with time recording
     game.lastUpdate = block.timestamp;
-    if (state == GameState.GameInitiated) {
-      game.startTime = game.lastUpdate;
-    } else if (state == GameState.GameEnd) {
+    if (state == GameState.GameEnd) {
       game.endTime = game.lastUpdate;
     }
 
@@ -157,9 +155,11 @@ contract GuessingGame is IGuessingGame, Ownable {
   function newGame() external override returns (uint32 gameId) {
     Game storage game = games.push();
     game.players.push(msg.sender);
-    gameId = nextGameId++;
-    _updateGameState(gameId, GameState.GameInitiated);
+    game.state = GameState.GameInitiated;
+    game.startTime = block.timestamp;
+    game.lastUpdate = block.timestamp;
 
+    gameId = nextGameId++;
     emit NewGame(gameId, msg.sender);
   }
 
@@ -175,6 +175,7 @@ contract GuessingGame is IGuessingGame, Ownable {
     }
 
     game.players.push(msg.sender);
+    _updateGameState(gameId, GameState.GameInitiated);
     emit PlayerJoinGame(gameId, msg.sender);
   }
 
