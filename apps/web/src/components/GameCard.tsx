@@ -4,7 +4,7 @@
 import { useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { Link as NextLink } from "next/link";
+import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -21,7 +21,7 @@ import {
 
 // Components defined in this repo
 import { useGameContractConfig } from "@/hooks";
-import { GameState } from "@/config";
+import { GameState, type GameView } from "@/config";
 import { formatter } from "@/utils";
 
 type GameCardProps = {
@@ -34,7 +34,7 @@ export default function GameCard({ gameId }: GameCardProps) {
   const contractCfg = useGameContractConfig();
   const { writeContractAsync, isPending } = useWriteContract();
   const { address: userAccount } = useAccount();
-  const [game, setGame] = useState(undefined);
+  const [game, setGame] = useState<GameView | undefined>(undefined);
 
   /**
    * event handlers
@@ -72,7 +72,7 @@ export default function GameCard({ gameId }: GameCardProps) {
         functionName: "getGame",
         args: [gameId],
       });
-      setState && setGame(res);
+      setState && setGame(res as GameView);
     };
 
     getGame();
@@ -106,14 +106,14 @@ export default function GameCard({ gameId }: GameCardProps) {
             ))}
           </UnorderedList>
           <Text>
-            State: <strong>{GameState[game.state]}</strong>
+            State: <strong>{GameState[Number(game.state)]}</strong>
           </Text>
-          <Text>Created: {formatter.dateTime(game.startTime)}</Text>
-          <Text>Last Updated: {formatter.dateTime(game.lastUpdate)}</Text>
+          <Text>Created: {formatter.dateTime(Number(game.startTime))}</Text>
+          <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
         </CardBody>
       </LinkBox>
       <CardFooter justifyContent="center">
-        {game.state === GameState.GameInitiated && (
+        {Number(game.state) === GameState.GameInitiated && (
           <Button
             onClick={joinGameHandler}
             variant="outline"
