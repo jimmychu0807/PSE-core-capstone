@@ -42,7 +42,7 @@ export const RpcUrls = {
   devChain: "http://localhost:8545",
 };
 
-export const project = {
+export const projectInfo = {
   name: "PSE Capstone - Number Guessing Game",
   desc: "Guessing game using zk-SNARKS",
   homepage: "https://github.com/jimmychu0807/PSE-core-self-capstone",
@@ -66,11 +66,11 @@ export const supportedChains =
     : { sepolia, optimismSepolia, devChain };
 
 const wagmiMetadata = {
-  name: project.name,
-  description: project.desc,
-  url: project.homepage, // origin must match your domain & subdomain
+  name: projectInfo.name,
+  description: projectInfo.desc,
+  url: projectInfo.homepage, // origin must match your domain & subdomain
   projectId: walletConnectProjectId,
-  icons: [project.image],
+  icons: [projectInfo.image],
 };
 
 export const wagmi = {

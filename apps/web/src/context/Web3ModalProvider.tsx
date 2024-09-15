@@ -5,7 +5,7 @@ import { createWeb3Modal } from "@web3modal/wagmi/react";
 import { type State, WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { walletConnectProjectId, project, wagmi } from "@/config";
+import { wagmi } from "@/config";
 
 interface Props {
   children?: ReactNode;
