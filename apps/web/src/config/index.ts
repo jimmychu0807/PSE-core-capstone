@@ -1,4 +1,4 @@
-import { defineChain } from "viem";
+import { defineChain, type Chain } from "viem";
 import { cookieStorage, createStorage } from "wagmi";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import {
@@ -60,10 +60,10 @@ const devChain = defineChain({
   },
 });
 
-export const supportedChains =
+export const chains: readonly [Chain, ...Chain[]] =
   process.env["NEXT_PUBLIC_ENV"] === "testnet"
-    ? { sepolia, optimismSepolia }
-    : { sepolia, optimismSepolia, devChain };
+    ? [sepolia, optimismSepolia]
+    : [sepolia, optimismSepolia, devChain];
 
 const wagmiMetadata = {
   name: projectInfo.name,
@@ -76,7 +76,7 @@ const wagmiMetadata = {
 export const wagmi = {
   metadata: wagmiMetadata,
   config: defaultWagmiConfig({
-    chains: Object.values(supportedChains),
+    chains,
     projectId: walletConnectProjectId,
     metadata: wagmiMetadata,
     enableWalletConnect: true,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { type ReactNode, createContext, useContext, useState } from "react";
 
 export type LogContextType = {
   log: string;
