@@ -1,4 +1,5 @@
 {
+  "name": "@jimmychu0807/guessing-game",
   "description": "A mini-game of guessing number",
   "license": "MIT",
   "repository": "https://github.com/jimmychu0807/PSE-core-hackathon.git",
@@ -7,13 +8,15 @@
   "private": true,
   "scripts": {
     "dev": "yarn workspaces foreach -A -pi run dev",
-    "dev:web-app": "yarn workspace web-app dev",
-    "dev:contracts": "yarn workspace contracts dev",
+    "web:dev": "yarn workspace @jimmychu0807/guessing-game-web dev",
+    "web:build": "yarn workspace @jimmychu0807/guessing-game-web build",
+    "contracts:compile": "yarn workspace @jimmychu0807/guessing-game-contracts compile",
+    "contracts:dev": "yarn workspace @jimmychu0807/guessing-game-contracts dev",
     "test": "yarn workspaces foreach -A -pi run test",
     "lint": "yarn workspaces foreach -A -pi run lint",
     "prettier": "prettier -c .",
     "prettier:write": "prettier -w .",
-    "check": "yarn prettier && yarn lint"
+    "ci-check": "yarn prettier & yarn lint & yarn web:build & yarn contracts:compile"
   },
   "keywords": [
     "javascript",

@@ -1,5 +1,5 @@
 {
-  "name": "contracts",
+  "name": "@jimmychu0807/guessing-game-contracts",
   "version": "1.0.0",
   "private": true,
   "main": "index.js",
