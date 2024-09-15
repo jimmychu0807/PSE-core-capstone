@@ -21,7 +21,7 @@ export const { abi: GameContractAbi } = GameJson;
 
 // Copied over from typechain-types inside apps/contracts
 export type GameView = [
-  players: string[],
+  players: Address[],
   currentRound: bigint,
   state: bigint,
   winner: string,
@@ -29,7 +29,7 @@ export type GameView = [
   lastUpdate: bigint,
   endTime: bigint
 ] & {
-  players: string[];
+  players: Address[];
   currentRound: bigint;
   state: bigint;
   winner: string;
