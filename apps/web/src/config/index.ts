@@ -1,4 +1,4 @@
-import { defineChain, type Chain } from "viem";
+import { defineChain, type Chain, type Address } from "viem";
 import { cookieStorage, createStorage } from "wagmi";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import {
@@ -17,24 +17,37 @@ export enum GameState {
   GameEnd,
 }
 
-export const MIN_PLAYERS_TO_START = 3;
+export const { abi: GameContractAbi } = GameJson;
 
-export const gameEventTypes = {
+// Copied over from typechain-types inside apps/contracts
+export type GameView = [
+  players: string[],
+  currentRound: bigint,
+  state: bigint,
+  winner: string,
+  startTime: bigint,
+  lastUpdate: bigint,
+  endTime: bigint
+] & {
+  players: string[];
+  currentRound: bigint;
+  state: bigint;
+  winner: string;
+  startTime: bigint;
+  lastUpdate: bigint;
+  endTime: bigint;
+};
+
+export const GameEvent = {
   newGame: "NewGame",
 } as const;
+
+export const MIN_PLAYERS_TO_START = 3;
 
 export const walletConnectProjectId = process.env["NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID"] as string;
 
 // GuessingGAme contract deployed address
-export const deployedAddress = process.env["NEXT_PUBLIC_GUESSING_GAME_CONTRACT_ADDRESS"] as string;
-
-export const gameArtifact = {
-  ...GameJson,
-  // Added a new property of the deployed address.
-  // Since we used CREATE2 to deploy contract (https://hardhat.org/ignition/docs/guides/create2),
-  //   the deployed address should be the same across all chains.
-  deployedAddress,
-} as const;
+export const deployedAddress = process.env["NEXT_PUBLIC_GUESSING_GAME_CONTRACT_ADDRESS"] as Address;
 
 export const RpcUrls = {
   sepolia: `https://eth-sepolia.g.alchemy.com/v2/${process.env["NEXT_PUBLIC_ALCHEMY_API_KEY"]}`,

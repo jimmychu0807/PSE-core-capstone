@@ -2306,6 +2306,7 @@ __metadata:
     "@wagmi/connectors": "npm:^5.1"
     "@wagmi/core": "npm:^2.12.11"
     "@web3modal/wagmi": "npm:^5.1.8"
+    abitype: "npm:^1.0.6"
     esbuild: "npm:0.21.1"
     eslint: "npm:^8.56.0"
     eslint-config-next: "npm:^14.2.11"
@@ -4996,6 +4997,21 @@ __metadata:
     zod:
       optional: true
   checksum: 10/1acd0d9687945dd78442b71bd84ff3b9dceae27d15f0d8b14b16554a0c8c9518eeb971ff8e94d507f4d9f05a8a8b91eb8fafd735eaecebac37d5c5a4aac06d8e
+  languageName: node
+  linkType: hard
+
+"abitype@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "abitype@npm:1.0.6"
+  peerDependencies:
+    typescript: ">=5.0.4"
+    zod: ^3 >=3.22.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10/d04d58f90405c29a3c68353508502d7e870feb27418a6281ba9a13e6aaee42c26b2c5f08f648f058b8eaffac32927194b33f396d2451d18afeccfb654c7285c2
   languageName: node
   linkType: hard
 

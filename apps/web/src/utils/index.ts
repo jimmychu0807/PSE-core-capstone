@@ -5,7 +5,7 @@ export function zeroToNArr(n: number): Array<number> {
 }
 
 export const formatter = {
-  dateTime(dateTime: Date) {
-    return new Date(Number(dateTime) * 1000).toLocaleString();
+  dateTime(dateTime: number) {
+    return new Date(dateTime * 1000).toLocaleString();
   },
 };

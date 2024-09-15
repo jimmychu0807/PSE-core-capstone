@@ -1,8 +1,13 @@
-import { gameArtifact } from "@/config";
+import { GameContractAbi, deployedAddress } from "@/config";
 import { useMemo } from "react";
 
 export default function useGameContractConfig() {
-  const { abi, deployedAddress } = gameArtifact;
-  const contractConfig = useMemo(() => ({ abi, address: deployedAddress }), [abi, deployedAddress]);
+  const contractConfig = useMemo(
+    () => ({
+      abi: GameContractAbi,
+      address: deployedAddress,
+    }),
+    []
+  );
   return contractConfig;
 }
