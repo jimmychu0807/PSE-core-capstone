@@ -5,7 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IGuessingGame} from "./interfaces/IGuessingGame.sol";
 import {ICommitmentVerifier} from "./interfaces/ICommitmentVerifier.sol";
 import {IOpeningVerifier} from "./interfaces/IOpeningVerifier.sol";
-import {MIN_NUM, MAX_NUM, ROUNDS_TO_WIN} from "./base/Constants.sol";
+import {MIN_NUM, MAX_NUM, MIN_PLAYERS_TO_START, ROUNDS_TO_WIN} from "./base/Constants.sol";
 
 contract GuessingGame is IGuessingGame, Ownable {
   ICommitmentVerifier public commitmentVerifier;
@@ -192,7 +192,7 @@ contract GuessingGame is IGuessingGame, Ownable {
     // Need at least three players for a game
     // 1 player: no game
     // 2 players: both player tie
-    if (game.players.length <= 2) {
+    if (game.players.length < MIN_PLAYERS_TO_START) {
       revert GuessingGame__NotEnoughPlayers(gameId);
     }
 

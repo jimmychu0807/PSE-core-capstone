@@ -85,6 +85,7 @@ export default function GameCard({ gameId }: GameCardProps) {
   }
 
   const userJoinedGame = game.players.includes(userAccount);
+  const gameState = Number(game.state);
 
   return (
     <Card w={500}>
@@ -105,14 +106,15 @@ export default function GameCard({ gameId }: GameCardProps) {
             ))}
           </UnorderedList>
           <Text>
-            State: <strong>{GameState[Number(game.state)]}</strong>
+            State:&nbsp;
+            <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
           </Text>
           <Text>Created: {formatter.dateTime(Number(game.startTime))}</Text>
           <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
         </CardBody>
       </LinkBox>
       <CardFooter justifyContent="center">
-        {Number(game.state) === GameState.GameInitiated && (
+        {gameState === GameState.GameInitiated && (
           <Button
             onClick={joinGameHandler}
             variant="outline"
@@ -123,10 +125,10 @@ export default function GameCard({ gameId }: GameCardProps) {
             {userJoinedGame ? "Already Joined" : "Join Game"}
           </Button>
         )}
-        {game.state >= GameState.RoundCommit && game.state <= GameState.RoundEnd && (
+        {gameState >= GameState.RoundCommit && gameState <= GameState.RoundEnd && (
           <Text>Game in Progress...</Text>
         )}
-        {game.state >= GameState.GameEnd && <Text>Game Ended</Text>}
+        {gameState >= GameState.GameEnd && <Text>Game Ended</Text>}
       </CardFooter>
     </Card>
   );

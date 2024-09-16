@@ -4,11 +4,11 @@
 import { useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { VStack, UnorderedList, ListItem, HStack, Button, Text } from "@chakra-ui/react";
+import { Box, VStack, UnorderedList, ListItem, HStack, Button, Text } from "@chakra-ui/react";
 
 // Components defined in this repo
 import { useGameContractConfig } from "@/hooks";
-import { type GameView, MIN_PLAYERS_TO_START, GameState } from "@/config";
+import { type GameView, GameConfig, GameState } from "@/config";
 import { formatter } from "@/utils";
 
 type GamePageProps = {
@@ -43,9 +43,9 @@ export default function GamePage(pageProps: GamePageProps) {
     };
   }, [wagmiConfig, contractCfg, setGame, gameId]);
 
-  if (!game) {
-    return <></>;
-  }
+  if (!game) return <></>;
+
+  const gameState = Number(game.state);
 
   return (
     <VStack spacing={3}>
@@ -61,13 +61,41 @@ export default function GamePage(pageProps: GamePageProps) {
         ))}
       </UnorderedList>
       <Text>
-        State: <strong>{GameState[Number(game.state)]}</strong>
+        State:&nbsp;
+        <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
       </Text>
       <Text>Created: {formatter.dateTime(Number(game.startTime))}</Text>
       <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
-      {Number(game.state) === GameState.GameInitiated && (
+      {gameState === GameState.GameInitiated && (
         <GameInitiatedActionPanel gameId={gameId} game={game} />
       )}
+      {gameState === GameState.RoundCommit && (
+        <SubmitCommitmentActionPanel gameId={gameId} game={game} />
+      )}
+    </VStack>
+  );
+}
+
+function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
+  gameId;
+  const { address: userAccount } = useAccount();
+  const userJoinedGame = userAccount && game.players.includes(userAccount);
+
+  if (!userAccount || !userJoinedGame) return <></>;
+
+  return (
+    <VStack spacing={3}>
+      <Box>
+        <Text fontSize="lg" as="b">
+          Submit Commitment
+        </Text>
+        <Text>
+          Please submit a value between&nbsp;
+          <b>{GameConfig.MIN_NUM}</b> to&nbsp;
+          <b>{GameConfig.MAX_NUM}</b> inclusively.
+        </Text>
+      </Box>
+      <Box></Box>
     </VStack>
   );
 }
@@ -106,7 +134,7 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
 
   if (!userAccount) return <></>;
 
-  const canStartGame: boolean = game.players.length >= MIN_PLAYERS_TO_START;
+  const canStartGame: boolean = game.players.length >= GameConfig.MIN_PLAYERS_TO_START;
   const userJoinedGame = game.players.includes(userAccount);
   const isGameHost = userAccount === game.players[0];
 
@@ -124,7 +152,7 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
         </Button>
       )}
       {userJoinedGame && !canStartGame && (
-        <Text>Waiting for more players to join (mininum 3 to start)</Text>
+        <Text>{`Waiting for more players to join (mininum ${GameConfig.MIN_PLAYERS_TO_START} to start)`}</Text>
       )}
       {userJoinedGame && canStartGame && !isGameHost && (
         <Text>Waiting for game host to start game</Text>
