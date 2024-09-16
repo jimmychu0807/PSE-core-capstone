@@ -1,7 +1,8 @@
 "use client";
 
 import { useLogContext } from "@/context/LogContext";
-import { Container, HStack, Icon, IconButton, Link, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Container, HStack, Icon, IconButton, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Link } from "@chakra-ui/next-js";
 import { FaGithub } from "react-icons/fa";
 import { useWalletInfo } from "@web3modal/wagmi/react";
 import { projectInfo } from "@/config";
@@ -28,6 +29,7 @@ export default function PageContainer({
   return (
     <>
       <HStack align="center" justify="right" p="2">
+        <Link href="/">Back</Link>
         <Web3Connect />
         <Link href={projectInfo.github} isExternal>
           <IconButton

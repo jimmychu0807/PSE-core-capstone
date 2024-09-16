@@ -43,9 +43,9 @@ export default function GamePage(pageProps: GamePageProps) {
     };
   }, [wagmiConfig, contractCfg, setGame, gameId]);
 
-  if (!game) {
-    return <></>;
-  }
+  if (!game) return <></>;
+
+  const gameState = Number(game.state);
 
   return (
     <VStack spacing={3}>
@@ -61,15 +61,23 @@ export default function GamePage(pageProps: GamePageProps) {
         ))}
       </UnorderedList>
       <Text>
-        State: <strong>{GameState[Number(game.state)]}</strong>
+        State:&nbsp;
+        <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
       </Text>
       <Text>Created: {formatter.dateTime(Number(game.startTime))}</Text>
       <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
-      {Number(game.state) === GameState.GameInitiated && (
+      {gameState === GameState.GameInitiated && (
         <GameInitiatedActionPanel gameId={gameId} game={game} />
+      )}
+      {gameState === GameState.RoundCommit && (
+        <SubmitCommitmentActionPanel gameId={gameId} game={game} />
       )}
     </VStack>
   );
+}
+
+function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
+  return <></>;
 }
 
 function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
