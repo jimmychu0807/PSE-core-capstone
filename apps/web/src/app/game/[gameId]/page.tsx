@@ -4,7 +4,19 @@
 import { useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { Box, VStack, UnorderedList, ListItem, HStack, Button, Text } from "@chakra-ui/react";
+import {
+  VStack,
+  UnorderedList,
+  ListItem,
+  HStack,
+  Button,
+  Text,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  FormHelperText,
+  Input,
+} from "@chakra-ui/react";
 
 // Components defined in this repo
 import { useGameContractConfig } from "@/hooks";
@@ -79,23 +91,39 @@ export default function GamePage(pageProps: GamePageProps) {
 function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
   gameId;
   const { address: userAccount } = useAccount();
+  const [submissionError, setSubmissionError] = useState("");
+
+  const submitCommitment = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      const formData = new FormData(ev.target);
+      const formValues = Object.fromEntries(formData.entries());
+      console.log("formValues:", formValues);
+
+      // NX: validate the value and then generate proof and submit
+      setSubmissionError("Unknown Input");
+    },
+    [setSubmissionError]
+  );
+
   const userJoinedGame = userAccount && game.players.includes(userAccount);
 
   if (!userAccount || !userJoinedGame) return <></>;
 
   return (
     <VStack spacing={3}>
-      <Box>
-        <Text fontSize="lg" as="b">
-          Submit Commitment
-        </Text>
-        <Text>
-          Please submit a value between&nbsp;
-          <b>{GameConfig.MIN_NUM}</b> to&nbsp;
-          <b>{GameConfig.MAX_NUM}</b> inclusively.
-        </Text>
-      </Box>
-      <Box></Box>
+      <form onSubmit={(ev) => submitCommitment(ev)}>
+        <FormControl isInvalid={!!submissionError}>
+          <FormLabel>
+            Submit a commitment ({GameConfig.MIN_NUM} to {GameConfig.MAX_NUM})
+          </FormLabel>
+          <Input id="submission" name="submission" type="number" />
+          <FormErrorMessage>{submissionError}</FormErrorMessage>
+        </FormControl>
+        <Button display="block" margin="0.5em auto" mt={4} colorScheme="yellow" type="submit">
+          Submit
+        </Button>
+      </form>
     </VStack>
   );
 }
@@ -152,7 +180,10 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
         </Button>
       )}
       {userJoinedGame && !canStartGame && (
-        <Text>{`Waiting for more players to join (mininum ${GameConfig.MIN_PLAYERS_TO_START} to start)`}</Text>
+        <Text>
+          Waiting for more players to join (mininum&nbsp;
+          {GameConfig.MIN_PLAYERS_TO_START}&nbsp; players to start)
+        </Text>
       )}
       {userJoinedGame && canStartGame && !isGameHost && (
         <Text>Waiting for game host to start game</Text>

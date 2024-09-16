@@ -3,15 +3,7 @@
 // 3rd-parties components
 import { useWalletInfo } from "@web3modal/wagmi/react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Box,
-  HStack,
-  Icon,
-  IconButton,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, HStack, Icon, IconButton, Spinner, Text, VStack } from "@chakra-ui/react";
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import { Link } from "@chakra-ui/next-js";
 import { FaGithub } from "react-icons/fa";
