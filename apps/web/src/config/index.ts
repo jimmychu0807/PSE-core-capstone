@@ -19,6 +19,13 @@ export enum GameState {
 
 export const { abi: GameContractAbi } = GameJson;
 
+/**
+ * The following values have to be consistent with the smart contract setting.
+ * Refer to:
+ *   - /apps/contracts/contracts/base/Constants.sol
+ *   - /apps/contracts/contracts/interfaces/IGuessingGame.sol
+ **/
+
 // Copied over from typechain-types inside apps/contracts
 export type GameView = [
   players: Address[],
@@ -42,7 +49,14 @@ export const GameEvent = {
   newGame: "NewGame",
 } as const;
 
-export const MIN_PLAYERS_TO_START = 3;
+export const GameConfig = {
+  MIN_NUM: 1,
+  MAX_NUM: 100,
+  ROUNDS_TO_WIN: 3,
+  MIN_PLAYERS_TO_START: 3,
+};
+
+// --- End of GuessingGame smart contract constants ---
 
 export const walletConnectProjectId = process.env["NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID"] as string;
 
@@ -62,6 +76,7 @@ export const projectInfo = {
   authorHomepage: "https://jimmychu0807.hk",
   github: "https://github.com/jimmychu0807/PSE-core-self-capstone",
   image: "https://avatars.githubusercontent.com/u/898091?v=4",
+  psePage: "https://pse.dev/en/programs",
 };
 
 const devChain = defineChain({
