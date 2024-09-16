@@ -22,6 +22,7 @@ import {
 import { useGameContractConfig } from "@/hooks";
 import { type GameView, GameConfig, GameState } from "@/config";
 import { formatter } from "@/utils";
+import { getRandomNullifier, generateFullProof } from "@/utils/proof";
 
 type GamePageProps = {
   params: {
@@ -89,21 +90,43 @@ export default function GamePage(pageProps: GamePageProps) {
 }
 
 function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
-  gameId;
   const { address: userAccount } = useAccount();
   const [submissionError, setSubmissionError] = useState("");
+  const contractCfg = useGameContractConfig();
+  const { writeContractAsync, isPending, status, data: txHash } = useWriteContract();
+
+  // debugging...
+  console.log("SubmitCommitmentActionPanel status:", status);
+  console.log("SubmitCommitmentActionPanel txHash:", txHash);
 
   const submitCommitment = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
       const formData = new FormData(ev.target);
       const formValues = Object.fromEntries(formData.entries());
-      console.log("formValues:", formValues);
 
-      // NX: validate the value and then generate proof and submit
-      setSubmissionError("Unknown Input");
+      if (!formValues["submission"]) return setSubmissionError(`Please enter a value.`);
+
+      const submission = Number.parseInt(formValues["submission"].toString(), 10);
+      if (submission < GameConfig.MIN_NUM || submission > GameConfig.MAX_NUM)
+        return setSubmissionError(
+          `Submission must be between ${GameConfig.MIN_NUM} to ${GameConfig.MAX_NUM}.`
+        );
+
+      // Value validated, generate a large integer
+      const nullifier = getRandomNullifier();
+      const fullProof = generateFullProof("CommitmentProof", submission, nullifier);
+
+      console.log("nullifier:", nullifier);
+      console.log("fullProof:", fullProof);
+
+      await writeContractAsync({
+        ...contractCfg,
+        functionName: "submitCommitment",
+        args: [gameId, fullProof.proof, fullProof.pubSignals],
+      });
     },
-    [setSubmissionError]
+    [gameId, contractCfg, setSubmissionError, writeContractAsync]
   );
 
   const userJoinedGame = userAccount && game.players.includes(userAccount);
@@ -117,10 +140,22 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
           <FormLabel>
             Submit a commitment ({GameConfig.MIN_NUM} to {GameConfig.MAX_NUM})
           </FormLabel>
-          <Input id="submission" name="submission" type="number" />
+          <Input
+            id="submission"
+            name="submission"
+            type="number"
+            onChange={() => setSubmissionError("")}
+          />
           <FormErrorMessage>{submissionError}</FormErrorMessage>
         </FormControl>
-        <Button display="block" margin="0.5em auto" mt={4} colorScheme="yellow" type="submit">
+        <Button
+          display="block"
+          margin="0.5em auto"
+          mt={4}
+          colorScheme="yellow"
+          type="submit"
+          isLoading={isPending}
+        >
           Submit
         </Button>
       </form>
