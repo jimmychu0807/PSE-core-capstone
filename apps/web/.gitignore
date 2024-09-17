@@ -48,3 +48,7 @@ public/worker-*.js.map
 .env.local
 .env.development
 .env.production
+
+# ZK artifacts
+public/circuit-artifacts
+

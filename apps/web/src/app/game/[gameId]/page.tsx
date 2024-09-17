@@ -108,10 +108,11 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
       if (!formValues["submission"]) return setSubmissionError(`Please enter a value.`);
 
       const submission = Number.parseInt(formValues["submission"].toString(), 10);
-      if (submission < GameConfig.MIN_NUM || submission > GameConfig.MAX_NUM)
+      if (submission < GameConfig.MIN_NUM || submission > GameConfig.MAX_NUM) {
         return setSubmissionError(
           `Submission must be between ${GameConfig.MIN_NUM} to ${GameConfig.MAX_NUM}.`
         );
+      }
 
       // Value validated, generate a large integer
       const nullifier = getRandomNullifier();
