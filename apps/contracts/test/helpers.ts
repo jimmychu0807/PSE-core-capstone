@@ -16,11 +16,7 @@ export enum GameState {
 }
 
 export async function prove(input, circuitPath) {
-  const fullProof = await plonk.fullProve(
-    input,
-    `${circuitPath}.wasm`,
-    `${circuitPath}.zkey`
-  );
+  const fullProof = await plonk.fullProve(input, `${circuitPath}.wasm`, `${circuitPath}.zkey`);
 
   return fullProof;
 }

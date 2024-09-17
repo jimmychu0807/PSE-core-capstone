@@ -1,7 +1,7 @@
 "use client";
 
 // 3rd-parties components
-import { useCallback, useState, useEffect } from "react";
+import { type FormEvent, useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
 import {
@@ -14,7 +14,6 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  FormHelperText,
   Input,
 } from "@chakra-ui/react";
 
@@ -93,16 +92,12 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
   const { address: userAccount } = useAccount();
   const [submissionError, setSubmissionError] = useState("");
   const contractCfg = useGameContractConfig();
-  const { writeContractAsync, isPending, status, data: txHash } = useWriteContract();
-
-  // debugging...
-  console.log("SubmitCommitmentActionPanel status:", status);
-  console.log("SubmitCommitmentActionPanel txHash:", txHash);
+  const { writeContractAsync, isPending } = useWriteContract();
 
   const submitCommitment = useCallback(
-    async (ev) => {
+    async (ev: FormEvent) => {
       ev.preventDefault();
-      const formData = new FormData(ev.target);
+      const formData = new FormData(ev.target as HTMLFormElement);
       const formValues = Object.fromEntries(formData.entries());
 
       if (!formValues["submission"]) return setSubmissionError(`Please enter a value.`);
@@ -116,15 +111,12 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
 
       // Value validated, generate a large integer
       const nullifier = getRandomNullifier();
-      const fullProof = generateFullProof("CommitmentProof", submission, nullifier);
-
-      console.log("nullifier:", nullifier);
-      console.log("fullProof:", fullProof);
+      const fullProof = await generateFullProof("CommitmentProof", submission, nullifier);
 
       await writeContractAsync({
         ...contractCfg,
         functionName: "submitCommitment",
-        args: [gameId, fullProof.proof, fullProof.pubSignals],
+        args: [gameId, fullProof.proof, fullProof.publicSignals],
       });
     },
     [gameId, contractCfg, setSubmissionError, writeContractAsync]
@@ -135,8 +127,8 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
   if (!userAccount || !userJoinedGame) return <></>;
 
   return (
-    <VStack spacing={3}>
-      <form onSubmit={(ev) => submitCommitment(ev)}>
+    <form onSubmit={submitCommitment}>
+      <VStack spacing={3}>
         <FormControl isInvalid={!!submissionError}>
           <FormLabel>
             Submit a commitment ({GameConfig.MIN_NUM} to {GameConfig.MAX_NUM})
@@ -159,8 +151,8 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
         >
           Submit
         </Button>
-      </form>
-    </VStack>
+      </VStack>
+    </form>
   );
 }
 

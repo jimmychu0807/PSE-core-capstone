@@ -7,18 +7,18 @@ export type Proof = {
     string, string, string, string, string,
     string, string, string, string,
   ];
-  pubSignals: Array<string>;
+  publicSignals: Array<string>;
 };
 
 export type ProofType = "CommitmentProof" | "OpeningProof";
 
 export const proofArtifacts = {
   CommitmentProof: {
-    wasm: "wasm",
-    zkey: "zkey",
+    wasm: "/circuit-artifacts/commit-1-100.wasm",
+    zkey: "/circuit-artifacts/commit-1-100.zkey",
   },
   OpeningProof: {
-    wasm: "wasm",
-    zkey: "zkey",
+    wasm: "/circuit-artifacts/open-1-100.wasm",
+    zkey: "/circuit-artifacts/open-1-100.zkey",
   },
 };
