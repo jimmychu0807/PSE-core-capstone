@@ -12,6 +12,8 @@ import {
   FormLabel,
   HStack,
   Input,
+  InputGroup,
+  InputLeftAddon,
   ListItem,
   Text,
   UnorderedList,
@@ -21,7 +23,7 @@ import { CheckIcon } from "@chakra-ui/icons";
 import { useLocalStorage } from "@uidotdev/usehooks";
 
 // Components defined in this repo
-import { useGameContractConfig } from "@/hooks";
+import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
 import { useLogContext } from "@/context";
 import { type GameView, GameConfig, GameState } from "@/config";
 import { formatter } from "@/utils";
@@ -80,7 +82,7 @@ export default function GamePage(pageProps: GamePageProps) {
         return memo;
       }, {});
 
-      setPlayerCommitments(commitments);
+      setState && setPlayerCommitments(commitments);
     };
 
     const getPlayerOpenings = async () => {
@@ -97,7 +99,7 @@ export default function GamePage(pageProps: GamePageProps) {
         return memo;
       }, {});
 
-      setPlayerOpenings(openings);
+      setState && setPlayerOpenings(openings);
     };
 
     game && Number(game.state) === GameState.RoundCommit && getPlayerCommitments();
@@ -118,7 +120,7 @@ export default function GamePage(pageProps: GamePageProps) {
         Game ID: <strong>{gameId}</strong>
       </Text>
       <Text>Joined players: {game.players.length}</Text>
-      <UnorderedList styleType="- ">
+      <UnorderedList styleType="'- '">
         {game.players.map((p) => (
           <ListItem key={`game-${gameId}-${p}`} fontSize={14}>
             {p}
@@ -126,26 +128,30 @@ export default function GamePage(pageProps: GamePageProps) {
         ))}
       </UnorderedList>
 
-      <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8">
+      <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8" p={4}>
         <Text>
           State:&nbsp;
           <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
         </Text>
         {(gameState === GameState.RoundCommit || gameState === GameState.RoundOpen) && (
           <>
-            <Text fontSize="md">{gameState === GameState.RoundCommit ? "Commitment" : "Opening"} Status:</Text>
+            <Text fontSize="md">
+              {gameState === GameState.RoundCommit ? "Commitment" : "Opening"} Status:
+            </Text>
             <UnorderedList styleType="''">
               {game.players.map((p) => (
                 <ListItem key={`${gameId}-${game.currentRound}-${p}`} fontSize={14}>
                   {p}&nbsp;
-                  {(gameState === GameState.RoundCommit &&
+                  {((gameState === GameState.RoundCommit &&
                     playerCommitments &&
                     !!playerCommitments[p]["submission"]) ||
-                    (gameState === GameState.RoundOpen && playerOpenings && !!playerOpenings[p] && (
-                      <Badge variant="outline" colorScheme="yellow">
-                        <CheckIcon boxSize={2} />
-                      </Badge>
-                    ))}
+                    (gameState === GameState.RoundOpen &&
+                      playerOpenings &&
+                      !!playerOpenings[p])) && (
+                    <Badge variant="outline" colorScheme="yellow">
+                      <CheckIcon boxSize={2} />
+                    </Badge>
+                  )}
                 </ListItem>
               ))}
             </UnorderedList>
@@ -171,48 +177,93 @@ export default function GamePage(pageProps: GamePageProps) {
         <OpenCommitmentActionPanel
           gameId={gameId}
           game={game}
-          hasSubmitted={
-            !!playerOpenings?.[userAccount] &&
-            playerOpenings?.[userAccount] > 0
-          }
+          hasOpened={!!playerOpenings?.[userAccount] && playerOpenings?.[userAccount] > 0}
         />
       )}
     </VStack>
   );
 }
 
-function OpenCommitmentActionPanel(
-  { gameId, game, hasSubmitted }:
-  { gameId: number; game: GameView; hasSubmitted: boolean })
-{
-  return hasSubmitted
-    ? <Button
-      variant="outline"
-      colorScheme="yellow"
-      isDisabled={true}>
-        Waiting for other players to open...
-      </Button>
-    : <form >
-        <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8">
-          <FormControl>
-            <FormLabel>Open Commitment</FormLabel>
-          </FormControl>
-          <Button display="block" margin="0.5em auto" mt={4} colorScheme="yellow" type="submit">
-            Open Commitment
-          </Button>
-        </VStack>
-      </form>;
+function OpenCommitmentActionPanel({
+  gameId,
+  game,
+  hasOpened,
+}: {
+  gameId: number;
+  game: GameView;
+  hasOpened: boolean;
+}) {
+  const advancedMode = false;
+  const { address: userAccount } = useAccount();
+  const [subNull] = useLocalStorage(
+    `subNull-${gameId}-${game.currentRound}-${userAccount}`,
+    undefined
+  );
+
+  const openCommitment = useCallback(async (ev: FormEvent) => {
+    ev.preventDefault();
+    const formData = new FormData(ev.target as HTMLFormElement);
+    const formValues = Object.fromEntries(formData.entries());
+
+    console.log("openCommitment", formValues);
+  }, []);
+
+  return hasOpened ? (
+    <Button variant="outline" colorScheme="yellow" isDisabled={true}>
+      Waiting for other players to open...
+    </Button>
+  ) : (
+    <form onSubmit={openCommitment}>
+      <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8" p={4}>
+        <FormControl>
+          <FormLabel>Open Commitment</FormLabel>
+
+          <InputGroup display={advancedMode ? "block" : "none"}>
+            <InputLeftAddon>Commitment</InputLeftAddon>
+            <Input
+              id="submission"
+              name="submission"
+              type={advancedMode ? "number" : "hidden"}
+              value={subNull["submission"]}
+            />
+          </InputGroup>
+
+          <InputGroup display={advancedMode ? "block" : "none"}>
+            <InputLeftAddon>Nullifier</InputLeftAddon>
+            <Input
+              id="nullifier"
+              name="nullifier"
+              type={advancedMode ? "number" : "hidden"}
+              value={subNull["nullifier"]}
+            />
+          </InputGroup>
+        </FormControl>
+        <Button display="block" margin="0.5em auto" mt={4} colorScheme="yellow" type="submit">
+          Open Commitment
+        </Button>
+      </VStack>
+    </form>
+  );
 }
 
-function SubmitCommitmentActionPanel(
-  { gameId, game, hasSubmitted }:
-  { gameId: number; game: GameView; hasSubmitted: boolean })
-{
+function SubmitCommitmentActionPanel({
+  gameId,
+  game,
+  hasSubmitted,
+}: {
+  gameId: number;
+  game: GameView;
+  hasSubmitted: boolean;
+}) {
   const { address: userAccount } = useAccount();
   const { setLog } = useLogContext();
-  const [, saveSubNull] = useLocalStorage(`subNull-${gameId}-${game.currentRound}-${userAccount}`, undefined);
+  const [, saveSubNull] = useLocalStorage(
+    `subNull-${gameId}-${game.currentRound}-${userAccount}`,
+    undefined
+  );
   const [submissionError, setSubmissionError] = useState("");
   const contractCfg = useGameContractConfig();
+  const sleepAndGotoURL = useSleepAndGotoURL();
   const { writeContractAsync, isPending } = useWriteContract();
 
   const submitCommitment = useCallback(
@@ -242,50 +293,55 @@ function SubmitCommitmentActionPanel(
 
       setLog(`Committed submission: ${submission}, with nullifier: ${nullifier}`);
       saveSubNull({ submission, nullifier });
+      sleepAndGotoURL();
     },
-    [gameId, contractCfg, setSubmissionError, writeContractAsync, setLog]
+    [
+      gameId,
+      contractCfg,
+      setSubmissionError,
+      writeContractAsync,
+      setLog,
+      saveSubNull,
+      sleepAndGotoURL,
+    ]
   );
 
   const userJoinedGame = userAccount && game.players.includes(userAccount);
 
   if (!userAccount || !userJoinedGame) return <></>;
 
-  return hasSubmitted
-    ? <Button
-      variant="outline"
-      colorScheme="yellow"
-      isDisabled={true}>
-        Waiting for other players to commit...
-      </Button>
-    : <form onSubmit={submitCommitment}>
-        <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8">
-          <FormControl isInvalid={!!submissionError}>
-            <FormLabel>
-              Submit a commitment ({GameConfig.MIN_NUM} to {GameConfig.MAX_NUM})
-            </FormLabel>
-            <Input
-              id="submission"
-              name="submission"
-              type="number"
-              onChange={() => setSubmissionError("")}
-            />
-            <FormErrorMessage>{submissionError}</FormErrorMessage>
-          </FormControl>
-          <Button
-            colorScheme="yellow"
-            type="submit"
-            isLoading={isPending}
-          >
-            Submit
-          </Button>
-        </VStack>
-      </form>;
+  return hasSubmitted ? (
+    <Button variant="outline" colorScheme="yellow" isDisabled={true}>
+      Waiting for other players to commit...
+    </Button>
+  ) : (
+    <form onSubmit={submitCommitment}>
+      <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8" p={4}>
+        <FormControl isInvalid={!!submissionError}>
+          <FormLabel>
+            Submit a commitment ({GameConfig.MIN_NUM} to {GameConfig.MAX_NUM})
+          </FormLabel>
+          <Input
+            id="submission"
+            name="submission"
+            type="number"
+            onChange={() => setSubmissionError("")}
+          />
+          <FormErrorMessage>{submissionError}</FormErrorMessage>
+        </FormControl>
+        <Button colorScheme="yellow" type="submit" isLoading={isPending}>
+          Submit
+        </Button>
+      </VStack>
+    </form>
+  );
 }
 
 function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
   const { address: userAccount } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
   const contractCfg = useGameContractConfig();
+  const sleepAndGotoURL = useSleepAndGotoURL();
 
   /**
    * event handlers
@@ -297,10 +353,12 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
         functionName: "startGame",
         args: [gameId],
       });
+
+      sleepAndGotoURL();
     };
 
     startGame();
-  }, [contractCfg, gameId, writeContractAsync]);
+  }, [contractCfg, gameId, writeContractAsync, sleepAndGotoURL]);
 
   const joinGameHandler = useCallback(() => {
     const joinGame = async () => {
@@ -309,10 +367,12 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
         functionName: "joinGame",
         args: [gameId],
       });
+
+      sleepAndGotoURL();
     };
 
     joinGame();
-  }, [contractCfg, gameId, writeContractAsync]);
+  }, [contractCfg, gameId, writeContractAsync, sleepAndGotoURL]);
 
   if (!userAccount) return <></>;
 
@@ -326,8 +386,8 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
       {!userJoinedGame && (
         <Button
           onClick={joinGameHandler}
-          variant="outline"
-          colorScheme="blue"
+          variant="solid"
+          colorScheme="yellow"
           isLoading={isPending}
         >
           Join Game
@@ -345,8 +405,8 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
       {canStartGame && isGameHost && (
         <Button
           onClick={startGameHandler}
-          variant="outline"
-          colorScheme="blue"
+          variant="solid"
+          colorScheme="yellow"
           isLoading={isPending}
         >
           Start Game

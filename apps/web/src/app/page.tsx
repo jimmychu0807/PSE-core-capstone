@@ -8,43 +8,38 @@ import { Button, Heading, VStack, Stack } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
 // Components defined in this repo
-import { useGameContractConfig } from "@/hooks";
+import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
 import { GameCard } from "@/components";
 import { zeroToNArr } from "@/utils";
 
 export default function HomePage() {
   const wagmiConfig = useConfig();
   const contractCfg = useGameContractConfig();
-  const router = useRouter();
+  const sleepAndGotoURL = useSleepAndGotoURL();
   const [nextGameId, setNextGameId] = useState(0);
-  const [newGameHandling, setNewGameHandling] = useState(false);
 
-  const { data: txHash, isPending, writeContract } = useWriteContract();
-  const { data: txReceipt } = useWaitForTransactionReceipt({ hash: txHash });
+  const { isPending, writeContractAsync } = useWriteContract();
 
   /**
    * Handlers
    **/
   const newGameHandler = useCallback(() => {
-    writeContract({
-      ...contractCfg,
-      functionName: "newGame",
-      args: [],
-    });
-    setNewGameHandling(true);
-  }, [writeContract, contractCfg]);
-
-  useEffect(() => {
     let setState = true;
-    if (newGameHandling && txReceipt && setState) {
-      setNewGameHandling(false);
-      router.push(`/game/${nextGameId}`);
-    }
+    const newGame = async () => {
+      await writeContractAsync({
+        ...contractCfg,
+        functionName: "newGame",
+        args: [],
+      });
 
+      setState && sleepAndGotoURL(2, `/game/${nextGameId}`);
+    };
+
+    newGame();
     return () => {
       setState = false;
     };
-  }, [newGameHandling, txReceipt, router, nextGameId]);
+  }, [writeContractAsync, contractCfg, sleepAndGotoURL, nextGameId]);
 
   /**
    * Get the `gameContract.nextGameId` on page load
@@ -71,20 +66,21 @@ export default function HomePage() {
       <Heading as="h2" size="xl" textAlign="center">
         Guessing Game
       </Heading>
-      <Stack direction="column" spacing={8}>
-        {zeroToNArr(nextGameId).map((idx: number) => (
-          <GameCard key={`game-${idx}`} gameId={idx} />
-        ))}
-      </Stack>
       <Button
         colorScheme="yellow"
         size="lg"
-        width="10em"
+        m={4}
+        width="8em"
         isLoading={isPending}
         onClick={newGameHandler}
       >
         New Game
       </Button>
+      <Stack direction="column" spacing={8}>
+        {zeroToNArr(nextGameId).map((idx: number) => (
+          <GameCard key={`game-${idx}`} gameId={idx} />
+        ))}
+      </Stack>
     </VStack>
   );
 }
