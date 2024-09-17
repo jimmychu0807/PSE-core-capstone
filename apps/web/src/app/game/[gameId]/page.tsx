@@ -1,15 +1,27 @@
 "use client";
 
 // 3rd-parties components
-import { useCallback, useState, useEffect } from "react";
+import { type FormEvent, useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { Box, VStack, UnorderedList, ListItem, HStack, Button, Text } from "@chakra-ui/react";
+import {
+  VStack,
+  UnorderedList,
+  ListItem,
+  HStack,
+  Button,
+  Text,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Input,
+} from "@chakra-ui/react";
 
 // Components defined in this repo
 import { useGameContractConfig } from "@/hooks";
 import { type GameView, GameConfig, GameState } from "@/config";
 import { formatter } from "@/utils";
+import { getRandomNullifier, generateFullProof } from "@/utils/proof";
 
 type GamePageProps = {
   params: {
@@ -77,26 +89,70 @@ export default function GamePage(pageProps: GamePageProps) {
 }
 
 function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
-  gameId;
   const { address: userAccount } = useAccount();
+  const [submissionError, setSubmissionError] = useState("");
+  const contractCfg = useGameContractConfig();
+  const { writeContractAsync, isPending } = useWriteContract();
+
+  const submitCommitment = useCallback(
+    async (ev: FormEvent) => {
+      ev.preventDefault();
+      const formData = new FormData(ev.target as HTMLFormElement);
+      const formValues = Object.fromEntries(formData.entries());
+
+      if (!formValues["submission"]) return setSubmissionError(`Please enter a value.`);
+
+      const submission = Number.parseInt(formValues["submission"].toString(), 10);
+      if (submission < GameConfig.MIN_NUM || submission > GameConfig.MAX_NUM) {
+        return setSubmissionError(
+          `Submission must be between ${GameConfig.MIN_NUM} to ${GameConfig.MAX_NUM}.`
+        );
+      }
+
+      // Value validated, generate a large integer
+      const nullifier = getRandomNullifier();
+      const fullProof = await generateFullProof("CommitmentProof", submission, nullifier);
+
+      await writeContractAsync({
+        ...contractCfg,
+        functionName: "submitCommitment",
+        args: [gameId, fullProof.proof, fullProof.publicSignals],
+      });
+    },
+    [gameId, contractCfg, setSubmissionError, writeContractAsync]
+  );
+
   const userJoinedGame = userAccount && game.players.includes(userAccount);
 
   if (!userAccount || !userJoinedGame) return <></>;
 
   return (
-    <VStack spacing={3}>
-      <Box>
-        <Text fontSize="lg" as="b">
-          Submit Commitment
-        </Text>
-        <Text>
-          Please submit a value between&nbsp;
-          <b>{GameConfig.MIN_NUM}</b> to&nbsp;
-          <b>{GameConfig.MAX_NUM}</b> inclusively.
-        </Text>
-      </Box>
-      <Box></Box>
-    </VStack>
+    <form onSubmit={submitCommitment}>
+      <VStack spacing={3}>
+        <FormControl isInvalid={!!submissionError}>
+          <FormLabel>
+            Submit a commitment ({GameConfig.MIN_NUM} to {GameConfig.MAX_NUM})
+          </FormLabel>
+          <Input
+            id="submission"
+            name="submission"
+            type="number"
+            onChange={() => setSubmissionError("")}
+          />
+          <FormErrorMessage>{submissionError}</FormErrorMessage>
+        </FormControl>
+        <Button
+          display="block"
+          margin="0.5em auto"
+          mt={4}
+          colorScheme="yellow"
+          type="submit"
+          isLoading={isPending}
+        >
+          Submit
+        </Button>
+      </VStack>
+    </form>
   );
 }
 
@@ -152,7 +208,10 @@ function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: Game
         </Button>
       )}
       {userJoinedGame && !canStartGame && (
-        <Text>{`Waiting for more players to join (mininum ${GameConfig.MIN_PLAYERS_TO_START} to start)`}</Text>
+        <Text>
+          Waiting for more players to join (mininum&nbsp;
+          {GameConfig.MIN_PLAYERS_TO_START}&nbsp; players to start)
+        </Text>
       )}
       {userJoinedGame && canStartGame && !isGameHost && (
         <Text>Waiting for game host to start game</Text>

@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { wtns, plonk } from "snarkjs";
+import { plonk } from "snarkjs";
 
 // Ref. to the game constants in contracts/base/Constants.sol
 export const MIN_NUM = 1;
@@ -16,12 +16,7 @@ export enum GameState {
 }
 
 export async function prove(input, circuitPath) {
-  const fullProof = await plonk.fullProve(
-    // utils.stringifyBitInts(input),
-    input,
-    `${circuitPath}.wasm`,
-    `${circuitPath}.zkey`
-  );
+  const fullProof = await plonk.fullProve(input, `${circuitPath}.wasm`, `${circuitPath}.zkey`);
 
   return fullProof;
 }
