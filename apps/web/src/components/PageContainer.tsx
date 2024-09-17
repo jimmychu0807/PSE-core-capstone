@@ -63,8 +63,8 @@ function Header() {
             size="lg"
             colorScheme="blue"
             aria-label="Back to Home"
-            onClick={() => router.push("/")}
-            icon={<ChevronLeftIcon />}
+            onClick={() => router.back()}
+            icon={<ChevronLeftIcon boxSize="1.4em" />}
           />
         )}
       </Box>

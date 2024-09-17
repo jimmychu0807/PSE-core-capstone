@@ -3,22 +3,26 @@
 // 3rd-parties components
 import { type FormEvent, useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
-import { readContract } from "@wagmi/core";
+import { readContract, readContracts } from "@wagmi/core";
+import { useRouter } from "next/navigation";
 import {
-  VStack,
-  UnorderedList,
-  ListItem,
-  HStack,
+  Badge,
   Button,
-  Text,
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Input,
+  ListItem,
+  Text,
+  UnorderedList,
+  VStack,
 } from "@chakra-ui/react";
+import { CheckIcon } from "@chakra-ui/icons";
 
 // Components defined in this repo
 import { useGameContractConfig } from "@/hooks";
+import { useLogContext } from "@/context";
 import { type GameView, GameConfig, GameState } from "@/config";
 import { formatter } from "@/utils";
 import { getRandomNullifier, generateFullProof } from "@/utils/proof";
@@ -34,6 +38,8 @@ export default function GamePage(pageProps: GamePageProps) {
   const wagmiConfig = useConfig();
   const contractCfg = useGameContractConfig();
   const [game, setGame] = useState<GameView | undefined>(undefined);
+  const [playerCommitments, setPlayerCommitments] = useState(undefined);
+  const [playerOpenings, setPlayerOpenings] = useState(undefined);
 
   /**
    * call on-chain `getGame()` on page load
@@ -55,6 +61,47 @@ export default function GamePage(pageProps: GamePageProps) {
     };
   }, [wagmiConfig, contractCfg, setGame, gameId]);
 
+  // Reading player commitments && openings
+  useEffect(() => {
+    let setState = true;
+
+    const getPlayerCommitments = async () => {
+      const result = await readContracts(wagmiConfig, {
+        contracts: game.players.map((p) => ({
+          ...contractCfg,
+          functionName: "getPlayerCommitment",
+          args: [gameId, game.currentRound, p],
+        })),
+      });
+
+      const _commitments = game.players.reduce((memo, p, idx) => {
+        memo[p] = result[idx]["result"];
+        return memo;
+      }, {});
+
+      setPlayerCommitments(_commitments);
+    };
+
+    const getPlayerOpenings = async () => {
+      const result = await readContracts(wagmiConfig, {
+        contracts: game.players.map((p) => ({
+          ...contractCfg,
+          functionName: "getPlayerOpening",
+          args: [gameId, game.currentRound, p],
+        })),
+      });
+
+      console.log("getPlayerOpenings result", result);
+    };
+
+    game && Number(game.state) === GameState.RoundCommit && getPlayerCommitments();
+    game && Number(game.state) === GameState.RoundOpen && getPlayerOpenings();
+
+    return () => {
+      setState = false;
+    };
+  }, [gameId, game, contractCfg, wagmiConfig]);
+
   if (!game) return <></>;
 
   const gameState = Number(game.state);
@@ -72,10 +119,28 @@ export default function GamePage(pageProps: GamePageProps) {
           </ListItem>
         ))}
       </UnorderedList>
-      <Text>
-        State:&nbsp;
-        <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
-      </Text>
+
+      <VStack>
+        <Text>
+          State:&nbsp;
+          <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
+        </Text>
+        {gameState === GameState.RoundCommit && (
+          <UnorderedList styleType="- ">
+            {game.players.map((p) => (
+              <ListItem key={`playerCommitment-${gameId}-${game.currentRound}-${p}`} fontSize={14}>
+                {p}&nbsp;
+                {playerCommitments && !!playerCommitments[p]["submission"] && (
+                  <Badge variant="outline" colorScheme="yellow">
+                    <CheckIcon boxSize={2} />
+                  </Badge>
+                )}
+              </ListItem>
+            ))}
+          </UnorderedList>
+        )}
+      </VStack>
+
       <Text>Created: {formatter.dateTime(Number(game.startTime))}</Text>
       <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
       {gameState === GameState.GameInitiated && (
@@ -90,6 +155,7 @@ export default function GamePage(pageProps: GamePageProps) {
 
 function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
   const { address: userAccount } = useAccount();
+  const { log, setLog } = useLogContext();
   const [submissionError, setSubmissionError] = useState("");
   const contractCfg = useGameContractConfig();
   const { writeContractAsync, isPending } = useWriteContract();
@@ -118,8 +184,10 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
         functionName: "submitCommitment",
         args: [gameId, fullProof.proof, fullProof.publicSignals],
       });
+
+      setLog(`Committed submission: ${submission}, with nullifier: ${nullifier}`);
     },
-    [gameId, contractCfg, setSubmissionError, writeContractAsync]
+    [gameId, contractCfg, setSubmissionError, writeContractAsync, setLog]
   );
 
   const userJoinedGame = userAccount && game.players.includes(userAccount);
