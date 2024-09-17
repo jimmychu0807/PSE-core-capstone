@@ -74,12 +74,12 @@ export default function GamePage(pageProps: GamePageProps) {
         })),
       });
 
-      const _commitments = game.players.reduce((memo, p, idx) => {
+      const commitments = game.players.reduce((memo, p, idx) => {
         memo[p] = result[idx]["result"];
         return memo;
       }, {});
 
-      setPlayerCommitments(_commitments);
+      setPlayerCommitments(commitments);
     };
 
     const getPlayerOpenings = async () => {
@@ -91,7 +91,12 @@ export default function GamePage(pageProps: GamePageProps) {
         })),
       });
 
-      console.log("getPlayerOpenings result", result);
+      const openings = game.players.reduce((memo, p, idx) => {
+        memo[p] = result[idx]["result"];
+        return memo;
+      }, {});
+
+      setPlayerOpenings(openings);
     };
 
     game && Number(game.state) === GameState.RoundCommit && getPlayerCommitments();
@@ -125,16 +130,19 @@ export default function GamePage(pageProps: GamePageProps) {
           State:&nbsp;
           <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
         </Text>
-        {gameState === GameState.RoundCommit && (
+        {(gameState === GameState.RoundCommit || gameState === GameState.RoundOpen) && (
           <UnorderedList styleType="- ">
             {game.players.map((p) => (
-              <ListItem key={`playerCommitment-${gameId}-${game.currentRound}-${p}`} fontSize={14}>
+              <ListItem key={`${gameId}-${game.currentRound}-${p}`} fontSize={14}>
                 {p}&nbsp;
-                {playerCommitments && !!playerCommitments[p]["submission"] && (
-                  <Badge variant="outline" colorScheme="yellow">
-                    <CheckIcon boxSize={2} />
-                  </Badge>
-                )}
+                {(gameState === GameState.RoundCommit &&
+                  playerCommitments &&
+                  !!playerCommitments[p]["submission"]) ||
+                  (gameState === GameState.RoundOpen && playerOpenings && !!playerOpenings[p] && (
+                    <Badge variant="outline" colorScheme="yellow">
+                      <CheckIcon boxSize={2} />
+                    </Badge>
+                  ))}
               </ListItem>
             ))}
           </UnorderedList>
@@ -149,7 +157,25 @@ export default function GamePage(pageProps: GamePageProps) {
       {gameState === GameState.RoundCommit && (
         <SubmitCommitmentActionPanel gameId={gameId} game={game} />
       )}
+      {gameState === GameState.RoundOpen && (
+        <OpenCommitmentActionPanel gameId={gameId} game={game} />
+      )}
     </VStack>
+  );
+}
+
+function OpenCommitmentActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
+  return (
+    <form>
+      <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8">
+        <FormControl>
+          <FormLabel>Open Commitment</FormLabel>
+        </FormControl>
+        <Button display="block" margin="0.5em auto" mt={4} colorScheme="yellow" type="submit">
+          Open Commitment
+        </Button>
+      </VStack>
+    </form>
   );
 }
 
@@ -196,7 +222,7 @@ function SubmitCommitmentActionPanel({ gameId, game }: { gameId: number; game: G
 
   return (
     <form onSubmit={submitCommitment}>
-      <VStack spacing={3}>
+      <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8">
         <FormControl isInvalid={!!submissionError}>
           <FormLabel>
             Submit a commitment ({GameConfig.MIN_NUM} to {GameConfig.MAX_NUM})
