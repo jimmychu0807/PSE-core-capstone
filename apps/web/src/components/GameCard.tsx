@@ -109,7 +109,6 @@ export default function GameCard({ gameId }: GameCardProps) {
             State:&nbsp;
             <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
           </Text>
-          <Text>Created: {formatter.dateTime(Number(game.startTime))}</Text>
           <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
         </CardBody>
       </LinkBox>
