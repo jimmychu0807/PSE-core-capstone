@@ -117,7 +117,7 @@ export default function GamePage(pageProps: GamePageProps) {
     };
   }, [gameId, game, contractCfg, wagmiConfig]);
 
-  if (!game) return <></>;
+  if (!game || !userAccount) return <></>;
 
   const gameState = Number(game.state);
   const userJoinedGame: boolean = game.players.includes(userAccount);
@@ -225,6 +225,7 @@ function PlayerListWithRoundResult({ gameId, game }: { gameId: number; game: Gam
 
     const getWonOpenings = async () => {
       const res = await readContracts(wagmiConfig, {
+        // @ts-ignore
         contracts: game.roundWinners.map((winner, idx) => ({
           ...contractCfg,
           functionName: "getPlayerOpening",
@@ -233,9 +234,9 @@ function PlayerListWithRoundResult({ gameId, game }: { gameId: number; game: Gam
       });
 
       const wo = res.reduce((memo, r) => {
-        memo.push(r.result);
+        memo.push(r.result as number);
         return memo;
-      }, []);
+      }, [] as Array<number>);
       setState && setWonOpenings(wo);
     };
 

@@ -4,6 +4,7 @@ import { type Address } from "viem";
 export type GameView = [
   players: Address[],
   currentRound: bigint,
+  roundWinners: Address[],
   state: bigint,
   winner: string,
   startTime: bigint,
@@ -12,6 +13,7 @@ export type GameView = [
 ] & {
   players: Address[];
   currentRound: bigint;
+  roundWinners: Address[];
   state: bigint;
   winner: string;
   startTime: bigint;
