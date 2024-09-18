@@ -95,10 +95,15 @@ export default function GameCard({ gameId }: GameCardProps) {
 
         <CardBody>
           <Text>Players: {game.players.length}</Text>
-          <UnorderedList styleType="'- '">
+          <UnorderedList styleType="''">
             {game.players.map((p) => (
               <ListItem key={`game-${gameId}-${p}`} fontSize={14}>
-                {p}
+                {p}&nbsp;
+                {game.winner === p && (
+                  <span role="img" aria-label="info">
+                    👑
+                  </span>
+                )}
               </ListItem>
             ))}
           </UnorderedList>
@@ -106,7 +111,12 @@ export default function GameCard({ gameId }: GameCardProps) {
             State:&nbsp;
             <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
           </Text>
-          <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
+
+          {gameState === GameState.GameEnd ? (
+            <Text>Game Ended: {formatter.dateTime(Number(game.endTime))}</Text>
+          ) : (
+            <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
+          )}
         </CardBody>
       </LinkBox>
       <CardFooter justifyContent="center">

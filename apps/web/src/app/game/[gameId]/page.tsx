@@ -4,7 +4,16 @@
 import { useState, useEffect } from "react";
 import { useConfig, useAccount } from "wagmi";
 import { readContract, readContracts } from "@wagmi/core";
-import { Badge, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  Badge,
+  ListItem,
+  Text,
+  UnorderedList,
+  VStack,
+} from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { type Address } from "viem";
 
@@ -32,6 +41,7 @@ export default function GamePage(pageProps: GamePageProps) {
   const [game, setGame] = useState<GameView | undefined>(undefined);
   const [playerCommitments, setPlayerCommitments] = useState<Record<Address, SubNullHash>>({});
   const [playerOpenings, setPlayerOpenings] = useState<Record<Address, number>>({});
+  const [playerRoundsWon, setPlayerRoundsWon] = useState<Record<Address, number>>({});
 
   /**
    * call on-chain `getGame()` on page load
@@ -53,7 +63,7 @@ export default function GamePage(pageProps: GamePageProps) {
     };
   }, [wagmiConfig, contractCfg, setGame, gameId]);
 
-  // Reading player commitments && openings
+  // Reading in-depth game info: commitments, openings, playerRoundsWon
   useEffect(() => {
     let setState = true;
 
@@ -90,13 +100,30 @@ export default function GamePage(pageProps: GamePageProps) {
         return memo;
       }, {} as Record<Address, number>);
 
-      if (game && setState && openings) {
-        setPlayerOpenings(openings);
-      }
+      setState && openings && setPlayerOpenings(openings);
+    };
+
+    const getPlayerRoundsWon = async () => {
+      const result = await readContracts(wagmiConfig, {
+        // @ts-ignore
+        contracts: game?.players?.map((p) => ({
+          ...contractCfg,
+          functionName: "getPlayerGameRoundsWon",
+          args: [gameId, p],
+        })),
+      });
+
+      const roundsWon = game?.players?.reduce((memo, p, idx) => {
+        memo[p] = result?.[idx]?.["result"] as number;
+        return memo;
+      }, {} as Record<Address, number>);
+
+      setState && roundsWon && setPlayerRoundsWon(roundsWon);
     };
 
     game && Number(game.state) === GameState.RoundCommit && getPlayerCommitments();
     game && Number(game.state) === GameState.RoundOpen && getPlayerOpenings();
+    game && Number(game.state) > GameState.GameInitiated && getPlayerRoundsWon();
 
     return () => {
       setState = false;
@@ -113,10 +140,11 @@ export default function GamePage(pageProps: GamePageProps) {
         Game ID: <strong>{gameId}</strong>
       </Text>
       <Text>Joined players: {game.players.length}</Text>
-      <UnorderedList styleType="'- '">
+      <UnorderedList styleType="''">
         {game.players.map((p) => (
           <ListItem key={`game-${gameId}-${p}`} fontSize={14}>
-            {p}
+            {p}&nbsp;
+            {formatter.repeatStrNTimes("🏅", Number(playerRoundsWon?.[p] || 0))}
           </ListItem>
         ))}
       </UnorderedList>
@@ -148,7 +176,25 @@ export default function GamePage(pageProps: GamePageProps) {
         )}
       </VStack>
 
-      <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
+      {gameState === GameState.GameEnd ? (
+        <Text>Game Ended: {formatter.dateTime(Number(game.endTime))}</Text>
+      ) : (
+        <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
+      )}
+
+      {gameState === GameState.GameEnd && (
+        <VStack>
+          <Alert status="success" borderRadius="lg" variant="solid">
+            <AlertIcon>
+              <span role="img" aria-label="info">
+                👑
+              </span>
+            </AlertIcon>
+            <AlertTitle>Winner: {game.winner}</AlertTitle>
+          </Alert>
+        </VStack>
+      )}
+
       {gameState === GameState.GameInitiated && (
         <GameInitiatedActionPanel gameId={gameId} game={game} />
       )}
