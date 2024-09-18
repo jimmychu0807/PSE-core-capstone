@@ -120,6 +120,7 @@ export default function GamePage(pageProps: GamePageProps) {
   if (!game) return <></>;
 
   const gameState = Number(game.state);
+  const userJoinedGame: boolean = game.players.includes(userAccount);
 
   return (
     <VStack spacing={3}>
@@ -177,7 +178,13 @@ export default function GamePage(pageProps: GamePageProps) {
       {gameState === GameState.GameInitiated && (
         <GameInitiatedActionPanel gameId={gameId} game={game} />
       )}
-      {gameState === GameState.RoundCommit && (
+
+      {/* For non-players sitting in the game */}
+      {gameState > GameState.GameInitiated && gameState < GameState.GameEnd && !userJoinedGame && (
+        <Text>Game in Progress...</Text>
+      )}
+
+      {gameState === GameState.RoundCommit && userJoinedGame && (
         <SubmitCommitmentActionPanel
           gameId={gameId}
           game={game}
@@ -188,7 +195,8 @@ export default function GamePage(pageProps: GamePageProps) {
           }
         />
       )}
-      {gameState === GameState.RoundOpen && (
+
+      {gameState === GameState.RoundOpen && userJoinedGame && (
         <OpenCommitmentActionPanel
           gameId={gameId}
           game={game}
@@ -199,7 +207,8 @@ export default function GamePage(pageProps: GamePageProps) {
           }
         />
       )}
-      {gameState === GameState.RoundEnd && (
+
+      {gameState === GameState.RoundEnd && userJoinedGame && (
         <GameConcludeRoundActionPanel gameId={gameId} game={game} />
       )}
     </VStack>
