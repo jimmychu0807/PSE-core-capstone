@@ -5,7 +5,6 @@ import { useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -20,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 
 // Components defined in this repo
-import { useGameContractConfig } from "@/hooks";
+import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
 import { GameState, type GameView } from "@/config";
 import { formatter } from "@/utils";
 
@@ -30,7 +29,7 @@ type GameCardProps = {
 
 export default function GameCard({ gameId }: GameCardProps) {
   const wagmiConfig = useConfig();
-  const router = useRouter();
+  const sleepAndGotoURL = useSleepAndGotoURL();
   const contractCfg = useGameContractConfig();
   const { writeContractAsync, isPending } = useWriteContract();
   const { address: userAccount } = useAccount();
@@ -48,16 +47,14 @@ export default function GameCard({ gameId }: GameCardProps) {
         args: [gameId],
       });
 
-      if (setState) {
-        router.push(`/game/${gameId}`);
-      }
+      setState && sleepAndGotoURL(2, `/game/${gameId}`);
     };
 
     joinGame();
     return () => {
       setState = false;
     };
-  }, [writeContractAsync, contractCfg, gameId, router]);
+  }, [writeContractAsync, contractCfg, gameId, sleepAndGotoURL]);
 
   /**
    * call on-chain `getGame()` on page load
@@ -98,7 +95,7 @@ export default function GameCard({ gameId }: GameCardProps) {
 
         <CardBody>
           <Text>Players: {game.players.length}</Text>
-          <UnorderedList styleType="- ">
+          <UnorderedList styleType="'- '">
             {game.players.map((p) => (
               <ListItem key={`game-${gameId}-${p}`} fontSize={14}>
                 {p}
@@ -109,7 +106,6 @@ export default function GameCard({ gameId }: GameCardProps) {
             State:&nbsp;
             <strong>{formatter.gameState(gameState, game.currentRound)}</strong>
           </Text>
-          <Text>Created: {formatter.dateTime(Number(game.startTime))}</Text>
           <Text>Last Updated: {formatter.dateTime(Number(game.lastUpdate))}</Text>
         </CardBody>
       </LinkBox>
@@ -117,8 +113,8 @@ export default function GameCard({ gameId }: GameCardProps) {
         {gameState === GameState.GameInitiated && (
           <Button
             onClick={joinGameHandler}
-            variant="outline"
-            colorScheme="blue"
+            variant="solid"
+            colorScheme="yellow"
             isDisabled={userJoinedGame}
             isLoading={isPending}
           >

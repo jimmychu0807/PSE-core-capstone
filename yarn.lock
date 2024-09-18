@@ -2319,6 +2319,7 @@ __metadata:
     "@types/react": "npm:^18.2.62"
     "@types/react-dom": "npm:^18.2.7"
     "@types/snarkjs": "npm:^0.7.8"
+    "@uidotdev/usehooks": "npm:^2.4.1"
     "@wagmi/connectors": "npm:^5.1"
     "@wagmi/core": "npm:^2.12.11"
     "@web3modal/wagmi": "npm:^5.1.8"
@@ -4375,6 +4376,16 @@ __metadata:
     "@typescript-eslint/types": "npm:7.2.0"
     eslint-visitor-keys: "npm:^3.4.1"
   checksum: 10/e0c9c7a9bb1ae93149e7a4816aed12651fd7374d0eb17e1f45348dbfddd8ee7014d3de35b40bc46b9df73cc1c9053aaf5d82b43270d93a0b551ed14e8afde37a
+  languageName: node
+  linkType: hard
+
+"@uidotdev/usehooks@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "@uidotdev/usehooks@npm:2.4.1"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: 10/7f2e1dcfcaf654841150fde36556a257afb2240bca0145586b4e1e9385b85fea108a7dd17c2cbc4c2bd46d136126ffdf84267118933120fe54ad2e028c2dfa68
   languageName: node
   linkType: hard
 
