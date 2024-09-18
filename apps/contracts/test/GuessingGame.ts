@@ -18,6 +18,8 @@ import { GuessingGame } from "../typechain-types";
 const COMMITMENT_VERIFIER_BASEPATH = "./artifacts/circuits/commit-1-100";
 const OPENING_VERIFIER_BASEPATH = "./artifacts/circuits/open-1-100";
 
+const defaultSubmissions = { host: 1, bob: 3, charlie: 5 };
+
 describe("GuessingGame", () => {
   async function deployContractsCleanSlate() {
     const contracts = await run("deploy", { logs: false });
@@ -45,7 +47,7 @@ describe("GuessingGame", () => {
     return { contracts, players: { host, bob, charlie, dave } };
   }
 
-  async function deployContractsRoundOpen() {
+  async function deployContractsRoundOpen(submissions = defaultSubmissions) {
     const { contracts, players } = await deployContractsGameStarted();
     const { host, bob, charlie } = players;
     const { gameContract } = contracts;
@@ -55,9 +57,9 @@ describe("GuessingGame", () => {
 
     // generate proofs
     const inputs = {
-      host: { in: 1, rand },
-      bob: { in: 3, rand },
-      charlie: { in: 5, rand },
+      host: { in: submissions.host, rand },
+      bob: { in: submissions.bob, rand },
+      charlie: { in: submissions.charlie, rand },
     };
 
     const fullProofs = await Promise.all([
@@ -91,8 +93,8 @@ describe("GuessingGame", () => {
     return { contracts, players, inputs };
   }
 
-  async function deployContractsRoundEnd() {
-    const { contracts, players, inputs } = await deployContractsRoundOpen();
+  async function deployContractsRoundEnd(submissions = defaultSubmissions) {
+    const { contracts, players, inputs } = await deployContractsRoundOpen(submissions);
     const { host, bob, charlie } = players;
     const { gameContract } = contracts;
     const GAME_ID = 0;
@@ -120,7 +122,11 @@ describe("GuessingGame", () => {
     return { contracts, players, inputs };
   }
 
-  async function deployContractsGameAlmostEnd() {
+  async function deployContractsRoundEnd_30_80_20() {
+    return await deployContractsRoundEnd({ host: 30, bob: 80, charlie: 20 });
+  }
+
+  async function deployContractsGameAlmostEnd(submissions = defaultSubmissions) {
     const { contracts, players } = await deployContractsGameStarted();
     const { host, bob, charlie } = players;
     const { gameContract } = contracts;
@@ -128,9 +134,9 @@ describe("GuessingGame", () => {
     const rand = randomInt(281474976710655);
 
     const inputs = {
-      host: { in: 1, rand },
-      bob: { in: 3, rand },
-      charlie: { in: 5, rand },
+      host: { in: submissions.host, rand },
+      bob: { in: submissions.bob, rand },
+      charlie: { in: submissions.charlie, rand },
     };
 
     // generate commitment proofs
@@ -438,11 +444,9 @@ describe("GuessingGame", () => {
         .withArgs(GAME_ID, 0, bob.address, inputs.bob.in);
 
       // Check Bob has won
-      const roundsWon = await gameContract.getPlayerGameRoundsWon(GAME_ID, bob.address);
-      expect(roundsWon).to.be.equal(1);
-
-      // check gamestate back to RoundCommit
       const game = await gameContract.getGame(GAME_ID);
+
+      expect(game.roundWinners[game.roundWinners.length - 1]).to.be.equal(bob.address);
       expect(game.state).to.be.equal(GameState.RoundCommit);
     });
   });
@@ -460,11 +464,31 @@ describe("GuessingGame", () => {
         .withArgs(GAME_ID, bob.address);
 
       const game = await gameContract.getGame(GAME_ID);
-      expect(game.winner).to.be.equal(bob.address);
       expect(game.state).to.be.equal(GameState.GameEnd);
+      expect(game.winner).to.be.equal(bob.address);
 
-      const roundsWon = await gameContract.getPlayerGameRoundsWon(GAME_ID, bob.address);
-      expect(roundsWon).to.be.equal(ROUNDS_TO_WIN);
+      const winnerRoundsWon = game.roundWinners.filter((p) => p === bob.address).length;
+      expect(winnerRoundsWon).to.be.equal(ROUNDS_TO_WIN);
+    });
+  });
+
+  describe("L Testing concludeRound", () => {
+    it("should calc properly with (30, 80, 20)", async () => {
+      const { contracts, players, inputs } = await loadFixture(deployContractsRoundEnd_30_80_20);
+      const { gameContract } = contracts;
+      const { host, bob } = players;
+      const GAME_ID = 0;
+
+      // Expect Bob be the winner
+      await expect(gameContract.concludeRound(GAME_ID))
+        .to.emit(gameContract, "RoundWinner")
+        .withArgs(GAME_ID, 0, host.address, inputs.host.in);
+
+      // Check Bob has won
+      const game = await gameContract.getGame(GAME_ID);
+
+      expect(game.roundWinners[game.roundWinners.length - 1]).to.be.equal(host.address);
+      expect(game.state).to.be.equal(GameState.RoundCommit);
     });
   });
 });

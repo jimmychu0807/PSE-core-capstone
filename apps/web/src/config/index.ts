@@ -45,7 +45,7 @@ export const projectInfo = {
   name: "PSE Capstone - Number Guessing Game",
   desc: "Guessing game using zk-SNARKS",
   homepage: "https://github.com/jimmychu0807/PSE-core-self-capstone",
-  authorHomepage: "https://jimmychu0807.hk",
+  authorHomepage: "https://linktr.ee/jimmychu0807",
   github: "https://github.com/jimmychu0807/PSE-core-self-capstone",
   image: "https://avatars.githubusercontent.com/u/898091?v=4",
   psePage: "https://pse.dev/en/programs",

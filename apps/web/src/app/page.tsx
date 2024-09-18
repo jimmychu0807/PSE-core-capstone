@@ -8,7 +8,7 @@ import { Button, Heading, VStack, Stack } from "@chakra-ui/react";
 
 // Components defined in this repo
 import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
-import { GameCard } from "@/components";
+import { GameCard, GameHelpPopover } from "@/components";
 import { zeroToNArr } from "@/utils";
 
 export default function HomePage() {
@@ -16,7 +16,6 @@ export default function HomePage() {
   const contractCfg = useGameContractConfig();
   const sleepAndGotoURL = useSleepAndGotoURL();
   const [nextGameId, setNextGameId] = useState(0);
-
   const { isPending, writeContractAsync } = useWriteContract();
 
   /**
@@ -65,6 +64,7 @@ export default function HomePage() {
       <Heading as="h2" size="xl" textAlign="center">
         Guessing Game
       </Heading>
+      <GameHelpPopover displayText="How to play? 🤔" />
       <Button
         colorScheme="yellow"
         size="lg"
