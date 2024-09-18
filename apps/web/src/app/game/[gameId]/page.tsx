@@ -4,24 +4,19 @@
 import { useState, useEffect } from "react";
 import { useConfig, useAccount } from "wagmi";
 import { readContract, readContracts } from "@wagmi/core";
-import {
-  Badge,
-  ListItem,
-  Text,
-  UnorderedList,
-  VStack,
-} from "@chakra-ui/react";
+import { Badge, ListItem, Text, UnorderedList, VStack } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { type Address } from "viem";
 
 // Components defined in this repo
 import { useGameContractConfig } from "@/hooks";
 import { formatter } from "@/utils";
-import { type GameView , type SubNullHash, GameState } from "@/types";
+import { type GameView, type SubNullHash, GameState } from "@/types";
 
 import GameInitiatedActionPanel from "./GameInitiatedActionPanel";
 import SubmitCommitmentActionPanel from "./SubmitCommitmentActionPanel";
 import OpenCommitmentActionPanel from "./OpenCommitmentActionPanel";
+import GameConcludeRoundActionPanel from "./GameConcludeRoundActionPanel";
 
 type GamePageProps = {
   params: {
@@ -95,7 +90,9 @@ export default function GamePage(pageProps: GamePageProps) {
         return memo;
       }, {} as Record<Address, number>);
 
-      setState && openings && setPlayerOpenings(openings);
+      if (game && setState && openings) {
+        setPlayerOpenings(openings);
+      }
     };
 
     game && Number(game.state) === GameState.RoundCommit && getPlayerCommitments();
@@ -176,6 +173,9 @@ export default function GamePage(pageProps: GamePageProps) {
             (playerOpenings?.[userAccount] as number) > 0
           }
         />
+      )}
+      {gameState === GameState.RoundEnd && (
+        <GameConcludeRoundActionPanel gameId={gameId} game={game} />
       )}
     </VStack>
   );

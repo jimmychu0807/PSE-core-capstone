@@ -3,18 +3,20 @@
 // 3rd-parties components
 import { useCallback } from "react";
 import { useAccount, useWriteContract } from "wagmi";
-import {
-  Button,
-  HStack,
-  Text,
-} from "@chakra-ui/react";
+import { Button, HStack, Text } from "@chakra-ui/react";
 
 // Components defined in this repo
 import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
 import { GameConfig } from "@/config";
 import { type GameView } from "@/types";
 
-export default function GameInitiatedActionPanel({ gameId, game }: { gameId: number; game: GameView }) {
+export default function GameInitiatedActionPanel({
+  gameId,
+  game,
+}: {
+  gameId: number;
+  game: GameView;
+}) {
   const { address: userAccount } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
   const contractCfg = useGameContractConfig();
@@ -55,7 +57,7 @@ export default function GameInitiatedActionPanel({ gameId, game }: { gameId: num
 
   const canStartGame: boolean = game.players.length >= GameConfig.MIN_PLAYERS_TO_START;
   const userJoinedGame = game.players.includes(userAccount);
-  const isGameHost = userAccount === game.players[0];
+  const isGameHost = game.players[0] === userAccount;
 
   return (
     <HStack>

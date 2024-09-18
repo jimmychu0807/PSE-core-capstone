@@ -113,7 +113,7 @@ export default function GameCard({ gameId }: GameCardProps) {
         {gameState === GameState.GameInitiated && (
           <Button
             onClick={joinGameHandler}
-            variant="solid"
+            variant="outline"
             colorScheme="yellow"
             isDisabled={userJoinedGame}
             isLoading={isPending}

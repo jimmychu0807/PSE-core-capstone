@@ -49,14 +49,14 @@ export default function OpenCommitmentActionPanel({
       const formValues = Object.fromEntries(formData.entries());
       const { submission, nullifier } = formValues;
 
-      if (!!submission || !!nullifier) {
+      if (typeof submission === "undefined" || typeof nullifier === "undefined") {
         return setOpeningError("Please enter a value for submission & nullifier");
       }
 
       const fullProof = await generateFullProof(
         "OpeningProof",
         Number(submission),
-        nullifier || ""
+        nullifier as string
       );
 
       await writeContractAsync({

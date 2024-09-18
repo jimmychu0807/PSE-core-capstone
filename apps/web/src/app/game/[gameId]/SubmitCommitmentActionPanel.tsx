@@ -3,20 +3,13 @@
 // 3rd-parties components
 import { type FormEvent, useCallback, useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  VStack,
-} from "@chakra-ui/react";
+import { Button, FormControl, FormErrorMessage, FormLabel, Input, VStack } from "@chakra-ui/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 
 // Components defined in this repo
 import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
 import { useLogContext } from "@/context";
-import { GameConfig, } from "@/config";
+import { GameConfig } from "@/config";
 import { getRandomNullifier, generateFullProof } from "@/utils/proof";
 import { type GameView, type SubNullLocalStorage } from "@/types";
 

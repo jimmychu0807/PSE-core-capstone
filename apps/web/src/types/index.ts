@@ -49,5 +49,5 @@ export type SubNullHash = {
 
 export type SubNullLocalStorage = {
   submission: number;
-  nullifier: SubNullHash['nullifier'];
+  nullifier: SubNullHash["nullifier"];
 };
