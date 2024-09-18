@@ -101,14 +101,7 @@ export default function OpenCommitmentActionPanel({
             />
           </InputGroup>
         </FormControl>
-        <Button
-          display="block"
-          margin="0.5em auto"
-          mt={4}
-          colorScheme="yellow"
-          type="submit"
-          isLoading={isPending}
-        >
+        <Button colorScheme="yellow" type="submit" isLoading={isPending}>
           Open Commitment
         </Button>
       </VStack>

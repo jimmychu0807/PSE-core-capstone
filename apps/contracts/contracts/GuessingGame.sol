@@ -6,6 +6,7 @@ import {IGuessingGame} from "./interfaces/IGuessingGame.sol";
 import {ICommitmentVerifier} from "./interfaces/ICommitmentVerifier.sol";
 import {IOpeningVerifier} from "./interfaces/IOpeningVerifier.sol";
 import {MIN_NUM, MAX_NUM, MIN_PLAYERS_TO_START, ROUNDS_TO_WIN} from "./base/Constants.sol";
+// import "hardhat/console.sol";
 
 contract GuessingGame is IGuessingGame, Ownable {
   ICommitmentVerifier public commitmentVerifier;
@@ -303,18 +304,19 @@ contract GuessingGame is IGuessingGame, Ownable {
     uint64 sum = 0;
     for (uint64 i = 0; i < game.players.length; i++) {
       address p = game.players[i];
-      sum += game.openings[round][p] * 1000;
+      sum += uint64(game.openings[round][p]) * 1000;
     }
     uint64 average = uint64(sum / playerCnt);
 
     // Finding the winner
     // When two openings have the same distance from the average, the round is draw.
     address minPlayer = game.players[0];
-    uint64 minDiff = _diff(game.openings[round][minPlayer] * 1000, average);
+    uint64 minDiff = _diff(uint64(game.openings[round][minPlayer]) * 1000, average);
+
     bool draw = false;
     for (uint64 i = 1; i < game.players.length; i++) {
       address p = game.players[i];
-      uint64 diff = _diff(game.openings[round][p] * 1000, average);
+      uint64 diff = _diff(uint64(game.openings[round][p]) * 1000, average);
       if (diff == minDiff) {
         draw = true;
       } else if (diff < minDiff) {
