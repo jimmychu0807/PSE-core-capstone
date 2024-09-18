@@ -20,7 +20,7 @@ import {
 
 // Components defined in this repo
 import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
-import { GameState, type GameView } from "@/config";
+import { GameState, type GameView } from "@/types";
 import { formatter } from "@/utils";
 
 type GameCardProps = {

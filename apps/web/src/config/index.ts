@@ -8,15 +8,6 @@ import {
 
 import * as GameJson from "@contract-artifacts/GuessingGame.json";
 
-// IMPROVE: can you get this GameState from hardhat compilation?
-export enum GameState {
-  GameInitiated = 0,
-  RoundCommit,
-  RoundOpen,
-  RoundEnd,
-  GameEnd,
-}
-
 export const { abi: GameContractAbi } = GameJson;
 
 /**
@@ -25,25 +16,6 @@ export const { abi: GameContractAbi } = GameJson;
  *   - /apps/contracts/contracts/base/Constants.sol
  *   - /apps/contracts/contracts/interfaces/IGuessingGame.sol
  **/
-
-// Copied over from typechain-types inside apps/contracts
-export type GameView = [
-  players: Address[],
-  currentRound: bigint,
-  state: bigint,
-  winner: string,
-  startTime: bigint,
-  lastUpdate: bigint,
-  endTime: bigint
-] & {
-  players: Address[];
-  currentRound: bigint;
-  state: bigint;
-  winner: string;
-  startTime: bigint;
-  lastUpdate: bigint;
-  endTime: bigint;
-};
 
 export const GameEvent = {
   newGame: "NewGame",

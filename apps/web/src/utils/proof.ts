@@ -1,5 +1,7 @@
-import { type Proof, type ProofType, proofArtifacts } from "@/config/proof";
 import { type PlonkProof, plonk } from "snarkjs";
+
+import { type Proof, type ProofType } from "@/types";
+import {  proofArtifacts } from "@/config/proof";
 
 export function getRandomNullifier(): string {
   // Using Crypto.getRandomValues():
