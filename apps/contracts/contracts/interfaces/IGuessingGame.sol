@@ -12,7 +12,7 @@ interface IGuessingGame {
     // game players. The first player is the game host
     address[] players;
     uint8 currentRound;
-    mapping(address => uint8) playerRoundsWon;
+    address[] roundWinners;
     // player bid list
     mapping(uint8 => mapping(address => Commitment)) commitments;
     mapping(uint8 => mapping(address => uint16)) openings;
@@ -25,6 +25,7 @@ interface IGuessingGame {
   struct GameView {
     address[] players;
     uint8 currentRound;
+    address[] roundWinners;
     GameState state;
     address winner;
     uint256 startTime;

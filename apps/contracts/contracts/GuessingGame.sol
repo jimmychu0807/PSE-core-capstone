@@ -82,6 +82,7 @@ contract GuessingGame is IGuessingGame, Ownable {
       GameView({
         players: game.players,
         currentRound: game.currentRound,
+        roundWinners: game.roundWinners,
         state: game.state,
         winner: game.winner,
         startTime: game.startTime,
@@ -111,14 +112,6 @@ contract GuessingGame is IGuessingGame, Ownable {
   ) public view validGameId(gameId) returns (uint16) {
     Game storage game = games[gameId];
     return game.openings[round][player];
-  }
-
-  function getPlayerGameRoundsWon(
-    uint32 gameId,
-    address player
-  ) public view validGameId(gameId) returns (uint8) {
-    Game storage game = games[gameId];
-    return game.playerRoundsWon[player];
   }
 
   /**
@@ -335,11 +328,14 @@ contract GuessingGame is IGuessingGame, Ownable {
     if (draw) {
       emit RoundDraw(gameId, round);
     } else {
-      game.playerRoundsWon[minPlayer] += 1;
+      game.roundWinners.push(minPlayer);
       emit RoundWinner(gameId, round, minPlayer, game.openings[round][minPlayer]);
     }
 
-    uint8 roundsWon = game.playerRoundsWon[minPlayer];
+    uint8 roundsWon = 0;
+    for (uint8 i = 0; i < game.roundWinners.length; ++i) {
+      if (game.roundWinners[i] == minPlayer) ++roundsWon;
+    }
 
     // update the game.state or end the game
     if (roundsWon == ROUNDS_TO_WIN) {

@@ -438,11 +438,9 @@ describe("GuessingGame", () => {
         .withArgs(GAME_ID, 0, bob.address, inputs.bob.in);
 
       // Check Bob has won
-      const roundsWon = await gameContract.getPlayerGameRoundsWon(GAME_ID, bob.address);
-      expect(roundsWon).to.be.equal(1);
-
-      // check gamestate back to RoundCommit
       const game = await gameContract.getGame(GAME_ID);
+
+      expect(game.roundWinners[game.roundWinners.length - 1]).to.be.equal(bob.address);
       expect(game.state).to.be.equal(GameState.RoundCommit);
     });
   });
@@ -460,11 +458,11 @@ describe("GuessingGame", () => {
         .withArgs(GAME_ID, bob.address);
 
       const game = await gameContract.getGame(GAME_ID);
-      expect(game.winner).to.be.equal(bob.address);
       expect(game.state).to.be.equal(GameState.GameEnd);
+      expect(game.winner).to.be.equal(bob.address);
 
-      const roundsWon = await gameContract.getPlayerGameRoundsWon(GAME_ID, bob.address);
-      expect(roundsWon).to.be.equal(ROUNDS_TO_WIN);
+      const winnerRoundsWon = game.roundWinners.filter((p) => p === bob.address).length;
+      expect(winnerRoundsWon).to.be.equal(ROUNDS_TO_WIN);
     });
   });
 });
