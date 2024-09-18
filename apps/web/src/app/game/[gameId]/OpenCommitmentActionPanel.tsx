@@ -10,6 +10,7 @@ import {
   Input,
   InputGroup,
   InputLeftAddon,
+  Switch,
   VStack,
 } from "@chakra-ui/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
@@ -80,6 +81,12 @@ export default function OpenCommitmentActionPanel({
       <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8" p={4}>
         <FormControl isInvalid={!!openingError}>
           <FormLabel>Open Commitment</FormLabel>
+
+          {/* Advanced Mode */}
+          <FormLabel htmlFor="form-advanced-mode" mb="0">
+            Advanced Mode
+          </FormLabel>
+          <Switch id="form-advanced-mode" />
 
           <InputGroup display={advancedMode ? "block" : "none"}>
             <InputLeftAddon>Commitment</InputLeftAddon>

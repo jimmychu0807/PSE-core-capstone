@@ -13,6 +13,46 @@ import { projectInfo } from "@/config";
 import { useLogContext } from "@/context/LogContext";
 import { Web3Connect } from "@/components";
 
+export default function PageContainer({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const { log } = useLogContext();
+  const { walletInfo } = useWalletInfo();
+
+  return (
+    <VStack spacing={0} align="stretch" height="100vh">
+      <Header />
+      <VStack flex="1" spacing={0} alignItems="center" align="stretch" height="90vh">
+        <Box flex="1" alignItems="center">
+          {walletInfo ? <>{children}</> : <PromptForWalletConnect />}
+        </Box>
+        {log && (
+          <Box
+            position="fixed"
+            bottom="10"
+            left="0"
+            right="0"
+            borderTopWidth="1px"
+            borderTopColor="text.600"
+            backgroundColor="darkBlueBg"
+            justify="center"
+            color="white"
+            spacing="4"
+            p={2}
+            textAlign="center"
+          >
+            {log.endsWith("...") && <Spinner color="primary.400" />}
+            <Text>{log}</Text>
+          </Box>
+        )}
+      </VStack>
+      <Footer />
+    </VStack>
+  );
+}
+
 function PromptForWalletConnect() {
   return (
     <VStack align="center" justify="center" height="80vh">
@@ -81,39 +121,5 @@ function Header() {
         <Web3Connect />
       </HStack>
     </HStack>
-  );
-}
-
-export default function PageContainer({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const { log } = useLogContext();
-  const { walletInfo } = useWalletInfo();
-
-  return (
-    <VStack spacing={0} align="stretch" height="100vh">
-      <Header />
-      <Box flex="1" alignItems="center">
-        {walletInfo ? <>{children}</> : <PromptForWalletConnect />}
-        {log && (
-          <HStack
-            flexBasis="56px"
-            borderTopWidth="1px"
-            borderTopColor="text.600"
-            backgroundColor="darkBlueBg"
-            align="center"
-            justify="center"
-            spacing="4"
-            p="4"
-          >
-            {log.endsWith("...") && <Spinner color="primary.400" />}
-            <Text>{log}</Text>
-          </HStack>
-        )}
-      </Box>
-      <Footer />
-    </VStack>
   );
 }
