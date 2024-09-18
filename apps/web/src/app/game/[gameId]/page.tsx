@@ -21,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { type Address } from "viem";
 
 // Components defined in this repo
 import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
@@ -35,14 +36,24 @@ type GamePageProps = {
   };
 };
 
+type SubNullHash = {
+  submission: string;
+  nullifier: string;
+};
+
+type SubNullLocalStorage = {
+  submission: number;
+  nullifier: string;
+};
+
 export default function GamePage(pageProps: GamePageProps) {
   const { gameId } = pageProps.params;
   const wagmiConfig = useConfig();
   const contractCfg = useGameContractConfig();
   const { address: userAccount } = useAccount();
   const [game, setGame] = useState<GameView | undefined>(undefined);
-  const [playerCommitments, setPlayerCommitments] = useState(undefined);
-  const [playerOpenings, setPlayerOpenings] = useState(undefined);
+  const [playerCommitments, setPlayerCommitments] = useState<Record<Address, SubNullHash>>({});
+  const [playerOpenings, setPlayerOpenings] = useState<Record<Address, number>>({});
 
   /**
    * call on-chain `getGame()` on page load
@@ -70,36 +81,38 @@ export default function GamePage(pageProps: GamePageProps) {
 
     const getPlayerCommitments = async () => {
       const result = await readContracts(wagmiConfig, {
-        contracts: game.players.map((p) => ({
+        // @ts-ignore
+        contracts: game?.players?.map((p) => ({
           ...contractCfg,
           functionName: "getPlayerCommitment",
-          args: [gameId, game.currentRound, p],
+          args: [gameId, game?.currentRound, p],
         })),
       });
 
-      const commitments = game.players.reduce((memo, p, idx) => {
-        memo[p] = result[idx]["result"];
+      const commitments = game?.players?.reduce((memo, p, idx) => {
+        memo[p] = result?.[idx]?.["result"] as SubNullHash;
         return memo;
-      }, {});
+      }, {} as Record<Address, SubNullHash>);
 
-      setState && setPlayerCommitments(commitments);
+      setState && commitments && setPlayerCommitments(commitments);
     };
 
     const getPlayerOpenings = async () => {
       const result = await readContracts(wagmiConfig, {
-        contracts: game.players.map((p) => ({
+        // @ts-ignore
+        contracts: game?.players?.map((p) => ({
           ...contractCfg,
           functionName: "getPlayerOpening",
-          args: [gameId, game.currentRound, p],
+          args: [gameId, game?.currentRound, p],
         })),
       });
 
-      const openings = game.players.reduce((memo, p, idx) => {
-        memo[p] = result[idx]["result"];
+      const openings = game?.players?.reduce((memo, p, idx) => {
+        memo[p] = result?.[idx]?.["result"] as number;
         return memo;
-      }, {});
+      }, {} as Record<Address, number>);
 
-      setState && setPlayerOpenings(openings);
+      setState && openings && setPlayerOpenings(openings);
     };
 
     game && Number(game.state) === GameState.RoundCommit && getPlayerCommitments();
@@ -142,12 +155,8 @@ export default function GamePage(pageProps: GamePageProps) {
               {game.players.map((p) => (
                 <ListItem key={`${gameId}-${game.currentRound}-${p}`} fontSize={14}>
                   {p}&nbsp;
-                  {((gameState === GameState.RoundCommit &&
-                    playerCommitments &&
-                    !!playerCommitments[p]["submission"]) ||
-                    (gameState === GameState.RoundOpen &&
-                      playerOpenings &&
-                      !!playerOpenings[p])) && (
+                  {((gameState === GameState.RoundCommit && !!playerCommitments?.[p]?.submission) ||
+                    (gameState === GameState.RoundOpen && !!playerOpenings?.[p])) && (
                     <Badge variant="outline" colorScheme="yellow">
                       <CheckIcon boxSize={2} />
                     </Badge>
@@ -168,8 +177,9 @@ export default function GamePage(pageProps: GamePageProps) {
           gameId={gameId}
           game={game}
           hasSubmitted={
-            !!playerCommitments?.[userAccount]?.["submission"] &&
-            playerCommitments?.[userAccount]?.["submission"] > 0
+            !!userAccount &&
+            !!playerCommitments?.[userAccount]?.submission &&
+            playerCommitments?.[userAccount]?.submission !== "0"
           }
         />
       )}
@@ -177,7 +187,11 @@ export default function GamePage(pageProps: GamePageProps) {
         <OpenCommitmentActionPanel
           gameId={gameId}
           game={game}
-          hasOpened={!!playerOpenings?.[userAccount] && playerOpenings?.[userAccount] > 0}
+          hasOpened={
+            !!userAccount &&
+            !!playerOpenings?.[userAccount] &&
+            (playerOpenings?.[userAccount] as number) > 0
+          }
         />
       )}
     </VStack>
@@ -195,7 +209,7 @@ function OpenCommitmentActionPanel({
 }) {
   const advancedMode = false;
   const { address: userAccount } = useAccount();
-  const [subNull] = useLocalStorage(
+  const [subNull] = useLocalStorage<SubNullLocalStorage>(
     `subNull-${gameId}-${game.currentRound}-${userAccount}`,
     undefined
   );
@@ -224,7 +238,7 @@ function OpenCommitmentActionPanel({
               id="submission"
               name="submission"
               type={advancedMode ? "number" : "hidden"}
-              value={subNull["submission"]}
+              value={subNull?.["submission"]}
             />
           </InputGroup>
 
@@ -234,7 +248,7 @@ function OpenCommitmentActionPanel({
               id="nullifier"
               name="nullifier"
               type={advancedMode ? "number" : "hidden"}
-              value={subNull["nullifier"]}
+              value={subNull?.["nullifier"]}
             />
           </InputGroup>
         </FormControl>
@@ -257,7 +271,7 @@ function SubmitCommitmentActionPanel({
 }) {
   const { address: userAccount } = useAccount();
   const { setLog } = useLogContext();
-  const [, saveSubNull] = useLocalStorage(
+  const [, saveSubNull] = useLocalStorage<SubNullLocalStorage>(
     `subNull-${gameId}-${game.currentRound}-${userAccount}`,
     undefined
   );

@@ -5,7 +5,6 @@ import { useCallback, useState, useEffect } from "react";
 import { useConfig, useAccount, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Card,
   CardHeader,

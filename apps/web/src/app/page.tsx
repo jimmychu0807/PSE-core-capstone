@@ -2,10 +2,9 @@
 
 // 3rd-parties components
 import { useCallback, useEffect, useState } from "react";
-import { useConfig, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useConfig, useWriteContract } from "wagmi";
 import { readContract } from "@wagmi/core";
 import { Button, Heading, VStack, Stack } from "@chakra-ui/react";
-import { useRouter } from "next/navigation";
 
 // Components defined in this repo
 import { useGameContractConfig, useSleepAndGotoURL } from "@/hooks";
