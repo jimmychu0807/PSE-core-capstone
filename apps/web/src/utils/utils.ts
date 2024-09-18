@@ -22,4 +22,7 @@ export const formatter = {
     if (gameStateNum === GameState.RoundEnd) return `Round End ${roundStr}`;
     return "Game End";
   },
+  repeatStrNTimes(str: string, n: number, sep: string = " "): string {
+    return new Array(n).fill(str).join(sep);
+  },
 };
