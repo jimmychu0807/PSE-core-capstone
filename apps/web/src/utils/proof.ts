@@ -1,5 +1,7 @@
-import { type Proof, type ProofType, proofArtifacts } from "@/config/proof";
 import { type PlonkProof, plonk } from "snarkjs";
+
+import { type Proof, type ProofType } from "@/types";
+import { proofArtifacts } from "@/config/proof";
 
 export function getRandomNullifier(): string {
   // Using Crypto.getRandomValues():
@@ -24,32 +26,15 @@ export function zeroPadNBytes(input: string | undefined, n: number, withPrefix =
 }
 
 export function toOnChainProof(proof: PlonkProof): Proof["proof"] {
+  const { A, B, C, Z, T1, T2, T3, Wxi, Wxiw, eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw } =
+    proof;
+
+  // prettier-ignore
   return [
-    zeroPadNBytes(proof.A[0], 32),
-    zeroPadNBytes(proof.A[1], 32),
-    zeroPadNBytes(proof.B[0], 32),
-    zeroPadNBytes(proof.B[1], 32),
-    zeroPadNBytes(proof.C[0], 32),
-    zeroPadNBytes(proof.C[1], 32),
-    zeroPadNBytes(proof.Z[0], 32),
-    zeroPadNBytes(proof.Z[1], 32),
-    zeroPadNBytes(proof.T1[0], 32),
-    zeroPadNBytes(proof.T1[1], 32),
-    zeroPadNBytes(proof.T2[0], 32),
-    zeroPadNBytes(proof.T2[1], 32),
-    zeroPadNBytes(proof.T3[0], 32),
-    zeroPadNBytes(proof.T3[1], 32),
-    zeroPadNBytes(proof.Wxi[0], 32),
-    zeroPadNBytes(proof.Wxi[1], 32),
-    zeroPadNBytes(proof.Wxiw[0], 32),
-    zeroPadNBytes(proof.Wxiw[1], 32),
-    zeroPadNBytes(proof.eval_a, 32),
-    zeroPadNBytes(proof.eval_b, 32),
-    zeroPadNBytes(proof.eval_c, 32),
-    zeroPadNBytes(proof.eval_s1, 32),
-    zeroPadNBytes(proof.eval_s2, 32),
-    zeroPadNBytes(proof.eval_zw, 32),
-  ];
+    A[0], A[1], B[0], B[1], C[0], C[1], Z[0], Z[1],
+    T1[0], T1[1], T2[0], T2[1], T3[0], T3[1], Wxi[0], Wxi[1],
+    Wxiw[0], Wxiw[1], eval_a, eval_b, eval_c, eval_s1, eval_s2, eval_zw
+  ].map((v) => zeroPadNBytes(v, 32)) as Proof["proof"];
 }
 
 export async function generateFullProof(
