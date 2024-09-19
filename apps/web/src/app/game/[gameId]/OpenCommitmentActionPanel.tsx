@@ -45,8 +45,9 @@ export default function OpenCommitmentActionPanel({
   const [openingError, setOpeningError] = useState<string>("");
   const sleepAndGotoURL = useSleepAndGotoURL();
   // For setting the initial value of the two form inputs
-  const subRef = useRef(null);
-  const nullRef = useRef(null);
+  const subRef = useRef<HTMLInputElement>(null);
+  const nullRef = useRef<HTMLInputElement>(null);
+  const [refSet, setRefSet] = useState<boolean>(false);
 
   const openCommitment = useCallback(
     async (ev: FormEvent) => {
@@ -78,9 +79,10 @@ export default function OpenCommitmentActionPanel({
   );
 
   useEffect(() => {
-    subRef.current && (subRef.current.value = subNull.submission);
-    nullRef.current && (nullRef.current.value = subNull.nullifier);
-  }, [subNull]);
+    !refSet && subRef.current && (subRef.current.value = subNull.submission.toString());
+    !refSet && nullRef.current && (nullRef.current.value = subNull.nullifier);
+    setRefSet(true);
+  }, [subNull, refSet]);
 
   return hasOpened ? (
     <Button variant="outline" colorScheme="yellow" isDisabled={true}>

@@ -37,9 +37,7 @@ export default function PageContainer({
             borderTopWidth="1px"
             borderTopColor="text.600"
             backgroundColor="darkBlueBg"
-            justify="center"
             color="white"
-            spacing="4"
             p={2}
             textAlign="center"
           >
