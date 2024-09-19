@@ -1,12 +1,13 @@
 "use client";
 
 // 3rd-parties components
-import { type FormEvent, useCallback, useState } from "react";
+import { type FormEvent, useCallback, useState, useRef, useEffect } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import {
   Button,
   FormControl,
   FormLabel,
+  FormErrorMessage,
   HStack,
   Input,
   InputGroup,
@@ -43,6 +44,9 @@ export default function OpenCommitmentActionPanel({
   );
   const [openingError, setOpeningError] = useState<string>("");
   const sleepAndGotoURL = useSleepAndGotoURL();
+  // For setting the initial value of the two form inputs
+  const subRef = useRef(null);
+  const nullRef = useRef(null);
 
   const openCommitment = useCallback(
     async (ev: FormEvent) => {
@@ -51,8 +55,8 @@ export default function OpenCommitmentActionPanel({
       const formValues = Object.fromEntries(formData.entries());
       const { submission, nullifier } = formValues;
 
-      if (typeof submission === "undefined" || typeof nullifier === "undefined") {
-        return setOpeningError("Please enter a value for submission & nullifier");
+      if (!submission || !nullifier) {
+        return setOpeningError("Please enter a value for submission and nullifier.");
       }
 
       const fullProof = await generateFullProof(
@@ -73,6 +77,11 @@ export default function OpenCommitmentActionPanel({
     [gameId, contractCfg, setLog, sleepAndGotoURL, writeContractAsync]
   );
 
+  useEffect(() => {
+    subRef.current && (subRef.current.value = subNull.submission);
+    nullRef.current && (nullRef.current.value = subNull.nullifier);
+  }, [subNull]);
+
   return hasOpened ? (
     <Button variant="outline" colorScheme="yellow" isDisabled={true}>
       Waiting for other players to open...
@@ -83,33 +92,48 @@ export default function OpenCommitmentActionPanel({
         <FormControl isInvalid={!!openingError}>
           <FormLabel>Open Commitment</FormLabel>
 
-          {/* Advanced mode toggle */}
-          <HStack justify="space-between" align="center">
-            <FormLabel htmlFor="form-advanced-mode" mb="0">
-              Advanced Mode
-            </FormLabel>
-            <Switch id="form-advanced-mode" onChange={(e) => setAdvancedMode(e.target.checked)} />
-          </HStack>
+          <VStack spacing={3} alignItems="stretch">
+            {/* Advanced mode toggle */}
+            <HStack justify="space-between" align="center">
+              <FormLabel htmlFor="form-advanced-mode" mb="0">
+                Advanced Mode
+              </FormLabel>
+              <Switch
+                id="form-advanced-mode"
+                onChange={(e) => {
+                  setAdvancedMode(e.target.checked);
+                  setOpeningError("");
+                }}
+              />
+            </HStack>
 
-          <InputGroup display={advancedMode ? "block" : "none"}>
-            <InputLeftAddon>Commitment</InputLeftAddon>
-            <Input
-              id="submission"
-              name="submission"
-              type={advancedMode ? "number" : "hidden"}
-              value={subNull?.["submission"]}
-            />
-          </InputGroup>
+            <InputGroup size="sm" display={advancedMode ? "flex" : "none"}>
+              <InputLeftAddon color="blue.800" fontWeight="medium">
+                Commitment
+              </InputLeftAddon>
+              <Input
+                ref={subRef}
+                id="submission"
+                name="submission"
+                type={advancedMode ? "number" : "hidden"}
+                onChange={() => setOpeningError("")}
+              />
+            </InputGroup>
 
-          <InputGroup display={advancedMode ? "block" : "none"}>
-            <InputLeftAddon>Nullifier</InputLeftAddon>
-            <Input
-              id="nullifier"
-              name="nullifier"
-              type={advancedMode ? "number" : "hidden"}
-              value={subNull?.["nullifier"]}
-            />
-          </InputGroup>
+            <InputGroup size="sm" display={advancedMode ? "flex" : "none"}>
+              <InputLeftAddon color="blue.800" fontWeight="medium">
+                Nullifier
+              </InputLeftAddon>
+              <Input
+                ref={nullRef}
+                id="nullifier"
+                name="nullifier"
+                type={advancedMode ? "number" : "hidden"}
+                onChange={() => () => setOpeningError("")}
+              />
+            </InputGroup>
+          </VStack>
+          <FormErrorMessage>{openingError}</FormErrorMessage>
         </FormControl>
         <Button colorScheme="yellow" type="submit" isLoading={isPending}>
           Open Commitment
