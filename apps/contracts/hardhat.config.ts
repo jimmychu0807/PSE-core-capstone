@@ -26,12 +26,12 @@ function getNetworks(): NetworksUserConfig {
 
   return {
     sepolia: {
-      url: `https://sepolia.infura.io/v3/${infuraApiKey}`,
+      url: `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
       chainId: 11155111,
       accounts,
     },
     "optimism-sepolia": {
-      url: "https://opt-sepolia.g.alchemy.com/v2/${alchemyApiKey}",
+      url: `https://opt-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
       chainId: 11155420,
       accounts,
     },
@@ -77,6 +77,16 @@ const hardhatConfig: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        network: "optimismSepolia",
+        chainId: 11155420,
+        urls: {
+          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
+          browserURL: "https://sepolia-optimism.etherscan.io/",
+        },
+      },
+    ],
   },
   sourcify: {
     enabled: true,

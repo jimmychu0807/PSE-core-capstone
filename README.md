@@ -53,45 +53,9 @@ You can start your app locally with:
 yarn dev
 ```
 
-### Deploy the contract
+### Contract Deployment
 
-1. Go to the `apps/contracts` directory and deploy your contract:
-
-```bash
-yarn deploy --semaphore <semaphore-address> --network sepolia
-```
-
-2. Update the `apps/web-app/.env.production` file with your new contract address and the group id.
-
-3. Copy your contract artifacts from `apps/contracts/artifacts/contracts` folder to `apps/web-app/contract-artifacts` folder.
-
-> [!NOTE]
-> Check the Semaphore contract addresses [here](https://docs.semaphore.pse.dev/deployed-contracts).
-
-### Verify the contract
-
-Verify your contract on Etherscan:
-
-```bash
-yarn verify <your-contract-address> <semaphore-address> --network sepolia
-```
-
-> **Note**  
-> Remember to set the Etherscan API Key in your .env file.
-
-### Code formatting
-
-Run [Prettier](https://prettier.io/) to check formatting rules:
-
-```bash
-yarn prettier
-```
-
-or to automatically format the code:
-
-```bash
-yarn prettier:write
-```
+[Deployed contracts addresses](./docs/deployed-addresses.md)
 
 ### Key Components
 
