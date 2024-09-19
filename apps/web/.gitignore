@@ -50,5 +50,5 @@ public/worker-*.js.map
 .env.production
 
 # ZK artifacts
-public/circuit-artifacts
+# public/circuit-artifacts
 
