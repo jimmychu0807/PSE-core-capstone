@@ -12,14 +12,13 @@
 </p>
 
 | The repository is divided into two components: [web](./apps/web), [contracts](./apps/contracts), and [circuits](./apps/circuits). The contracts have been deployed on Optimism Sepolia. |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 This repo is modified from [Semaphore Boilerplate Template](https://github.com/semaphore-protocol/boilerplate)
 
 👇 Click below to check the project explanation video.
 
 [![Project Explanation Video](http://img.youtube.com/vi/MrhGMfzsAX0/0.jpg)](https://youtu.be/MrhGMfzsAX0 "Project Explanation Video")
-
 
 ## 🛠 Install
 
