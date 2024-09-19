@@ -24,7 +24,7 @@ task("deploy:game", "Deploy Number Guessing Game main contract")
     const contract = await factory.deploy(commitmentVerifier, openingVerifier);
     await contract.waitForDeployment();
 
-    logs && console.info(`GuessingGame contract: ${await contract.getAddress()}`);
+    logs && console.info(`Guessing Game Contract: ${await contract.getAddress()}`);
 
     return contract;
   });
@@ -45,8 +45,8 @@ task("deploy:game-verifiers", "Deploy two Number Guessing Game verifier contract
     await openingVerifier.waitForDeployment();
 
     if (logs) {
-      console.info(`commitment verifier: ${await commitmentVerifier.getAddress()}`);
-      console.info(`commitment verifier: ${await openingVerifier.getAddress()}`);
+      console.info(`Commitment Submission Verifier: ${await commitmentVerifier.getAddress()}`);
+      console.info(`Commitment Opening Verifier: ${await openingVerifier.getAddress()}`);
     }
 
     return { commitmentVerifier, openingVerifier };
