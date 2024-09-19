@@ -2,8 +2,7 @@ import { defineChain, type Chain, type Address } from "viem";
 import { cookieStorage, createStorage } from "wagmi";
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import {
-  sepolia, // Ethereum
-  optimismSepolia, // Optimism
+  optimismSepolia, // Optimism testnet
 } from "wagmi/chains";
 
 import * as GameJson from "@contract-artifacts/GuessingGame.json";
@@ -36,7 +35,6 @@ export const walletConnectProjectId = process.env["NEXT_PUBLIC_WALLETCONNECT_PRO
 export const deployedAddress = process.env["NEXT_PUBLIC_GUESSING_GAME_CONTRACT_ADDRESS"] as Address;
 
 export const RpcUrls = {
-  sepolia: `https://eth-sepolia.g.alchemy.com/v2/${process.env["NEXT_PUBLIC_ALCHEMY_API_KEY"]}`,
   optimismSepolia: `https://opt-sepolia.g.alchemy.com/v2/${process.env["NEXT_PUBLIC_ALCHEMY_API_KEY"]}`,
   devChain: "http://localhost:8545",
 };
@@ -61,9 +59,9 @@ const devChain = defineChain({
 });
 
 export const chains: readonly [Chain, ...Chain[]] =
-  process.env["NEXT_PUBLIC_ENV"] === "testnet"
-    ? [sepolia, optimismSepolia]
-    : [sepolia, optimismSepolia, devChain];
+  process.env["NEXT_PUBLIC_ENV"] === "development"
+    ? [optimismSepolia, devChain]
+    : [optimismSepolia];
 
 const wagmiMetadata = {
   name: projectInfo.name,
