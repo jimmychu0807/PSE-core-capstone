@@ -1,5 +1,5 @@
 <h1 align="center">
-    PSE Core Stage 2: Number Guessing Game
+    PSE Core Capstone Project: Number Guessing Game
 </h1>
 
 <p align="center">
@@ -9,15 +9,17 @@
     <a href="https://prettier.io/">
         <img alt="Code style prettier" src="https://img.shields.io/badge/code%20style-prettier-f8bc45?style=flat-square&logo=prettier">
     </a>
-    <a href="https://www.gitpoap.io/gh/semaphore-protocol/boilerplate" target="_blank">
-        <img src="https://public-api.gitpoap.io/v1/repo/semaphore-protocol/boilerplate/badge">
-    </a>
 </p>
 
-| The repository is divided into two components: [web app](./apps/web-app), [contracts](./apps/contracts), and [circuits](./apps/circuits). Hopefully the app will be deployed on Sepolia. |
+| The repository is divided into two components: [web](./apps/web), [contracts](./apps/contracts), and [circuits](./apps/circuits). The contracts have been deployed on Optimism Sepolia. |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 This repo is modified from [Semaphore Boilerplate Template](https://github.com/semaphore-protocol/boilerplate)
+
+👇 Click below to check the project explanation video.
+
+[![Project Explanation Video](http://img.youtube.com/vi/MrhGMfzsAX0/0.jpg)](https://youtu.be/MrhGMfzsAX0 "Project Explanation Video")
+
 
 ## 🛠 Install
 
