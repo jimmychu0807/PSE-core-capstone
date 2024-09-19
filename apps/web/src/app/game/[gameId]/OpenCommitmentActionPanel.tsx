@@ -7,6 +7,7 @@ import {
   Button,
   FormControl,
   FormLabel,
+  HStack,
   Input,
   InputGroup,
   InputLeftAddon,
@@ -31,7 +32,7 @@ export default function OpenCommitmentActionPanel({
   game: GameView;
   hasOpened: boolean;
 }) {
-  const advancedMode = false;
+  const [advancedMode, setAdvancedMode] = useState<boolean>(false);
   const { address: userAccount } = useAccount();
   const contractCfg = useGameContractConfig();
   const { writeContractAsync, isPending } = useWriteContract();
@@ -78,15 +79,17 @@ export default function OpenCommitmentActionPanel({
     </Button>
   ) : (
     <form onSubmit={openCommitment}>
-      <VStack spacing={3} border="1px" borderColor="gray.200" borderRadius="8" p={4}>
+      <VStack w="300px" spacing={3} border="1px" borderColor="gray.200" borderRadius="8" p={4}>
         <FormControl isInvalid={!!openingError}>
           <FormLabel>Open Commitment</FormLabel>
 
-          {/* Advanced Mode */}
-          <FormLabel htmlFor="form-advanced-mode" mb="0">
-            Advanced Mode
-          </FormLabel>
-          <Switch id="form-advanced-mode" />
+          {/* Advanced mode toggle */}
+          <HStack justify="space-between" align="center">
+            <FormLabel htmlFor="form-advanced-mode" mb="0">
+              Advanced Mode
+            </FormLabel>
+            <Switch id="form-advanced-mode" onChange={(e) => setAdvancedMode(e.target.checked)} />
+          </HStack>
 
           <InputGroup display={advancedMode ? "block" : "none"}>
             <InputLeftAddon>Commitment</InputLeftAddon>
