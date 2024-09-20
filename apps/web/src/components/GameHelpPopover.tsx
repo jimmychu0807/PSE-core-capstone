@@ -71,12 +71,12 @@ export default function GameHelpPopover({ displayText }: { displayText: string }
               indeed be rejected by the verifier on-chain 😏).
             </ListItem>
             <ListItem fontSize="sm">
-              When a round is concluded, the winner's guess, <b>NOT the actual mean</b>, is
+              When a round is concluded, the winner&apos;s guess, <b>NOT the actual mean</b>, is
               revealed. I think this will make the game a bit more interesting. But all the opening
               values are stored on-chain in plain values, so players can still inspect the smart
               contract storage on-chain and compute the mean off-chain. Further work can be done to
               explore how to hide those openings but still being able to compute the mean and
-              distances from players' guesses.
+              distances from players&apos; guesses.
             </ListItem>
           </OrderedList>
         </PopoverBody>
