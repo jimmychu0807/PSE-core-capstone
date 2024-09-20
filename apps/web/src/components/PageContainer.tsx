@@ -25,7 +25,7 @@ export default function PageContainer({
     <VStack spacing={0} align="stretch" height="100vh">
       <Header />
       <VStack flex="1" spacing={0} alignItems="center" align="stretch" height="90vh">
-        <Box flex="1" alignItems="center">
+        <Box flex="1" alignItems="center" pb={20}>
           {walletInfo ? <>{children}</> : <PromptForWalletConnect />}
         </Box>
         {log && (
