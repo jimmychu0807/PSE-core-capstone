@@ -14,27 +14,14 @@
 | The repository is divided into two components: [web](./apps/web), [contracts](./apps/contracts), and [circuits](./apps/circuits). The contracts have been deployed on Optimism Sepolia. |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
-This repo is modified from [Semaphore Boilerplate Template](https://github.com/semaphore-protocol/boilerplate)
+This repo is modified from [Semaphore Boilerplate](https://github.com/semaphore-protocol/boilerplate)
 
-👇 Click below to check the project explanation video.
+- 👇 Click below to check the project explanation video.
 
-[![Project Explanation Video](http://img.youtube.com/vi/MrhGMfzsAX0/0.jpg)](https://youtu.be/MrhGMfzsAX0 "Project Explanation Video")
+  [![Project Explanation Video](http://img.youtube.com/vi/MrhGMfzsAX0/0.jpg)](https://youtu.be/MrhGMfzsAX0 "Project Explanation Video")
 
-## 🛠 Install
-
-Use this repository as a Github [template](https://github.com/semaphore-protocol/boilerplate/generate).
-
-Clone your repository:
-
-```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-```
-
-and install the dependencies:
-
-```bash
-cd <your-repo> && yarn
-```
+- [Project Presentation](https://docs.google.com/presentation/d/1SE4omIJJaYBLAXkV0Ew6o47RLgoQ8pTcIkkv1tFMbik/edit?usp=sharing)
+- [Project Write Up](https://jimmychu0807.hk/pse-core-capstone-project)
 
 ## 📜 Usage
 
