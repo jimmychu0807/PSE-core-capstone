@@ -42,7 +42,7 @@ export const RpcUrls = {
 export const projectInfo = {
   name: "PSE Capstone - Number Guessing Game",
   desc: "Guessing game using zk-SNARKS",
-  homepage: "https://pse-core-capstone.vercel.app",
+  homepage: "https://guessing.jimmychu0807.hk",
   authorHomepage: "https://linktr.ee/jimmychu0807",
   github: "https://github.com/jimmychu0807/PSE-core-capstone",
   image: "https://avatars.githubusercontent.com/u/898091?v=4",

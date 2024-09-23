@@ -2,7 +2,7 @@
   "name": "@jimmychu0807/guessing-game",
   "description": "A mini-game of guessing number",
   "license": "MIT",
-  "homepage": "https://pse-core-capstone.vercel.app",
+  "homepage": "https://guessing.jimmychu0807.hk",
   "repository": "https://github.com/jimmychu0807/PSE-core-hackathon.git",
   "bugs": "https://github.com/jimmychu0807/PSE-core-hackathon/issues",
   "private": true,
