@@ -11,17 +11,17 @@
     </a>
 </p>
 
-| The repository is divided into two components: [web](./apps/web), [contracts](./apps/contracts), and [circuits](./apps/circuits). The contracts have been deployed on Optimism Sepolia. |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The repository is divided into three components: [web](./apps/web), [contracts](./apps/contracts), and [circuits](./apps/circuits).<br/>The contracts have been deployed on Optimism Sepolia. |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 This repo is modified from [Semaphore Boilerplate](https://github.com/semaphore-protocol/boilerplate)
 
-- 👇 Click below to check the project explanation video.
+- 🎮 Project Website: **https://guessing.jimmychu0807.hk**
+- 📝 [Project Write Up](https://jimmychu0807.hk/pse-core-capstone-project)
+- 🧑🏻‍🏫 [Project Presentation](https://docs.google.com/presentation/d/1SE4omIJJaYBLAXkV0Ew6o47RLgoQ8pTcIkkv1tFMbik/edit?usp=sharing)
+- 📽️ Project Explanation Video
 
   [![Project Explanation Video](http://img.youtube.com/vi/MrhGMfzsAX0/0.jpg)](https://youtu.be/MrhGMfzsAX0 "Project Explanation Video")
-
-- [Project Presentation](https://docs.google.com/presentation/d/1SE4omIJJaYBLAXkV0Ew6o47RLgoQ8pTcIkkv1tFMbik/edit?usp=sharing)
-- [Project Write Up](https://jimmychu0807.hk/pse-core-capstone-project)
 
 ## 📜 Usage
 
@@ -49,5 +49,6 @@ yarn dev
 
 Key components for writing circuits
 
+- [circom](https://docs.circom.io/)
 - [circomkit](https://github.com/erhant/circomkit/tree/main)
-- [hardhat-circom](https://github.com/projectsophon/hardhat-circom)
+- [snarkjs](https://github.com/iden3/snarkjs)
