@@ -21,7 +21,7 @@ This repo is modified from [Semaphore Boilerplate](https://github.com/semaphore-
 - 🧑🏻‍🏫 [Project Presentation](https://docs.google.com/presentation/d/1SE4omIJJaYBLAXkV0Ew6o47RLgoQ8pTcIkkv1tFMbik/edit?usp=sharing)
 - 📽️ Project Explanation Video
 
-  [![Project Explanation Video](http://img.youtube.com/vi/MrhGMfzsAX0/0.jpg)](https://youtu.be/MrhGMfzsAX0 "Project Explanation Video")
+  <a href="https://youtu.be/MrhGMfzsAX0" target="_blank"><img src="http://img.youtube.com/vi/MrhGMfzsAX0/0.jpg" alt="Project Explanation Video"/></a>
 
 ## 📜 Usage
 
